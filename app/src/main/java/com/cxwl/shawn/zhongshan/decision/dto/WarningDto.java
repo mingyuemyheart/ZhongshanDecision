@@ -12,7 +12,7 @@ public class WarningDto implements Parcelable {
 	public String lng;// 经度
 	public String type;//预警类型，如11B09
 	public String color;// 预警颜色,红橙黄蓝，id的后两位
-	public String provinceId;//省份id
+	public String cId;//市id
 	public String item0;
 	public int count;
 	public String colorName;
@@ -20,6 +20,7 @@ public class WarningDto implements Parcelable {
 	public String proCount;
 	public String cityCount;
 	public String disCount;
+	public boolean isSelected = true;
 
 	//预警统计
 	public String areaName;//省、市、县（区）对应的名称
@@ -53,7 +54,7 @@ public class WarningDto implements Parcelable {
 		dest.writeString(this.lng);
 		dest.writeString(this.type);
 		dest.writeString(this.color);
-		dest.writeString(this.provinceId);
+		dest.writeString(this.cId);
 		dest.writeString(this.item0);
 		dest.writeInt(this.count);
 		dest.writeString(this.colorName);
@@ -84,7 +85,7 @@ public class WarningDto implements Parcelable {
 		this.lng = in.readString();
 		this.type = in.readString();
 		this.color = in.readString();
-		this.provinceId = in.readString();
+		this.cId = in.readString();
 		this.item0 = in.readString();
 		this.count = in.readInt();
 		this.colorName = in.readString();

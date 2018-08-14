@@ -19,7 +19,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:layout_margin="10dp"
+        android:layout_marginTop="70dp"
+        android:layout_marginEnd="10dp"
         android:background="@drawable/shawn_bg_corner_wind_time"
         android:gravity="center"
         android:paddingBottom="5dp"
@@ -29,78 +30,5 @@
         android:textColor="@color/text_color3"
         android:textSize="@dimen/level_5"
         android:visibility="gone"/>
-
-    <!--<RelativeLayout-->
-        <!--android:id="@+id/reHeight"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_above="@+id/ivSwitch"-->
-        <!--android:layout_marginBottom="5dp"-->
-        <!--android:layout_marginLeft="10dp">-->
-
-        <!--<LinearLayout-->
-            <!--android:id="@+id/llHeight"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="35dp"-->
-            <!--android:layout_centerVertical="true"-->
-            <!--android:layout_marginLeft="5dp"-->
-            <!--android:background="@drawable/corner_bg_analysis"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:orientation="horizontal"-->
-            <!--android:paddingLeft="30dp"-->
-            <!--android:visibility="gone">-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/tvHeight200"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:gravity="center"-->
-                <!--android:paddingLeft="15dp"-->
-                <!--android:paddingRight="15dp"-->
-                <!--android:text="200hPa"-->
-                <!--android:textColor="@color/text_color4"-->
-                <!--android:textSize="@dimen/level_5"/>-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/tvHeight500"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:gravity="center"-->
-                <!--android:paddingLeft="15dp"-->
-                <!--android:paddingRight="15dp"-->
-                <!--android:text="500hPa"-->
-                <!--android:textColor="@color/text_color4"-->
-                <!--android:textSize="@dimen/level_5"/>-->
-
-            <!--<TextView-->
-                <!--android:id="@+id/tvHeight1000"-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="match_parent"-->
-                <!--android:gravity="center"-->
-                <!--android:paddingLeft="15dp"-->
-                <!--android:paddingRight="15dp"-->
-                <!--android:text="1000hPa"-->
-                <!--android:textColor="@color/blue"-->
-                <!--android:textSize="@dimen/level_4"/>-->
-
-        <!--</LinearLayout>-->
-
-        <!--<ImageView-->
-            <!--android:id="@+id/ivHeight"-->
-            <!--android:layout_width="35dp"-->
-            <!--android:layout_height="35dp"-->
-            <!--android:src="@drawable/icon_wind_heightoff"/>-->
-
-    <!--</RelativeLayout>-->
-
-    <!--<ImageView-->
-        <!--android:id="@+id/ivSwitch"-->
-        <!--android:layout_width="35dp"-->
-        <!--android:layout_height="35dp"-->
-        <!--android:layout_alignParentBottom="true"-->
-        <!--android:layout_marginBottom="5dp"-->
-        <!--android:layout_marginLeft="10dp"-->
-        <!--android:src="@drawable/icon_switch_dataoff"/>-->
-
 
 </RelativeLayout>

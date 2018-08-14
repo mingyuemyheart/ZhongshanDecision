@@ -12,7 +12,7 @@
         android:paddingBottom="6dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
-        android:background="@drawable/iv_marker_bubble"
+        android:background="@drawable/shawn_iv_marker_bubble"
         android:gravity="center_vertical|center">
         
         <TextView 
@@ -28,6 +28,6 @@
         android:layout_width="10dp"
         android:layout_height="10dp"
         android:layout_marginEnd="1dp"
-        android:src="@drawable/iv_marker_point"/>
+        android:src="@drawable/shawn_iv_marker_point"/>
 
 </LinearLayout>

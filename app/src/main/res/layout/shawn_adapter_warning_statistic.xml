@@ -22,11 +22,13 @@
         android:textSize="@dimen/level_5" />
 
     <TextView
+        android:visibility="gone"
         android:layout_width="0.5dp"
         android:layout_height="match_parent"
         android:background="@color/light_gray" />
 
     <TextView
+        android:visibility="gone"
         android:id="@+id/tvNation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

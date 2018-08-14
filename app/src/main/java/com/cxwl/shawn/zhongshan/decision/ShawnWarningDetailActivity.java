@@ -152,26 +152,33 @@ public class ShawnWarningDetailActivity extends ShawnBaseActivity implements OnC
 												tvName.setText(name.replace("发布", "发布\n"));
 											}
 
+											String severityCode = object.getString("severityCode");
+											String eventType = object.getString("eventType");
 											Bitmap bitmap = null;
-											if (object.getString("severityCode").equals(CONST.blue[0])) {
-												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+object.getString("eventType")+CONST.blue[1]+CONST.imageSuffix);
+											if (severityCode.equals(CONST.blue[0])) {
+												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+eventType+CONST.blue[1]+CONST.imageSuffix);
 												if (bitmap == null) {
 													bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.blue[1]+CONST.imageSuffix);
 												}
-											}else if (object.getString("severityCode").equals(CONST.yellow[0])) {
-												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+object.getString("eventType")+CONST.yellow[1]+CONST.imageSuffix);
+											}else if (severityCode.equals(CONST.yellow[0])) {
+												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+eventType+CONST.yellow[1]+CONST.imageSuffix);
 												if (bitmap == null) {
 													bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.yellow[1]+CONST.imageSuffix);
 												}
-											}else if (object.getString("severityCode").equals(CONST.orange[0])) {
-												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+object.getString("eventType")+CONST.orange[1]+CONST.imageSuffix);
+											}else if (severityCode.equals(CONST.orange[0])) {
+												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+eventType+CONST.orange[1]+CONST.imageSuffix);
 												if (bitmap == null) {
 													bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.orange[1]+CONST.imageSuffix);
 												}
-											}else if (object.getString("severityCode").equals(CONST.red[0])) {
-												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+object.getString("eventType")+CONST.red[1]+CONST.imageSuffix);
+											}else if (severityCode.equals(CONST.red[0])) {
+												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+eventType+CONST.red[1]+CONST.imageSuffix);
 												if (bitmap == null) {
 													bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.red[1]+CONST.imageSuffix);
+												}
+											}else if (severityCode.equals(CONST.white[0])) {
+												bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+eventType+CONST.white[1]+CONST.imageSuffix);
+												if (bitmap == null) {
+													bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.white[1]+CONST.imageSuffix);
 												}
 											}
 											if (bitmap == null) {

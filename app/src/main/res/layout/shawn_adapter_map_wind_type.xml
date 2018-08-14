@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content" >
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="90dp"
+        android:layout_height="25dp"
+        android:gravity="center"
+        android:background="@drawable/shawn_bg_corner_map_press"
+        android:textColor="@color/text_color3"
+        android:textSize="@dimen/level_5" />
+
+</RelativeLayout>

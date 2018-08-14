@@ -162,7 +162,7 @@ public class MinuteFallView extends View {
 				rectPath.lineTo(x1, h-bottomMargin);
 				rectPath.close();
 				lineP.setStrokeWidth(CommonUtil.dip2px(mContext, 1));
-				lineP.setColor(0x300cf6ff);
+				lineP.setColor(0x600cf6ff);
 				lineP.setStyle(Style.FILL);
 				canvas.drawPath(rectPath, lineP);
 			}
@@ -173,9 +173,9 @@ public class MinuteFallView extends View {
 		float value = level2;
 		dividerY = chartH - chartH* Math.abs(value)/(Math.abs(maxValue)+ Math.abs(minValue)) + topMargin;
 		lineP.setStrokeWidth(CommonUtil.dip2px(mContext, 0.5f));
-		lineP.setColor(0x60ffffff);
+		lineP.setColor(0x10000000);
 		canvas.drawLine(leftMargin, dividerY, w-rightMargin, dividerY, lineP);
-		textP.setColor(Color.WHITE);
+		textP.setColor(getResources().getColor(R.color.text_color3));
 		textP.setTextSize(CommonUtil.dip2px(mContext, 10));
 //		canvas.drawText(String.valueOf(value)+"mm", CommonUtil.dip2px(mContext, 5), dividerY-CommonUtil.dip2px(mContext, 2.5f), textP);
 		textP.setTextSize(CommonUtil.dip2px(mContext, 10));
@@ -187,9 +187,9 @@ public class MinuteFallView extends View {
 		value = level3;
 		dividerY = chartH - chartH* Math.abs(value)/(Math.abs(maxValue)+ Math.abs(minValue)) + topMargin;
 		lineP.setStrokeWidth(CommonUtil.dip2px(mContext, 0.5f));
-		lineP.setColor(0x60ffffff);
+		lineP.setColor(0x10000000);
 		canvas.drawLine(leftMargin, dividerY, w-rightMargin, dividerY, lineP);
-		textP.setColor(Color.WHITE);
+		textP.setColor(getResources().getColor(R.color.text_color3));
 		textP.setTextSize(CommonUtil.dip2px(mContext, 10));
 //		canvas.drawText(String.valueOf(value)+"mm", CommonUtil.dip2px(mContext, 5), dividerY-CommonUtil.dip2px(mContext, 2.5f), textP);
 		textP.setTextSize(CommonUtil.dip2px(mContext, 10));
@@ -204,7 +204,7 @@ public class MinuteFallView extends View {
 		value = 0;
 		dividerY = chartH - chartH* Math.abs(value)/(Math.abs(maxValue)+ Math.abs(minValue)) + topMargin;
 		lineP.setStrokeWidth(CommonUtil.dip2px(mContext, 1));
-		lineP.setColor(Color.WHITE);
+		lineP.setColor(0x60000000);
 		canvas.drawLine(leftMargin, dividerY, w-rightMargin, dividerY, lineP);
 		canvas.drawLine(leftMargin, topMargin, leftMargin, dividerY, lineP);
 		
@@ -212,13 +212,13 @@ public class MinuteFallView extends View {
 			WeatherDto dto = tempList.get(i);
 			//绘制分钟刻度线上的刻度
 			if (i == 0 || i == 20 || i == 40 || i == 60 || i == 80 || i == 100 || i == 119) {
-				lineP.setColor(Color.WHITE);
+				lineP.setColor(0x60000000);
 				lineP.setStrokeWidth(CommonUtil.dip2px(mContext, 1));
 				canvas.drawLine(dto.x, dividerY, dto.x, dividerY+CommonUtil.dip2px(mContext, 4), lineP);
 			}
 			//绘制10、30、50分钟值
 			if (i == 20 || i == 60 || i == 100) {
-				textP.setColor(Color.WHITE);
+				textP.setColor(getResources().getColor(R.color.text_color3));
 				textP.setTextSize(CommonUtil.dip2px(mContext, 10));
 				float tempWidth = textP.measureText(i+"分钟");
 				canvas.drawText(i+"分钟", dto.x-tempWidth/2, dividerY+CommonUtil.dip2px(mContext, 15), textP);

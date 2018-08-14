@@ -2,12 +2,16 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 27
+    //png图片命名带有数字则编译不通过使用一下声明
+    aaptOptions.cruncherEnabled = false
+    aaptOptions.useNewCruncher = false
+
     defaultConfig {
         applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -41,4 +45,6 @@ dependencies {
     implementation 'com.wang.avi:library:1.0.0'
     //AVLoadingIndicatorView
     implementation files('libs/AMap3DMap_5.7.0_AMapSearch_5.7.0_AMapLocation_3.7.0_20171229.jar')
+    implementation 'com.github.zcweng:switch-button:0.0.3@aar'
+    implementation files('libs/ChinaWeatherAPI.jar')
 }

@@ -1,49 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="10dp"
+                android:paddingEnd="50dp"
+                android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/llWarningPrompt"
+    <RelativeLayout
+        android:id="@+id/reWarningPrompt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/shawn_bg_corner_normal"
         android:orientation="vertical"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
-        android:paddingTop="5dp"
-        android:visibility="gone" >
+        android:padding="5dp"
+        android:layout_margin="10dp">
+
+        <TextView
+            android:id="@+id/tvWarningPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_4"/>
+
+        <TextView
+            android:id="@+id/tvWaringList"
+            android:layout_width="50dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_toStartOf="@+id/ivWarningClose"
+            android:background="@drawable/shawn_bg_warning_list"
+            android:gravity="center"
+            android:text="列表"
+            android:textColor="@color/white"
+            android:textSize="@dimen/level_5"/>
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_below="@+id/tvWaringList"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            android:id="@+id/llWarningContainer"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="bottom"
-            android:orientation="horizontal" >
-
-            <TextView
-                android:id="@+id/tvWarningPrompt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:textColor="@color/text_color3"
-                android:textSize="@dimen/level_4" />
-
-            <TextView
-                android:id="@+id/tvWaringList"
-                android:layout_width="50dp"
-                android:layout_height="20dp"
-                android:textColor="@color/white"
-                android:text="列表"
-                android:gravity="center"
-                android:background="@drawable/shawn_bg_warning_list"
-                android:textSize="@dimen/level_5" />
-        </LinearLayout>
+            android:orientation="vertical" />
 
         <ListView
+            android:visibility="gone"
+            android:layout_below="@+id/llWarningContainer"
             android:id="@+id/warningListView"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:cacheColorHint="@color/transparent"
             android:divider="@null"
@@ -52,14 +58,15 @@
             android:overScrollMode="never"
             android:paddingLeft="5dp"
             android:paddingRight="5dp"
-            android:scrollbars="none" />
+            android:scrollbars="none"/>
 
         <ImageView
-            android:id="@+id/ivWarningArrow"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_gravity="center"
-            android:src="@drawable/shawn_icon_arrow_bottom" />
-    </LinearLayout>
+            android:id="@+id/ivWarningClose"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/shawn_icon_close"/>
+
+    </RelativeLayout>
 
 </RelativeLayout>

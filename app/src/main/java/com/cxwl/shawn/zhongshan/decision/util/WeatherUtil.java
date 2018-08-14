@@ -407,7 +407,7 @@ public class WeatherUtil {
 	 * @param code 天气现象编号
 	 * @return
 	 */
-	public static final Bitmap getBitmap(Context context, int code) {
+	public static final Bitmap getDayBitmap(Context context, int code) {
 		Bitmap bitmap = null;
 		if (code == 0) {
 			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day00_mini);
@@ -592,6 +592,284 @@ public class WeatherUtil {
 	}
 
 	/**
+	 * 根据天气现象编号获取相应的图标
+	 * @param context
+	 * @param code 天气现象编号
+	 * @return
+	 */
+	public static final Bitmap getDayBitmapWhite(Context context, int code) {
+		Bitmap bitmap = null;
+		if (code == 0) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day00_mini_white);
+		}else if (code == 1) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day01_mini_white);
+		}else if (code == 2) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day02_mini_white);
+		}else if (code == 3) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day03_mini_white);
+		}else if (code == 4) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day04_mini_white);
+		}else if (code == 5) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day05_mini_white);
+		}else if (code == 6) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day06_mini_white);
+		}else if (code == 7) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 8) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day08_mini_white);
+		}else if (code == 9) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day09_mini_white);
+		}else if (code == 10) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day10_mini_white);
+		}else if (code == 11) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 12) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 13) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day13_mini_white);
+		}else if (code == 14) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 15) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day15_mini_white);
+		}else if (code == 16) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day16_mini_white);
+		}else if (code == 17) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day17_mini_white);
+		}else if (code == 18) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 19) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 20) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day20_mini_white);
+		}else if (code == 21) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 22) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day08_mini_white);
+		}else if (code == 23) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day09_mini_white);
+		}else if (code == 24) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day10_mini_white);
+		}else if (code == 25) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 26) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 27) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day15_mini_white);
+		}else if (code == 28) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day16_mini_white);
+		}else if (code == 29) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day29_mini_white);
+		}else if (code == 30) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day30_mini_white);
+		}else if (code == 31) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day31_mini_white);
+		}else if (code == 32) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 33) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 49) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 53) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 54) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 55) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 56) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 57) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 58) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}
+
+		return bitmap;
+	}
+
+	/**
+	 * 根据天气现象编号获取相应的晚上图标
+	 * @param context
+	 * @param code 天气现象编号
+	 * @return
+	 */
+	public static final Bitmap getNightBitmapWhite(Context context, int code) {
+		Bitmap bitmap = null;
+		if (code == 0) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.night00_mini_white);
+		}else if (code == 1) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.night01_mini_white);
+		}else if (code == 2) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day02_mini_white);
+		}else if (code == 3) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.night03_mini_white);
+		}else if (code == 4) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day04_mini_white);
+		}else if (code == 5) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day05_mini_white);
+		}else if (code == 6) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day06_mini_white);
+		}else if (code == 7) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 8) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day08_mini_white);
+		}else if (code == 9) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day09_mini_white);
+		}else if (code == 10) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day10_mini_white);
+		}else if (code == 11) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 12) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 13) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.night13_mini_white);
+		}else if (code == 14) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 15) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day15_mini_white);
+		}else if (code == 16) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day16_mini_white);
+		}else if (code == 17) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day17_mini_white);
+		}else if (code == 18) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 19) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 20) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day20_mini_white);
+		}else if (code == 21) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day07_mini_white);
+		}else if (code == 22) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day08_mini_white);
+		}else if (code == 23) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day09_mini_white);
+		}else if (code == 24) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day10_mini_white);
+		}else if (code == 25) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day11_mini_white);
+		}else if (code == 26) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 27) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day15_mini_white);
+		}else if (code == 28) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day16_mini_white);
+		}else if (code == 29) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day29_mini_white);
+		}else if (code == 30) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day30_mini_white);
+		}else if (code == 31) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day31_mini_white);
+		}else if (code == 32) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 33) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day14_mini_white);
+		}else if (code == 49) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 53) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 54) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 55) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 56) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day53_mini_white);
+		}else if (code == 57) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}else if (code == 58) {
+			bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.day18_mini_white);
+		}
+
+		return bitmap;
+	}
+
+	/**
+	 * 根据风速等级获取风速图标
+	 * @param context
+	 * @param code
+	 * @return
+	 */
+	public static final Bitmap getWindBitmap(Context context, int code) {
+		Bitmap bitmap = null;
+		switch (code) {
+			case 0:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_12_black);
+				break;
+			case 1:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_34_black);
+				break;
+			case 2:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_56_black);
+				break;
+			case 3:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_78_black);
+				break;
+			case 4:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+			case 5:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+			case 6:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+			case 7:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+			case 8:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+			case 9:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+				break;
+
+		}
+		return bitmap;
+	}
+
+	/**
+	 * 根据风速等级获取风速图标
+	 * @param context
+	 * @param code
+	 * @return
+	 */
+	public static final Bitmap getWindBitmapWhite(Context context, int code) {
+		Bitmap bitmap = null;
+		switch (code) {
+			case 0:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_12_white);
+				break;
+			case 1:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_34_white);
+				break;
+			case 2:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_56_white);
+				break;
+			case 3:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_78_white);
+				break;
+			case 4:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+			case 5:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+			case 6:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+			case 7:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+			case 8:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+			case 9:
+				bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_white);
+				break;
+
+		}
+		return bitmap;
+	}
+
+	/**
 	 * 根据逐小时风速获取风力等级对应柱形高度
 	 * @param speed
 	 * @return
@@ -626,6 +904,51 @@ public class WeatherUtil {
 			height = 80;
 		}
 		return height;
+	}
+
+	/**
+	 * 根据风向编号获取风向角度
+	 * @param code
+	 * @return
+	 */
+	public static final float getWindDegree(int code) {
+		float degree = 0;
+		switch (code) {
+			case 0:
+				degree = 0;
+				break;
+			case 1:
+				degree = 45;
+				break;
+			case 2:
+				degree = 90;
+				break;
+			case 3:
+				degree = 135;
+				break;
+			case 4:
+				degree = 180;
+				break;
+			case 5:
+				degree = 225;
+				break;
+			case 6:
+				degree = 270;
+				break;
+			case 7:
+				degree = 315;
+				break;
+			case 8:
+				degree = 360;
+				break;
+			case 9:
+				degree = 0;
+				break;
+			default:
+				degree = 0;
+				break;
+		}
+		return degree;
 	}
 	
 }

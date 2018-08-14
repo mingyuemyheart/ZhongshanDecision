@@ -17,4 +17,6 @@ public class WindDto {
 
 	public String speed;//风速
 	public String date;//时间
+	public String windHeight;//200、500、1000hPa高度数据
+	public boolean isGFS = true;//区别GFS、T639
 }

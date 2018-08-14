@@ -12,6 +12,7 @@ public class WeatherDto implements Parcelable {
 	public String factPheCode;
 	public float minuteFall= 0;//逐分钟降水量
 	public String aqi = null;//空气质量
+	public String level;//1、省会 2、城市 3、区县
 	
 	//平滑曲线
 	public float hourlyTemp = 0;//逐小时温度
@@ -28,15 +29,15 @@ public class WeatherDto implements Parcelable {
 	public String lowPhe = null;//晚上天气现象
 	public int lowPheCode = 0;//晚上天气现象编号
 	public int lowTemp = 0;//最低气温
-	public int nightWindDir = 0;//晚上风向编号
-	public int nightWindForce = 0;//晚上风力编号
+	public int lowWindDir = 0;
+	public int lowWindForce = 0;
 	public float lowX = 0;//最低温度x轴坐标点
 	public float lowY = 0;//最低温度y轴坐标点
 	public String highPhe = null;//白天天气现象
 	public int highPheCode = 0;//白天天气现象编号
 	public int highTemp = 0;//最高气温
-	public int dayWindDir = 0;//白天风向编号
-	public int dayWindForce = 0;//白天风力编号
+	public int highWindDir = 0;
+	public int highWindForce = 0;
 	public float highX = 0;//最高温度x轴坐标点
 	public float highY = 0;//最高温度y轴坐标点
 	public int windDir = 0;//风向编号
@@ -61,6 +62,7 @@ public class WeatherDto implements Parcelable {
 		dest.writeString(this.factPheCode);
 		dest.writeFloat(this.minuteFall);
 		dest.writeString(this.aqi);
+		dest.writeString(this.level);
 		dest.writeFloat(this.hourlyTemp);
 		dest.writeString(this.hourlyTime);
 		dest.writeInt(this.hourlyCode);
@@ -73,15 +75,15 @@ public class WeatherDto implements Parcelable {
 		dest.writeString(this.lowPhe);
 		dest.writeInt(this.lowPheCode);
 		dest.writeInt(this.lowTemp);
-		dest.writeInt(this.nightWindDir);
-		dest.writeInt(this.nightWindForce);
+		dest.writeInt(this.lowWindDir);
+		dest.writeInt(this.lowWindForce);
 		dest.writeFloat(this.lowX);
 		dest.writeFloat(this.lowY);
 		dest.writeString(this.highPhe);
 		dest.writeInt(this.highPheCode);
 		dest.writeInt(this.highTemp);
-		dest.writeInt(this.dayWindDir);
-		dest.writeInt(this.dayWindForce);
+		dest.writeInt(this.highWindDir);
+		dest.writeInt(this.highWindForce);
 		dest.writeFloat(this.highX);
 		dest.writeFloat(this.highY);
 		dest.writeInt(this.windDir);
@@ -98,6 +100,7 @@ public class WeatherDto implements Parcelable {
 		this.factPheCode = in.readString();
 		this.minuteFall = in.readFloat();
 		this.aqi = in.readString();
+		this.level = in.readString();
 		this.hourlyTemp = in.readFloat();
 		this.hourlyTime = in.readString();
 		this.hourlyCode = in.readInt();
@@ -110,15 +113,15 @@ public class WeatherDto implements Parcelable {
 		this.lowPhe = in.readString();
 		this.lowPheCode = in.readInt();
 		this.lowTemp = in.readInt();
-		this.nightWindDir = in.readInt();
-		this.nightWindForce = in.readInt();
+		this.lowWindDir = in.readInt();
+		this.lowWindForce = in.readInt();
 		this.lowX = in.readFloat();
 		this.lowY = in.readFloat();
 		this.highPhe = in.readString();
 		this.highPheCode = in.readInt();
 		this.highTemp = in.readInt();
-		this.dayWindDir = in.readInt();
-		this.dayWindForce = in.readInt();
+		this.highWindDir = in.readInt();
+		this.highWindForce = in.readInt();
 		this.highX = in.readFloat();
 		this.highY = in.readFloat();
 		this.windDir = in.readInt();

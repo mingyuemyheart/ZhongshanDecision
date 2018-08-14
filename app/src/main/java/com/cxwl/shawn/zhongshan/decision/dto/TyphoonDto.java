@@ -41,6 +41,7 @@ public class TyphoonDto {
 	public String time;
 	public boolean isFactPoint = true;//true为实况点，false为预报点
 	public String strength;//台风强度
+	public boolean isSelected;
 	
 	public String content(Context context) {
 		StringBuffer buffer = new StringBuffer();

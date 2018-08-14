@@ -2,16 +2,16 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:paddingBottom="10dp">
 
     <TextView
+        android:layout_marginTop="25dp"
         android:id="@+id/tvTyphoonName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
         android:gravity="center"
-        android:padding="5dp"
-        android:textColor="@color/text_color3"
+        android:textColor="@color/white"
         android:textSize="@dimen/level_5"/>
 
     <ImageView
@@ -20,38 +20,62 @@
         android:layout_height="35dp"
         android:layout_above="@+id/ivRange"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
         android:src="@drawable/shawn_icon_list"/>
 
     <ImageView
-        android:layout_above="@+id/ivLegend"
         android:id="@+id/ivRange"
         android:layout_width="35dp"
         android:layout_height="35dp"
+        android:layout_above="@+id/ivLocation"
         android:layout_alignParentEnd="true"
+        android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
         android:src="@drawable/shawn_icon_range"/>
+
+    <ImageView
+        android:id="@+id/ivLocation"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_above="@+id/ivLegend"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:layout_marginBottom="10dp"
+        android:src="@drawable/shawn_icon_location"/>
 
     <ImageView
         android:id="@+id/ivLegend"
         android:layout_width="35dp"
         android:layout_height="35dp"
+        android:layout_above="@+id/ivMore"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/shawn_icon_legend"/>
+
+    <ImageView
+        android:id="@+id/ivMore"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_legend"/>
+        android:src="@drawable/shawn_icon_more"/>
+
 
     <RelativeLayout
-        android:clickable="true"
         android:id="@+id/reTyphoonList"
         android:layout_width="match_parent"
         android:layout_height="190dp"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        android:visibility="gone"
-        android:background="@drawable/shawn_bg_corner_typhoon_list">
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/shawn_bg_corner_normal"
+        android:clickable="true"
+        android:visibility="gone">
 
         <LinearLayout
             android:id="@+id/ll"
@@ -59,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -79,7 +103,7 @@
                 android:layout_height="25dp"
                 android:background="@drawable/shawn_bg_history"
                 android:gravity="center"
-                android:text="历史台风"
+                android:text="台风列表"
                 android:textColor="@color/text_color3"
                 android:textSize="@dimen/level_4"/>
 
@@ -98,7 +122,7 @@
 
         <ListView
             android:id="@+id/yearListView"
-            android:layout_width="100dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ll"
             android:cacheColorHint="@color/transparent"
@@ -133,37 +157,40 @@
     </RelativeLayout>
 
     <RelativeLayout
-        android:clickable="true"
         android:id="@+id/reLegend"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_margin="10dp"
-        android:visibility="gone"
-        android:background="@drawable/shawn_bg_corner_typhoon_list" >
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/shawn_bg_corner_normal"
+        android:clickable="true"
+        android:visibility="gone">
 
         <LinearLayout
-            android:layout_marginTop="15dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
             android:orientation="vertical"
-            android:padding="10dp" >
+            android:padding="10dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level1" />
+                        android:src="@drawable/typhoon_level1"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -171,19 +198,19 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level1"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level2" />
+                        android:src="@drawable/typhoon_level2"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -191,19 +218,19 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level2"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level3" />
+                        android:src="@drawable/typhoon_level3"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -211,25 +238,25 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level3"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level4" />
+                        android:src="@drawable/typhoon_level4"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -237,19 +264,19 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level4"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level5" />
+                        android:src="@drawable/typhoon_level5"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -257,19 +284,19 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level5"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_level6" />
+                        android:src="@drawable/typhoon_level6"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -277,25 +304,25 @@
                         android:layout_marginStart="5dp"
                         android:text="@string/typhoon_level6"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal" >
+                android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_circle7" />
+                        android:src="@drawable/typhoon_circle7"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -303,19 +330,19 @@
                         android:layout_marginStart="5dp"
                         android:text="七级风圈"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:gravity="center_vertical" >
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="12dp"
                         android:layout_height="12dp"
-                        android:src="@drawable/typhoon_circle10" />
+                        android:src="@drawable/typhoon_circle10"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -323,7 +350,7 @@
                         android:layout_marginStart="5dp"
                         android:text="十级风圈"
                         android:textColor="@color/text_color3"
-                        android:textSize="@dimen/level_5" />
+                        android:textSize="@dimen/level_5"/>
                 </LinearLayout>
 
                 <LinearLayout
@@ -352,11 +379,193 @@
             android:id="@+id/ivLegendClose"
             android:layout_width="25dp"
             android:layout_height="25dp"
-            android:padding="5dp"
             android:layout_alignParentEnd="true"
             android:layout_marginEnd="5dp"
             android:layout_marginTop="5dp"
-            android:src="@drawable/shawn_icon_close" />
+            android:padding="5dp"
+            android:src="@drawable/shawn_icon_close"/>
     </RelativeLayout>
+
+    <ScrollView
+        android:id="@+id/scrollViewMore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="10dp"
+        android:layout_alignBottom="@+id/ivMore"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/llMore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/shawn_bg_corner_normal"
+            android:orientation="vertical"
+            android:paddingBottom="5dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="地图切换"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/ivMapType1"
+                        android:layout_width="90dp"
+                        android:layout_height="70dp"
+                        android:background="@drawable/shawn_bg_corner_map_press"
+                        android:padding="2dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/shawn_map_type_sitelite"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="卫星地图"
+                        android:textColor="@color/text_color3"
+                        android:textSize="@dimen/level_5"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/ivMapType2"
+                        android:layout_width="90dp"
+                        android:layout_height="70dp"
+                        android:padding="2dp"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/shawn_map_type_normal"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="普通地图"
+                        android:textColor="@color/text_color3"
+                        android:textSize="@dimen/level_5"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvWarningTypeStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="预警类型选择"
+                android:layout_marginBottom="2dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.cxwl.shawn.zhongshan.decision.view.ScrollviewGridview
+                android:id="@+id/gridviewWarning"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cacheColorHint="@color/transparent"
+                android:fadingEdge="none"
+                android:gravity="center"
+                android:horizontalSpacing="5dp"
+                android:listSelector="@color/transparent"
+                android:numColumns="2"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="5dp"/>
+
+            <TextView
+                android:id="@+id/tvWarningListStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="2dp"
+                android:text="预警列表显示"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.suke.widget.SwitchButton
+                android:visibility="gone"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/sbWarning"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:sb_checked_color="@color/colorPrimary"
+                app:sb_checked="true"/>
+
+            <TextView
+                android:id="@+id/tvWindTypeStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="风场数据"
+                android:layout_marginBottom="2dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.cxwl.shawn.zhongshan.decision.view.ScrollviewGridview
+                android:id="@+id/gridviewWind"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cacheColorHint="@color/transparent"
+                android:fadingEdge="none"
+                android:gravity="center"
+                android:horizontalSpacing="5dp"
+                android:listSelector="@color/transparent"
+                android:numColumns="2"
+                android:overScrollMode="never"
+                android:scrollbars="none"
+                android:stretchMode="columnWidth"
+                android:verticalSpacing="5dp"/>
+
+            <TextView
+                android:id="@+id/tvMinuteStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:text="分钟降水图显示"
+                android:layout_marginBottom="2dp"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.suke.widget.SwitchButton
+                android:visibility="gone"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/sbMinute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:sb_checked_color="@color/colorPrimary"
+                app:sb_checked="true"/>
+
+        </LinearLayout>
+    </ScrollView>
 
 </RelativeLayout>

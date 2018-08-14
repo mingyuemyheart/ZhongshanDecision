@@ -37,8 +37,6 @@ public class WarningAdapter extends BaseAdapter {
 		TextView tvName,tvTime;//预警信息名称
 	}
 	
-	private ViewHolder mHolder = null;
-	
 	public WarningAdapter(Context context, List<WarningDto> mArrayList, boolean isMarkerCell) {
 		mContext = context;
 		this.isMarkerCell = isMarkerCell;
@@ -101,6 +99,11 @@ public class WarningAdapter extends BaseAdapter {
 			bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+dto.type+CONST.red[1]+CONST.imageSuffix);
 			if (bitmap == null) {
 				bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.red[1]+CONST.imageSuffix);
+			}
+		}else if (dto.color.equals(CONST.white[0])) {
+			bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+dto.type+CONST.white[1]+CONST.imageSuffix);
+			if (bitmap == null) {
+				bitmap = CommonUtil.getImageFromAssetsFile(mContext,"warning/"+"default"+CONST.white[1]+CONST.imageSuffix);
 			}
 		}
 		if (bitmap == null) {

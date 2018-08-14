@@ -79,9 +79,9 @@ public class WaitWindView2 extends View {
 			frameCount = 8;//帧数
 			speedRate = 1.5f;//离子运动速度系数
 		}else if (totalMemory > 3.0 && totalMemory <= 4.0) {//内存小于等于3G
-			partileCount = 1200;//绘制粒子个数
-			frameCount = 8;//帧数
-			speedRate = 1.2f;//离子运动速度系数
+			partileCount = 1000;//绘制粒子个数
+			frameCount = 10;//帧数
+			speedRate = 1.0f;//离子运动速度系数
 		}else if (totalMemory > 4.0) {//内存大于3G
 			partileCount = 1200;//绘制粒子个数
 			frameCount = 10;//帧数

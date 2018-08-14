@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.dto.TyphoonDto;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,8 +22,7 @@ public class TyphoonNameAdapter extends BaseAdapter {
 	private Context mContext;
 	private LayoutInflater mInflater;
 	private List<TyphoonDto> mArrayList;
-	public HashMap<Integer, Boolean> isSelected = new HashMap<>();
-	
+
 	private final class ViewHolder{
 		ImageView ivStatus;
 		TextView tvName;
@@ -34,10 +32,6 @@ public class TyphoonNameAdapter extends BaseAdapter {
 		mContext = context;
 		this.mArrayList = mArrayList;
 		mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		
-		for (int i = 0; i < mArrayList.size(); i++) {
-			isSelected.put(i, false);
-		}
 	}
 
 	@Override
@@ -70,19 +64,17 @@ public class TyphoonNameAdapter extends BaseAdapter {
 		
 		TyphoonDto dto = mArrayList.get(position);
 		if (TextUtils.isEmpty(dto.name) || TextUtils.equals(dto.name, "null")) {
-			mHolder.tvName.setText(dto.code + " " + dto.enName);
+			mHolder.tvName.setText(dto.code+" "+dto.enName);
 		}else {
-			mHolder.tvName.setText(dto.code + " " + dto.name + " " + dto.enName);
+			mHolder.tvName.setText(dto.code+" "+dto.name+" "+dto.enName);
 		}
 		
-		if (!isSelected.isEmpty() && isSelected.get(position) != null) {
-			if (!isSelected.get(position)) {
-				mHolder.ivStatus.setImageResource(R.drawable.shawn_bg_checkbox);
-			}else {
-				mHolder.ivStatus.setImageResource(R.drawable.shawn_bg_checkbox_selected);
-			}
+		if (dto.isSelected) {
+			mHolder.ivStatus.setImageResource(R.drawable.shawn_bg_checkbox_selected);
+		}else {
+			mHolder.ivStatus.setImageResource(R.drawable.shawn_bg_checkbox);
 		}
-		
+
 		return convertView;
 	}
 

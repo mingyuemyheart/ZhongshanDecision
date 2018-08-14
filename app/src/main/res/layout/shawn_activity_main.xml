@@ -4,39 +4,57 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <include
-        android:id="@+id/reTitle"
-        layout="@layout/shawn_layout_title"/>
-
     <com.amap.api.maps.TextureMapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"/>
+        android:layout_height="wrap_content"/>
 
     <include
         android:id="@+id/layoutWind"
         layout="@layout/shawn_layout_wind"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
         android:visibility="gone"/>
 
     <LinearLayout
+        android:id="@+id/llBack"
+        android:layout_marginTop="25dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:padding="10dp">
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/shawn_icon_back"/>
+
+        <TextView
+            android:id="@+id/tvBack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="返回"
+            android:textColor="@color/white"
+            android:textSize="@dimen/level_4"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_below="@+id/llBack"
         android:id="@+id/llMenu"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_below="@+id/reTitle"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginStart="3dp"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/shawn_bg_corner_menu"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/shawn_bg_corner_normal"
         android:gravity="center"
         android:orientation="vertical">
 
         <ImageView
             android:id="@+id/ivMenu"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:src="@drawable/shawn_icon_arrow_left"/>
 
     </LinearLayout>
@@ -54,12 +72,16 @@
 
         <RelativeLayout
             android:id="@+id/reControl"
-            android:layout_width="wrap_content"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:background="@drawable/shawn_bg_corner_normal"
+            android:layout_width="45dp"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical">
 
             <LinearLayout
+                android:visibility="gone"
                 android:id="@+id/llTyphoon"
                 android:layout_width="45dp"
                 android:layout_height="45dp"
@@ -90,7 +112,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llTyphoon"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -116,7 +137,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llFact"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -142,7 +162,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llSatelite"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -168,7 +187,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llRadar"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -194,7 +212,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llWarning"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -220,7 +237,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llFore"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -246,7 +262,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llMinute"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -272,7 +287,6 @@
                 android:layout_height="45dp"
                 android:layout_below="@+id/llWind"
                 android:layout_centerHorizontal="true"
-                android:background="#c0ffffff"
                 android:gravity="center"
                 android:orientation="vertical">
 
@@ -297,19 +311,10 @@
     </ScrollView>
 
     <include
-        android:id="@+id/lyoutTyphoon"
-        layout="@layout/shawn_layout_typhoon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
-        android:visibility="gone"/>
-
-    <include
         android:id="@+id/layoutWarning"
         layout="@layout/shawn_layout_warning"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
         android:visibility="gone"/>
 
     <include
@@ -317,15 +322,13 @@
         layout="@layout/shawn_layout_minute"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
         android:visibility="gone"/>
 
     <include
-        android:id="@+id/layoutWind"
-        layout="@layout/shawn_layout_wind"
+        android:id="@+id/lyoutTyphoon"
+        layout="@layout/shawn_layout_typhoon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
         android:visibility="gone"/>
 
     <com.wang.avi.AVLoadingIndicatorView

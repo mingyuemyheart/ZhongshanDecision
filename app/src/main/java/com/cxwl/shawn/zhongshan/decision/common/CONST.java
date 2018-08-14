@@ -11,6 +11,7 @@ public class CONST {
     public static String[] yellow = {"02", "_yellow"};
     public static String[] orange = {"03", "_orange"};
     public static String[] red = {"04", "_red"};
+    public static String[] white = {"05", "_white"};
 
     //下拉刷新progresBar四种颜色
     public static final int color1 = R.color.refresh_color1;

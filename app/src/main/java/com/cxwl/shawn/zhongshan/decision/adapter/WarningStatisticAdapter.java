@@ -72,7 +72,14 @@ public class WarningStatisticAdapter extends BaseAdapter {
 		mHolder.tvCity.setText(dto.cityCount);
 		mHolder.tvDis.setText(dto.disCount);
 		
-		if (dto.colorName.contains("红")) {
+		if (dto.colorName.contains("白")) {
+			mHolder.tvWarning.setTextColor(Color.BLACK);
+			mHolder.tvWarning.setBackgroundColor(Color.WHITE);
+			mHolder.tvNation.setBackgroundColor(0x10ffffff);
+			mHolder.tvPro.setBackgroundColor(0x10ffffff);
+			mHolder.tvCity.setBackgroundColor(0x10ffffff);
+			mHolder.tvDis.setBackgroundColor(0x10ffffff);
+		}else if (dto.colorName.contains("红")) {
 			mHolder.tvWarning.setTextColor(Color.WHITE);
 			mHolder.tvWarning.setBackgroundColor(0xfffe2624);
 			mHolder.tvNation.setBackgroundColor(0x10fe2624);
