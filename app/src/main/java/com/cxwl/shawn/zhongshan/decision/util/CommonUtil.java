@@ -6,13 +6,30 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.LocationManager;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Polygon;
+import com.amap.api.maps.model.PolygonOptions;
+import com.amap.api.services.district.DistrictItem;
+import com.amap.api.services.district.DistrictResult;
+import com.amap.api.services.district.DistrictSearch;
+import com.amap.api.services.district.DistrictSearchQuery;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -21,8 +38,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class CommonUtil {
@@ -238,30 +257,95 @@ public class CommonUtil {
     }
 
     /**
-     * 写入文件内容
+     * 查询高德地图最新行政区划json并保存到本地文件
      * @param context
-     * @param fileName
+     * @param adName 行政区划对应名称
+     * @param adCode 行政区划id
+     */
+    public static void drawOnlineDistrict(final Context context, final String adName, final String adCode) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                DistrictSearch search = new DistrictSearch(context);
+                DistrictSearchQuery query = new DistrictSearchQuery();
+                query.setKeywords(adCode);//传入关键字
+                query.setShowBoundary(true);//是否返回边界值
+                search.setQuery(query);
+                search.searchDistrictAsyn();
+                search.setOnDistrictSearchListener(new DistrictSearch.OnDistrictSearchListener() {
+                    @Override
+                    public void onDistrictSearched(DistrictResult districtResult) {
+                        if (districtResult == null || districtResult.getDistrict() == null) {
+                            return;
+                        }
+
+                        final DistrictItem item = districtResult.getDistrict().get(0);
+                        if (item == null) {
+                            return;
+                        }
+
+                        String[] polyStr = item.districtBoundary();
+                        if (polyStr == null || polyStr.length == 0) {
+                            return;
+                        }
+
+                        try {
+                            JSONObject obj = new JSONObject();
+                            obj.put("name", adName);
+                            obj.put("id", adCode);
+
+                            JSONArray array1 = new JSONArray();
+
+                            for (String str : polyStr) {
+                                String[] latLng = str.split(";");
+                                JSONArray array2 = new JSONArray();
+                                for (String latstr : latLng) {
+                                    String[] lats = latstr.split(",");
+                                    JSONArray array3 = new JSONArray();
+                                    try {
+                                        array3.put(Double.parseDouble(lats[0]));
+                                        array3.put(Double.parseDouble(lats[1]));
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    Log.e("array3", array3.toString());
+                                    array2.put(array3);
+                                }
+                                Log.e("array2", array2.toString());
+                                array1.put(array2);
+                            }
+
+                            Log.e("array1", array1.toString());
+                            obj.put("coordinates", array1);
+                            Log.e("obj", obj.toString());
+
+                            File file = new File(Environment.getExternalStorageDirectory()+ File.separator+adCode+".json");
+                            CommonUtil.writeExternalFile(file, obj.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+
+                    }
+                });//绑定监听器
+            }
+        }).start();
+    }
+
+    /**
+     * SDCard写入文件，注意读写权限
+     * @param file
      * @param content
      */
-    public static void writeFile(Context context, String fileName, String content) {
+    public static void writeExternalFile(File file, String content) {
         try {
-            /* 根据用户提供的文件名，以及文件的应用模式，打开一个输出流.文件不存系统会为你创建一个的，
-             * 至于为什么这个地方还有FileNotFoundException抛出，我也比较纳闷。在Context中是这样定义的
-             *   public abstract FileOutputStream openFileOutput(String name, int mode)
-             *   throws FileNotFoundException;
-             * openFileOutput(String name, int mode);
-             * 第一个参数，代表文件名称，注意这里的文件名称不能包括任何的/或者/这种分隔符，只能是文件名
-             *          该文件会被保存在/data/data/应用名称/files/chenzheng_java.txt
-             * 第二个参数，代表文件的操作模式
-             *          MODE_PRIVATE 私有（只能创建它的应用访问） 重复写入时会文件覆盖
-             *          MODE_APPEND  私有   重复写入时会在文件的末尾进行追加，而不是覆盖掉原来的文件
-             *          MODE_WORLD_READABLE 公用  可读
-             *          MODE_WORLD_WRITEABLE 公用 可读写
-             *  */
-            FileOutputStream outputStream = context.openFileOutput(fileName+".txt", Context.MODE_PRIVATE);
-            outputStream.write(content.getBytes());
-            outputStream.flush();
-            outputStream.close();
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(file);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            bos.write(content.getBytes());
+            bos.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
