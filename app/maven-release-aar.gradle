@@ -1,5 +1,6 @@
 //1.maven-插件
 apply plugin: 'maven'
+apply plugin: 'com.github.dcendents.android-maven' // ADD THIS 
 
 //2.maven-信息
 ext {// ext is a gradle closure allowing the declaration of global properties
