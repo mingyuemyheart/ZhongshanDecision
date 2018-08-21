@@ -13,7 +13,10 @@ uploadArchives {
     repositories.mavenDeployer {
         //这里就是最后输出地址，在自己电脑上新建个文件夹，把文件夹路径粘贴在此
         //注意”file://“ + 路径，有三个斜杠，别漏了
-        repository(url: "file:///Users/shawn/Desktop/打包/中山气象/aar")
+        repository(url: "file:///Users/shawn/AndroidStudioProjects/ZhongshanDecision/aar")
+
+//        def deployPath = file(getProperty('aar.deployPath'))
+//        repository(url: "file://${deployPath.absolutePath}")
 
         pom.project {
             groupId project.PUBLISH_GROUP_ID
