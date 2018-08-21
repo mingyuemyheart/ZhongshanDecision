@@ -7,11 +7,11 @@ public class CONST {
     public static final String imageSuffix = ".png";//图标后缀名//保存路径
 
     //预警颜色对应规则
-    public static String[] blue = {"01", "_blue"};
-    public static String[] yellow = {"02", "_yellow"};
-    public static String[] orange = {"03", "_orange"};
-    public static String[] red = {"04", "_red"};
-    public static String[] white = {"05", "_white"};
+    public static String[] white = {"01", "_white"};
+    public static String[] blue = {"02", "_blue"};
+    public static String[] yellow = {"03", "_yellow"};
+    public static String[] orange = {"04", "_orange"};
+    public static String[] red = {"05", "_red"};
 
     //下拉刷新progresBar四种颜色
     public static final int color1 = R.color.refresh_color1;

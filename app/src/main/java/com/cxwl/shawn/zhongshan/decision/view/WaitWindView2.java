@@ -16,7 +16,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 
 import com.amap.api.maps.model.LatLng;
-import com.cxwl.shawn.zhongshan.decision.ShawnMainActivity;
+import com.cxwl.shawn.zhongshan.decision.activity.ShawnMainActivity;
 import com.cxwl.shawn.zhongshan.decision.dto.WindData;
 import com.cxwl.shawn.zhongshan.decision.dto.WindDto;
 
@@ -75,15 +75,15 @@ public class WaitWindView2 extends View {
 
 		float totalMemory = getTotalMemorySize()/1024/1024;//手机内存大小(G)
 		if (totalMemory <= 3.0) {//内存小于等于2G
-			partileCount = 800;//绘制粒子个数
-			frameCount = 8;//帧数
-			speedRate = 1.5f;//离子运动速度系数
+			partileCount = 600;//绘制粒子个数
+			frameCount = 10;//帧数
+			speedRate = 1.0f;//离子运动速度系数
 		}else if (totalMemory > 3.0 && totalMemory <= 4.0) {//内存小于等于3G
-			partileCount = 1000;//绘制粒子个数
+			partileCount = 800;//绘制粒子个数
 			frameCount = 10;//帧数
 			speedRate = 1.0f;//离子运动速度系数
 		}else if (totalMemory > 4.0) {//内存大于3G
-			partileCount = 1200;//绘制粒子个数
+			partileCount = 1000;//绘制粒子个数
 			frameCount = 10;//帧数
 			speedRate = 1.0f;//离子运动速度系数
 		}
@@ -112,6 +112,12 @@ public class WaitWindView2 extends View {
 
 	public void setData(WindData windData) {
 		this.windData = windData;
+	}
+
+	public void setStokeColor(int stokeColor) {
+		if (paint != null) {
+			paint.setColor(stokeColor);
+		}
 	}
 
 	public void start() {

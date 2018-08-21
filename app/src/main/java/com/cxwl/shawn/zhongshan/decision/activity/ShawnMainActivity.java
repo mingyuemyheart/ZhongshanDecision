@@ -1,4 +1,4 @@
-package com.cxwl.shawn.zhongshan.decision;
+package com.cxwl.shawn.zhongshan.decision.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -46,6 +46,7 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptor;
@@ -70,6 +71,7 @@ import com.amap.api.services.geocoder.GeocodeResult;
 import com.amap.api.services.geocoder.GeocodeSearch;
 import com.amap.api.services.geocoder.RegeocodeQuery;
 import com.amap.api.services.geocoder.RegeocodeResult;
+import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.adapter.TyphoonNameAdapter;
 import com.cxwl.shawn.zhongshan.decision.adapter.TyphoonStartAdapter;
 import com.cxwl.shawn.zhongshan.decision.adapter.TyphoonYearAdapter;
@@ -134,14 +136,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private AMap aMap;//高德地图
     private int AMapType = AMap.MAP_TYPE_SATELLITE;
     private float zoom = 4.0f;
-    private String locationAdcode, clickAdcode;//定位点对应行政区划
     private Bundle savedInstanceState;
     private LinearLayout llBack,llMenu,llTyphoon,llFact,llSatelite,llRadar,llWarning,llFore,llMinute,llWind,llValue;
     private ImageView ivBack,ivMenu,ivTyphoon,ivFact,ivSatelite,ivRadar,ivWarning,ivFore,ivMinute,ivWind,ivValue;
     private TextView tvBack,tvTyphoonName,tvTyphoon,tvFact,tvSatelite,tvRadar,tvWarning,tvFore,tvMinute,tvWind,tvValue;
     private AMapLocationClientOption mLocationOption;//声明mLocationOption对象
     private AMapLocationClient mLocationClient;//声明AMapLocationClient类对象
-    private LatLng locationLatLng,clickLatLng;
+    private String locationAdcode = "442000", clickAdcode = "442000";//定位点对应行政区划
+    private LatLng locationLatLng = new LatLng(22.519470, 113.356614),clickLatLng = new LatLng(22.519470, 113.356614);
     private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy", Locale.CHINA);
     private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMddHH", Locale.CHINA);
     private SimpleDateFormat sdf3 = new SimpleDateFormat("yyyy年MM月dd日HH时", Locale.CHINA);
@@ -176,8 +178,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Map<String, Marker> rangeMarkersMap = new HashMap<>();//测距中点距离marker
     private Map<String, TyphoonDto> lastFactPointMap = new HashMap<>();//最后一个实况点数据集合
 
-    private Circle circle7, circle10;//七级风圈和十级风圈
-    private boolean isShowInfoWindow = false;//是否显示气泡
+    private List<Polygon> windCirclePolygons = new ArrayList<>();//fengquan
+    private boolean isShowInfoWindow = true;//是否显示气泡
     private boolean isShowTime = false;//是否显示台风实况、预报时间
     private boolean isRanging = false;//是否允许测距
     private Marker locationMarker,clickMarker;
@@ -187,6 +189,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private ImageView ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
     private TextView tvCurrent,tvHistory;
     private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend;
+    private String typhoonPointAddr = "";
 
     //更多
     private ImageView ivMore,ivMapType1,ivMapType2;
@@ -307,9 +310,54 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             @Override
             public void onMapLoaded() {
                 drawWarningLines();
-                startLocation();
+
+                if (CommonUtil.isLocationOpen(mContext)) {
+                    startLocation();
+                }else {
+                    getSharedPreferences();
+                }
             }
         });
+    }
+
+    /**
+     * 读取设置
+     */
+    private void getSharedPreferences() {
+        SharedPreferences sp = getSharedPreferences("zhongshan", Context.MODE_PRIVATE);
+
+        if (sp.contains("adCode")) {
+            String adCode = sp.getString("adCode", "");
+            if (!TextUtils.isEmpty(adCode)) {
+                clickAdcode = adCode;
+            }
+        }
+
+        if (sp.contains("lat") && sp.contains("lng")) {
+            double lat = sp.getLong("lat", 0);
+            double lng = sp.getLong("lng", 0);
+            if (lat != 0 && lng != 0) {
+                clickLatLng = new LatLng(lat, lng);
+            }
+        }
+    }
+
+    /**
+     * 保存设置
+     */
+    private void saveSharedPreferences() {
+        SharedPreferences sp = getSharedPreferences("zhongshan", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        if (!TextUtils.isEmpty(clickAdcode)) {
+            editor.putString("adCode", clickAdcode);
+        }
+
+        if (clickLatLng != null) {
+            editor.putLong("lat", (long)clickLatLng.latitude);
+            editor.putLong("lng", (long)clickLatLng.longitude);
+        }
+
+        editor.apply();
     }
 
     /**
@@ -321,7 +369,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);//设置定位模式为高精度模式，Battery_Saving为低功耗模式，Device_Sensors是仅设备模式
             mLocationOption.setNeedAddress(true);//设置是否返回地址信息（默认返回地址信息）
             mLocationOption.setOnceLocation(true);//设置是否只定位一次,默认为false
-            mLocationOption.setWifiActiveScan(true);//设置是否强制刷新WIFI，默认为强制刷新
             mLocationOption.setMockEnable(false);//设置是否允许模拟位置,默认为false，不允许模拟位置
             mLocationOption.setInterval(2000);//设置定位间隔,单位毫秒,默认为2000ms
         }
@@ -337,11 +384,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     public void onLocationChanged(AMapLocation amapLocation) {
         if (amapLocation != null && amapLocation.getErrorCode() == 0) {
             locationAdcode = amapLocation.getAdCode();
-            locationAdcode = "440229";
             clickAdcode = locationAdcode;
             locationLatLng = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
             clickLatLng = locationLatLng;
             addLocationMarker();
+            saveSharedPreferences();
         }
     }
 
@@ -781,7 +828,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 if (dto.isSelected) {
                     selectList.add(0, dto);
 
-                    isShowInfoWindow = false;
+                    isShowInfoWindow = true;
                     String detailUrl = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/"+dto.id;
                     OkHttpTyphoonDetail(dto.status, dto.id, detailUrl, name);
                 }else {
@@ -829,7 +876,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
 
                 clearAllPoints(null);
-                isShowInfoWindow = false;
+                isShowInfoWindow = true;
                 String detailUrl = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/"+dto.id;
                 OkHttpTyphoonDetail(dto.status, dto.id, detailUrl, tvTyphoonName.getText().toString());
 
@@ -1298,14 +1345,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 清除七级、十级风圈
      */
     private void removeWindCircle() {
-        if (circle7 != null) {
-            circle7.remove();
-            circle7 = null;
+        for (Polygon polygon : windCirclePolygons) {
+            polygon.remove();
         }
-        if (circle10 != null) {
-            circle10.remove();
-            circle10 = null;
-        }
+        windCirclePolygons.clear();
     }
 
     /**
@@ -1641,7 +1684,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             ivPoint.setImageResource(R.drawable.typhoon_yb);
         }
         MarkerOptions options = new MarkerOptions();
-        options.title(firstPoint.name+"|"+firstPoint.content(mContext)+"|"+firstPoint.radius_7+"|"+firstPoint.radius_10);
+        String title1 = firstPoint.name+"|"+firstPoint.content(mContext)+";";
+        String title2 = firstPoint.move_speed+"|"+lastPoint.move_speed+"|"+lastPoint.time+"|"+firstPoint.wind_dir+";";//前后两个点速度，为计算强度字符串所用
+        String title3 = firstPoint.en_radius_7+"|"+firstPoint.es_radius_7+"|"+firstPoint.ws_radius_7+"|"+firstPoint.wn_radius_7+"|"+
+                firstPoint.en_radius_10+"|"+firstPoint.es_radius_10+"|"+firstPoint.ws_radius_10+"|"+firstPoint.wn_radius_10;
+        options.title(title1+title2+title3);
         options.snippet(TYPE_TYPHOON);
         options.anchor(0.5f, 0.5f);
         options.position(firstLatLng);
@@ -1656,7 +1703,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 clickMarker.showInfoWindow();
 
                 //绘制最后一个实况点对应的七级、十级风圈
-                drawWindCircle(firstPoint.radius_7, firstPoint.radius_10, firstLatLng);
+                drawWindCircle(firstPoint.en_radius_7,firstPoint.es_radius_7,firstPoint.ws_radius_7,firstPoint.wn_radius_7,
+                        firstPoint.en_radius_10,firstPoint.es_radius_10,firstPoint.ws_radius_10,firstPoint.wn_radius_10,firstLatLng);
             }
 
             //绘制最后一个实况点对应的时间
@@ -1733,19 +1781,64 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     /**
      * 绘制七级、十级风圈
      */
-    private void drawWindCircle(String radius_7, String radius_10, LatLng latLng) {
+    private void drawWindCircle(String en_radius7, String es_radius7, String ws_radius7, String wn_radius7,
+                                String en_radius10, String es_radius10, String ws_radius10, String wn_radius10,LatLng center) {
         removeWindCircle();
 
-        if (!TextUtils.isEmpty(radius_7) && !TextUtils.equals(radius_7, "null")) {
-            circle7 = aMap.addCircle(new CircleOptions().center(latLng)
-                    .radius(Double.valueOf(radius_7)*1000).strokeColor(Color.YELLOW)
-                    .fillColor(0x30ffffff).strokeWidth(5));
+        //七级风圈
+        List<LatLng> wind7Points = new ArrayList<>();
+        getWindCirclePoints(center, en_radius7, 0, wind7Points);
+        getWindCirclePoints(center, es_radius7, 90, wind7Points);
+        getWindCirclePoints(center, ws_radius7, 180, wind7Points);
+        getWindCirclePoints(center, wn_radius7, 270, wind7Points);
+        if (wind7Points.size() > 0) {
+            PolygonOptions polygonOptions = new PolygonOptions();
+            polygonOptions.strokeWidth(5).strokeColor(Color.YELLOW).fillColor(0x30ffffff);
+            for (LatLng latLng : wind7Points) {
+                polygonOptions.add(latLng);
+            }
+            Polygon polygon = aMap.addPolygon(polygonOptions);
+            windCirclePolygons.add(polygon);
         }
 
-        if (!TextUtils.isEmpty(radius_10) && !TextUtils.equals(radius_10, "null")) {
-            circle10 = aMap.addCircle(new CircleOptions().center(latLng)
-                    .radius(Double.valueOf(radius_10)*1000).strokeColor(Color.RED)
-                    .fillColor(0x30ffffff).strokeWidth(5));
+
+        //十级风圈
+        List<LatLng> wind10Points = new ArrayList<>();
+        getWindCirclePoints(center, en_radius10, 0, wind10Points);
+        getWindCirclePoints(center, es_radius10, 90, wind10Points);
+        getWindCirclePoints(center, ws_radius10, 180, wind10Points);
+        getWindCirclePoints(center, wn_radius10, 270, wind10Points);
+        if (wind10Points.size() > 0) {
+            PolygonOptions polygonOptions = new PolygonOptions();
+            polygonOptions.strokeWidth(5).strokeColor(Color.RED).fillColor(0x30ffffff);
+            for (LatLng latLng : wind10Points) {
+                polygonOptions.add(latLng);
+            }
+            Polygon polygon = aMap.addPolygon(polygonOptions);
+            windCirclePolygons.add(polygon);
+        }
+
+    }
+
+    /**
+     * 获取风圈经纬度点集合
+     * @param center
+     * @param radius
+     * @param startAngle
+     * @return
+     */
+    private void getWindCirclePoints(LatLng center, String radius, double startAngle, List<LatLng> points) {
+        if (!TextUtils.isEmpty(radius) && !TextUtils.equals(radius, "null")) {
+            double r = Double.valueOf(radius)/100;
+            int pointCount = 90;
+            double endAngle = startAngle+90;
+
+            for (int i = 0; i <= pointCount; i++) {
+                double angle = startAngle+(endAngle-startAngle)*i/pointCount;
+                double lat = center.latitude+r*Math.sin(angle*Math.PI*2/360);
+                double lng = center.longitude+r*Math.cos(angle*Math.PI*2/360);
+                points.add(new LatLng(lat, lng));
+            }
         }
     }
 
@@ -1809,7 +1902,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View mView = inflater.inflate(R.layout.shawn_typhoon_marker_range, null);
         TextView tvName = mView.findViewById(R.id.tvName);
-        tvName.setText("距离台风"+getDistance(longitude1, latitude1, longitude2, latitude2)+"公里");
+        float distance = AMapUtils.calculateLineDistance(new LatLng(latitude1, longitude1), new LatLng(latitude2, longitude2));
+        float d = new BigDecimal(distance/1000).setScale(1, BigDecimal.ROUND_FLOOR).floatValue();
+        tvName.setText("距离台风"+d+"公里");
         MarkerOptions options = new MarkerOptions();
         options.position(latLng);
         options.icon(BitmapDescriptorFactory.fromView(mView));
@@ -1818,38 +1913,18 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         rangeMarkersMap.put(typhoonId, marker);
     }
 
-    /**
-     * 计算两点之间距离
-     * @param longitude1
-     * @param latitude1
-     * @param longitude2
-     * @param latitude2
-     * @return
-     */
-    private static String getDistance(double longitude1, double latitude1, double longitude2, double latitude2) {
-        double EARTH_RADIUS = 6378137;//单位米
-        double Lat1 = latitude1 * Math.PI / 180.0;
-        double Lat2 = latitude2 * Math.PI / 180.0;
-        double Lng1 = longitude1 * Math.PI / 180.0;
-        double Lng2 = longitude2 * Math.PI / 180.0;
-        double a = Lat1-Lat2;
-        double b = Lng1-Lng2;
-        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2) + Math.cos(Lat1) * Math.cos(Lat2) * Math.pow(Math.sin(b / 2), 2)));
-        s = s * EARTH_RADIUS;
-        s = Math.round(s * 10000) / 10000;
-        BigDecimal bd = new BigDecimal(s / 1000);
-        double d = bd.setScale(1, BigDecimal.ROUND_HALF_UP).doubleValue();
-        return d+"";
-    }
-
     @Override
     public boolean onMarkerClick(Marker marker) {
         if (marker != null && marker != locationMarker) {
             String markerType = marker.getSnippet();
             if (!TextUtils.isEmpty(markerType)) {
                 if (TextUtils.equals(markerType, TYPE_TYPHOON)) {//点击台风点
-                    String[] title = marker.getTitle().split("\\|");
-                    drawWindCircle(title[2], title[3], marker.getPosition());
+                    String[] titles = marker.getTitle().split(";");
+                    if (!TextUtils.isEmpty(titles[2])) {
+                        String[] circles = titles[2].split("\\|");
+                        drawWindCircle(circles[0], circles[1], circles[2], circles[3], circles[4], circles[5],circles[6], circles[7], marker.getPosition());
+                        searchAddrByLatLng(marker.getPosition().latitude, marker.getPosition().longitude);//参考位置
+                    }
                 }else if (TextUtils.equals(markerType, TYPE_WARNING)) {//点击预警marker
                     //点击预警marker
                 }else if (TextUtils.equals(markerType, TYPE_FORE)) {//点击预报marker
@@ -1907,13 +1982,49 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             TextView tvInfo = view.findViewById(R.id.tvInfo);
             ImageView ivDelete = view.findViewById(R.id.ivDelete);
             if (!TextUtils.isEmpty(marker.getTitle())) {
-                String[] str = marker.getTitle().split("\\|");
-                if (!TextUtils.isEmpty(str[0])) {
-                    tvName.setText(str[0]);
+                String[] titles = marker.getTitle().split(";");
+
+                //台风内容
+                String[] title1 = titles[0].split("\\|");
+                if (!TextUtils.isEmpty(title1[0])) {
+                    tvName.setText(title1[0]);
                 }
-                if (!TextUtils.isEmpty(str[1])) {
-                    tvInfo.setText(str[1]);
+                if (!TextUtils.isEmpty(title1[1])) {
+                    tvInfo.setText(title1[1]);
                 }
+
+                //预报结论
+                String[] title2 = titles[1].split("\\|");
+                float currentSpeed = Float.parseFloat(title2[0]);
+                float nextSpeed = Float.parseFloat(title2[1]);
+
+                String strength = "";
+                if (currentSpeed > nextSpeed) {
+                    strength = "强度逐渐减弱。";
+                }else {
+                    strength = "强度逐渐增强。";
+                }
+                String time = "";
+                try {
+                    time = "(下次更新时间为"+sdf5.format(sdf2.parse(title2[2]))+")";
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+
+                String content = tvInfo.getText().toString();
+                if (TextUtils.isEmpty(typhoonPointAddr)) {
+                    typhoonPointAddr = marker.getPosition().latitude+","+marker.getPosition().longitude;
+                }
+                String position = "参考位置："+typhoonPointAddr+"\n";
+
+                String result = "";
+                if (!TextUtils.isEmpty(title2[3]) && !TextUtils.equals(title2[3], "null")) {
+                    result = "预报结论：将以每小时"+currentSpeed+"公里左右\n的速度偏"+title2[3]+"方向移动，\n"+strength+"\n";
+                }else {
+                    result = "预报结论：将以每小时"+currentSpeed+"公里左右\n的速度移动，"+strength+"\n";
+                }
+                tvInfo.setText(content+position+result+time);
+
             }
             ivDelete.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -2477,7 +2588,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      */
     private void OkHttpWarning() {
         loadingView.setVisibility(View.VISIBLE);
-        final String url = "http://decision-admin.tianqi.cn/Home/extra/getwarns?order=1&areaid=44";
+        final String url = "https://api.bluepi.tianqi.cn/outdata/zhongshan/zhongShanWarnning";
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -2560,14 +2671,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 layoutWarning.setVisibility(View.VISIBLE);
 
                                                 //计算统计列表信息
-                                                int wnation = 0, wpro = 0, wcity = 0, wdis = 0;
                                                 int rnation = 0, rpro = 0, rcity = 0, rdis = 0;
                                                 int onation = 0, opro = 0, ocity = 0, odis = 0;
                                                 int ynation = 0, ypro = 0, ycity = 0, ydis = 0;
                                                 int bnation = 0, bpro = 0, bcity = 0, bdis = 0;
+                                                int wnation = 0, wpro = 0, wcity = 0, wdis = 0;
                                                 for (int i = 0; i < warningList.size(); i++) {
                                                     WarningDto dto = warningList.get(i);
-                                                    if (TextUtils.equals(dto.color, "05")) {
+                                                    if (TextUtils.equals(dto.color, "01")) {
                                                         if (TextUtils.equals(dto.item0, "000000")) {
                                                             wnation += 1;
                                                         }else if (TextUtils.equals(dto.item0.substring(dto.item0.length()-4, dto.item0.length()), "0000")) {
@@ -2577,7 +2688,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         }else {
                                                             wdis += 1;
                                                         }
-                                                    }else if (TextUtils.equals(dto.color, "04")) {
+                                                    }else if (TextUtils.equals(dto.color, "05")) {
                                                         if (TextUtils.equals(dto.item0, "000000")) {
                                                             rnation += 1;
                                                         }else if (TextUtils.equals(dto.item0.substring(dto.item0.length()-4, dto.item0.length()), "0000")) {
@@ -2587,7 +2698,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         }else {
                                                             rdis += 1;
                                                         }
-                                                    }else if (TextUtils.equals(dto.color, "03")) {
+                                                    }else if (TextUtils.equals(dto.color, "04")) {
                                                         if (TextUtils.equals(dto.item0, "000000")) {
                                                             onation += 1;
                                                         }else if (TextUtils.equals(dto.item0.substring(dto.item0.length()-4, dto.item0.length()), "0000")) {
@@ -2597,7 +2708,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         }else {
                                                             odis += 1;
                                                         }
-                                                    }else if (TextUtils.equals(dto.color, "02")) {
+                                                    }else if (TextUtils.equals(dto.color, "03")) {
                                                         if (TextUtils.equals(dto.item0, "000000")) {
                                                             ynation += 1;
                                                         }else if (TextUtils.equals(dto.item0.substring(dto.item0.length()-4, dto.item0.length()), "0000")) {
@@ -2607,7 +2718,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         }else {
                                                             ydis += 1;
                                                         }
-                                                    }else if (TextUtils.equals(dto.color, "01")) {
+                                                    }else if (TextUtils.equals(dto.color, "02")) {
                                                         if (TextUtils.equals(dto.item0, "000000")) {
                                                             bnation += 1;
                                                         }else if (TextUtils.equals(dto.item0.substring(dto.item0.length()-4, dto.item0.length()), "0000")) {
@@ -2787,15 +2898,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     for (WarningDto dto : list) {
                         int color = 0;
                         if (TextUtils.equals(dto.color, "01")) {
-                            color = 0x990456F3;
-                        }else if (TextUtils.equals(dto.color, "02")) {
-                            color = 0x99FFFF0C;
-                        }else if (TextUtils.equals(dto.color, "03")) {
-                            color = 0x99FC9807;
-                        }else if (TextUtils.equals(dto.color, "04")) {
-                            color = 0x99D5202A;
-                        }else if (TextUtils.equals(dto.color, "05")) {
                             color = 0x99ffffff;
+                        }else if (TextUtils.equals(dto.color, "02")) {
+                            color = 0x990456F3;
+                        }else if (TextUtils.equals(dto.color, "03")) {
+                            color = 0x99FFFF0C;
+                        }else if (TextUtils.equals(dto.color, "04")) {
+                            color = 0x99FC9807;
+                        }else if (TextUtils.equals(dto.color, "05")) {
+                            color = 0x99D5202A;
                         }
 
                         String wId = dto.item0;
@@ -3309,6 +3420,17 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         if (result != null && result.getRegeocodeAddress() != null && result.getRegeocodeAddress().getFormatAddress() != null) {
             loadingView.setVisibility(View.GONE);
 
+            clickAdcode = result.getRegeocodeAddress().getAdCode();
+            clickLatLng = new LatLng(result.getRegeocodeQuery().getPoint().getLatitude(), result.getRegeocodeQuery().getPoint().getLongitude());
+            saveSharedPreferences();
+
+            if (isShowTyphoon) {
+                typhoonPointAddr = result.getRegeocodeAddress().getProvince()+result.getRegeocodeAddress().getCity();
+                if (clickMarker != null) {//为了显示"参考位置"
+                    clickMarker.showInfoWindow();
+                }
+            }
+
             if (isShowMinute) {
                 String addr = result.getRegeocodeAddress().getFormatAddress();
                 if (!TextUtils.isEmpty(addr)) {
@@ -3317,7 +3439,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
 
             if (isShowWarning) {
-                clickAdcode = result.getRegeocodeAddress().getAdCode();
                 addLocationWarnings();
 //                Toast.makeText(mContext, clickAdcode+"-"+result.getRegeocodeAddress().getCity()+result.getRegeocodeAddress().getDistrict(), Toast.LENGTH_LONG).show();
             }
@@ -3656,6 +3777,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             return;
         }
 
+        int strokeColor = Color.WHITE;
+        if (AMapType == AMap.MAP_TYPE_SATELLITE) {
+            strokeColor = Color.WHITE;
+        }else if (AMapType == AMap.MAP_TYPE_NORMAL) {
+            strokeColor = 0x9955A7FF;
+        }
+
         LatLng latLngStart = aMap.getProjection().fromScreenLocation(new Point(0, 0));
         LatLng latLngEnd = aMap.getProjection().fromScreenLocation(new Point(width, height));
         Log.e("latLng", latLngStart.latitude+","+latLngStart.longitude+"\n"+latLngEnd.latitude+","+latLngEnd.longitude);
@@ -3674,6 +3802,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 waitWindView.setData(windDataT639);
             }
+            waitWindView.setStokeColor(strokeColor);
             waitWindView.start();
             waitWindView.invalidate();
         }else {
@@ -3682,6 +3811,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 waitWindView.setData(windDataT639);
             }
+            waitWindView.setStokeColor(strokeColor);
         }
 
         windContainer2.removeAllViews();
@@ -3713,123 +3843,47 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.llBack:
-                finish();
-                break;
-            case R.id.llMenu:
-                scaleAnimation = !scaleAnimation;
-                if (scaleAnimation) {
-                    toRightAnimation();
-                }else {
-                    toLeftAnimation();
-                }
-                break;
+        int i = v.getId();
+        if (i == R.id.llBack) {
+            finish();
 
-                //台风
-            case R.id.llTyphoon:
-                isShowTyphoon = !isShowTyphoon;
-                if (isShowTyphoon) {
-                    lyoutTyphoon.setVisibility(View.VISIBLE);
-                    llTyphoon.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivTyphoon.setImageResource(R.drawable.shawn_icon_typhoon_press);
-                    tvTyphoon.setTextColor(Color.WHITE);
-
-                    String typhoonName = "";
-                    for (TyphoonDto dto : startList) {
-                        String name;
-                        if (TextUtils.equals(dto.enName, "nameless")) {
-                            if (!TextUtils.isEmpty(typhoonName)) {
-                                typhoonName = dto.enName+"\n"+typhoonName;
-                            }else {
-                                typhoonName = dto.enName;
-                            }
-                            name = dto.code+" "+dto.enName;
-                        }else {
-                            if (!TextUtils.isEmpty(typhoonName)) {
-                                typhoonName = dto.code+" "+dto.name+" "+dto.enName+"\n"+typhoonName;
-                            }else {
-                                typhoonName = dto.code+" "+dto.name+" "+dto.enName;
-                            }
-                            name = dto.code+" "+dto.name+" "+dto.enName;
-                        }
-                        String url = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/"+dto.id;
-                        OkHttpTyphoonDetail(dto.status, dto.id, url, name);
-                    }
-                    if (!TextUtils.isEmpty(typhoonName)) {
-                        tvTyphoonName.setText(typhoonName);
-                    }
-                    if (startList.size() <= 0) {// 没有生效台风
-                        tvTyphoonName.setText(getString(R.string.no_typhoon));
-                    }
-                    tvTyphoonName.setVisibility(View.VISIBLE);
-                }else {
-                    lyoutTyphoon.setVisibility(View.GONE);
-                    llTyphoon.setBackgroundColor(Color.TRANSPARENT);
-                    ivTyphoon.setImageResource(R.drawable.shawn_icon_typhoon);
-                    tvTyphoon.setTextColor(getResources().getColor(R.color.text_color3));
-                    clearAllPoints(null);
-                }
-                break;
-            case R.id.ivRange:
-                isRanging = !isRanging;
-                if (isRanging) {
-                    ivRange.setImageResource(R.drawable.shawn_icon_range_press);
-                    addLocationMarker();
-                    addLocationCircles();
-                    ranging(null);
-                }else {
-                    ivRange.setImageResource(R.drawable.shawn_icon_range);
-                    removeLocationMarker();
-                    removeLocationCirces();
-                    removeRange(null);
-                }
-                break;
-            case R.id.tvCurrent:
-                if (startListView.getVisibility() == View.VISIBLE) {
-                    return;
-                }
-
-                tvCurrent.setBackgroundResource(R.drawable.shawn_bg_current_press);
-                tvHistory.setBackgroundResource(R.drawable.shawn_bg_history);
-                tvCurrent.setTextColor(Color.WHITE);
-                tvHistory.setTextColor(getResources().getColor(R.color.text_color3));
-                startListView.setVisibility(View.VISIBLE);
-                yearListView.setVisibility(View.GONE);
-                nameListView.setVisibility(View.GONE);
+        } else if (i == R.id.llMenu) {
+            scaleAnimation = !scaleAnimation;
+            if (scaleAnimation) {
+                toRightAnimation();
+            } else {
+                toLeftAnimation();
+            }
 
 
-                tvTyphoonName.setText("");
-                clearAllPoints(null);
-
-                //清空选中的所有台风，并还原历史台风列表状态
-                selectList.clear();
-                for (TyphoonDto dto : nameList) {
-                    dto.isSelected = false;
-                }
-                if (nameAdapter != null) {
-                    nameAdapter.notifyDataSetChanged();
-                }
+            //台风
+        } else if (i == R.id.llTyphoon) {
+            isShowTyphoon = !isShowTyphoon;
+            if (isShowTyphoon) {
+                lyoutTyphoon.setVisibility(View.VISIBLE);
+                llTyphoon.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivTyphoon.setImageResource(R.drawable.shawn_icon_typhoon_press);
+                tvTyphoon.setTextColor(Color.WHITE);
 
                 String typhoonName = "";
                 for (TyphoonDto dto : startList) {
                     String name;
                     if (TextUtils.equals(dto.enName, "nameless")) {
                         if (!TextUtils.isEmpty(typhoonName)) {
-                            typhoonName = dto.enName+"\n"+typhoonName;
-                        }else {
+                            typhoonName = dto.enName + "\n" + typhoonName;
+                        } else {
                             typhoonName = dto.enName;
                         }
-                        name = dto.code+" "+dto.enName;
-                    }else {
+                        name = dto.code + " " + dto.enName;
+                    } else {
                         if (!TextUtils.isEmpty(typhoonName)) {
-                            typhoonName = dto.code+" "+dto.name+" "+dto.enName+"\n"+typhoonName;
-                        }else {
-                            typhoonName = dto.code+" "+dto.name+" "+dto.enName;
+                            typhoonName = dto.code + " " + dto.name + " " + dto.enName + "\n" + typhoonName;
+                        } else {
+                            typhoonName = dto.code + " " + dto.name + " " + dto.enName;
                         }
-                        name = dto.code+" "+dto.name+" "+dto.enName;
+                        name = dto.code + " " + dto.name + " " + dto.enName;
                     }
-                    String url = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/"+dto.id;
+                    String url = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/" + dto.id;
                     OkHttpTyphoonDetail(dto.status, dto.id, url, name);
                 }
                 if (!TextUtils.isEmpty(typhoonName)) {
@@ -3839,310 +3893,389 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     tvTyphoonName.setText(getString(R.string.no_typhoon));
                 }
                 tvTyphoonName.setVisibility(View.VISIBLE);
-                break;
-            case R.id.tvHistory:
-                if (startListView.getVisibility() != View.VISIBLE) {
-                    return;
-                }
-                tvCurrent.setBackgroundResource(R.drawable.shawn_bg_current);
-                tvHistory.setBackgroundResource(R.drawable.shawn_bg_history_press);
-                tvCurrent.setTextColor(getResources().getColor(R.color.text_color3));
-                tvHistory.setTextColor(Color.WHITE);
-                startListView.setVisibility(View.GONE);
-                yearListView.setVisibility(View.VISIBLE);
-                nameListView.setVisibility(View.VISIBLE);
+            } else {
+                lyoutTyphoon.setVisibility(View.GONE);
+                llTyphoon.setBackgroundColor(Color.TRANSPARENT);
+                ivTyphoon.setImageResource(R.drawable.shawn_icon_typhoon);
+                tvTyphoon.setTextColor(getResources().getColor(R.color.text_color3));
+                clearAllPoints(null);
+            }
 
-                //清空选中的所有台风，并还原历史台风列表状态
-                selectList.clear();
-                for (TyphoonDto dto : nameList) {
-                    if (TextUtils.equals(dto.status, "start")) {
-                        dto.isSelected = true;
-                    }else {
-                        dto.isSelected = false;
+        } else if (i == R.id.ivRange) {
+            isRanging = !isRanging;
+            if (isRanging) {
+                ivRange.setImageResource(R.drawable.shawn_icon_range_press);
+                addLocationMarker();
+                addLocationCircles();
+                ranging(null);
+            } else {
+                ivRange.setImageResource(R.drawable.shawn_icon_range);
+                removeLocationMarker();
+                removeLocationCirces();
+                removeRange(null);
+            }
+
+        } else if (i == R.id.tvCurrent) {
+            if (startListView.getVisibility() == View.VISIBLE) {
+                return;
+            }
+
+            tvCurrent.setBackgroundResource(R.drawable.shawn_bg_current_press);
+            tvHistory.setBackgroundResource(R.drawable.shawn_bg_history);
+            tvCurrent.setTextColor(Color.WHITE);
+            tvHistory.setTextColor(getResources().getColor(R.color.text_color3));
+            startListView.setVisibility(View.VISIBLE);
+            yearListView.setVisibility(View.GONE);
+            nameListView.setVisibility(View.GONE);
+
+
+            tvTyphoonName.setText("");
+            clearAllPoints(null);
+
+            //清空选中的所有台风，并还原历史台风列表状态
+            selectList.clear();
+            for (TyphoonDto dto : nameList) {
+                dto.isSelected = false;
+            }
+            if (nameAdapter != null) {
+                nameAdapter.notifyDataSetChanged();
+            }
+
+            String typhoonName = "";
+            for (TyphoonDto dto : startList) {
+                String name;
+                if (TextUtils.equals(dto.enName, "nameless")) {
+                    if (!TextUtils.isEmpty(typhoonName)) {
+                        typhoonName = dto.enName + "\n" + typhoonName;
+                    } else {
+                        typhoonName = dto.enName;
                     }
-                }
-                if (nameAdapter != null) {
-                    nameAdapter.notifyDataSetChanged();
-                }
-                break;
-            case R.id.ivList:
-            case R.id.ivTyphoonClose:
-                if (reTyphoonList.getVisibility() == View.GONE) {
-                    animationDownToUp(reTyphoonList);
-                    ivList.setImageResource(R.drawable.shawn_icon_list_press);
-                }else {
-                    animationUpToDown(reTyphoonList);
-                    ivList.setImageResource(R.drawable.shawn_icon_list);
-                }
-                break;
-            case R.id.ivLegend:
-            case R.id.ivLegendClose:
-                if (reLegend.getVisibility() == View.GONE) {
-                    animationDownToUp(reLegend);
-                    ivLegend.setImageResource(R.drawable.shawn_icon_legend_press);
-                }else {
-                    animationUpToDown(reLegend);
-                    ivLegend.setImageResource(R.drawable.shawn_icon_legend);
-                }
-                break;
-            case R.id.ivLocation:
-                clickAdcode = locationAdcode;
-                clickLatLng = locationLatLng;
-
-                if (isRanging) {//测距状态下
-                    addLocationMarker();
-                    addLocationCircles();
-                    ranging(null);
-                }
-
-                if (isShowMinute) {//选中分钟降水状态下
-                    if (clickLatLng != null) {
-                        addLocationMarker();
-                        searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
-                        OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
+                    name = dto.code + " " + dto.enName;
+                } else {
+                    if (!TextUtils.isEmpty(typhoonName)) {
+                        typhoonName = dto.code + " " + dto.name + " " + dto.enName + "\n" + typhoonName;
+                    } else {
+                        typhoonName = dto.code + " " + dto.name + " " + dto.enName;
                     }
+                    name = dto.code + " " + dto.name + " " + dto.enName;
                 }
+                String url = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/" + dto.id;
+                OkHttpTyphoonDetail(dto.status, dto.id, url, name);
+            }
+            if (!TextUtils.isEmpty(typhoonName)) {
+                tvTyphoonName.setText(typhoonName);
+            }
+            if (startList.size() <= 0) {// 没有生效台风
+                tvTyphoonName.setText(getString(R.string.no_typhoon));
+            }
+            tvTyphoonName.setVisibility(View.VISIBLE);
 
-                if (isShowWarning) {//选中预警状态下
-                    if (clickLatLng != null) {
-                        addLocationMarker();
-                        searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
-                    }
+        } else if (i == R.id.tvHistory) {
+            if (startListView.getVisibility() != View.VISIBLE) {
+                return;
+            }
+            tvCurrent.setBackgroundResource(R.drawable.shawn_bg_current);
+            tvHistory.setBackgroundResource(R.drawable.shawn_bg_history_press);
+            tvCurrent.setTextColor(getResources().getColor(R.color.text_color3));
+            tvHistory.setTextColor(Color.WHITE);
+            startListView.setVisibility(View.GONE);
+            yearListView.setVisibility(View.VISIBLE);
+            nameListView.setVisibility(View.VISIBLE);
+
+            //清空选中的所有台风，并还原历史台风列表状态
+            selectList.clear();
+            for (TyphoonDto dto : nameList) {
+                if (TextUtils.equals(dto.status, "start")) {
+                    dto.isSelected = true;
+                } else {
+                    dto.isSelected = false;
                 }
+            }
+            if (nameAdapter != null) {
+                nameAdapter.notifyDataSetChanged();
+            }
 
+        } else if (i == R.id.ivList || i == R.id.ivTyphoonClose) {
+            if (reTyphoonList.getVisibility() == View.GONE) {
+                animationDownToUp(reTyphoonList);
+                ivList.setImageResource(R.drawable.shawn_icon_list_press);
+            } else {
+                animationUpToDown(reTyphoonList);
+                ivList.setImageResource(R.drawable.shawn_icon_list);
+            }
+
+        } else if (i == R.id.ivLegend || i == R.id.ivLegendClose) {
+            if (reLegend.getVisibility() == View.GONE) {
+                animationDownToUp(reLegend);
+                ivLegend.setImageResource(R.drawable.shawn_icon_legend_press);
+            } else {
+                animationUpToDown(reLegend);
+                ivLegend.setImageResource(R.drawable.shawn_icon_legend);
+            }
+
+        } else if (i == R.id.ivLocation) {
+            clickAdcode = locationAdcode;
+            clickLatLng = locationLatLng;
+
+            if (isRanging) {//测距状态下
+                addLocationMarker();
+                addLocationCircles();
+                ranging(null);
+            }
+
+            if (isShowMinute) {//选中分钟降水状态下
                 if (clickLatLng != null) {
-                    aMap.animateCamera(CameraUpdateFactory.newLatLng(clickLatLng));
+                    addLocationMarker();
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
+                    OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
                 }
-                break;
+            }
 
-                //更多
-            case R.id.ivMore:
-                isShowMore = !isShowMore;
-                if (isShowMore) {
-                    ivMore.setImageResource(R.drawable.shawn_icon_more_press);
-                    enlargeAnimation(scrollViewMore);
-                    scrollViewMore.setVisibility(View.VISIBLE);
-                }else {
-                    ivMore.setImageResource(R.drawable.shawn_icon_more);
-                    narrowAnimation(scrollViewMore);
-                    scrollViewMore.setVisibility(View.GONE);
+            if (isShowWarning) {//选中预警状态下
+                if (clickLatLng != null) {
+                    addLocationMarker();
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
                 }
-                break;
-            case R.id.ivMapType1:
-                if (AMapType == AMap.MAP_TYPE_SATELLITE) {
-                    return;
-                }else {
-                    ivBack.setImageResource(R.drawable.shawn_icon_back);
-                    tvBack.setTextColor(Color.WHITE);
-                    tvTyphoonName.setTextColor(Color.WHITE);
-                    ivMapType1.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
-                    ivMapType2.setBackgroundColor(getResources().getColor(R.color.transparent));
-                    aMap.setMapType(AMap.MAP_TYPE_SATELLITE);
-                    AMapType = AMap.MAP_TYPE_SATELLITE;
-                }
-                break;
-            case R.id.ivMapType2:
-                if (AMapType == AMap.MAP_TYPE_NORMAL) {
-                    return;
-                }else {
-                    ivBack.setImageResource(R.drawable.shawn_icon_arrow_left);
-                    tvBack.setTextColor(Color.BLACK);
-                    tvTyphoonName.setTextColor(getResources().getColor(R.color.text_color3));
-                    ivMapType1.setBackgroundColor(getResources().getColor(R.color.transparent));
-                    ivMapType2.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
-                    aMap.setMapType(AMap.MAP_TYPE_NORMAL);
-                    AMapType = AMap.MAP_TYPE_NORMAL;
-                }
-                break;
+            }
+
+            if (clickLatLng != null) {
+                addLocationMarker();
+                aMap.animateCamera(CameraUpdateFactory.newLatLng(clickLatLng));
+            }
 
 
-                //天气实况
-            case R.id.llFact:
-                Toast.makeText(mContext, "开发中，敬请期待~~~", Toast.LENGTH_SHORT).show();
-                break;
+            //更多
+        } else if (i == R.id.ivMore) {
+            isShowMore = !isShowMore;
+            if (isShowMore) {
+                ivMore.setImageResource(R.drawable.shawn_icon_more_press);
+                enlargeAnimation(scrollViewMore);
+                scrollViewMore.setVisibility(View.VISIBLE);
+            } else {
+                ivMore.setImageResource(R.drawable.shawn_icon_more);
+                narrowAnimation(scrollViewMore);
+                scrollViewMore.setVisibility(View.GONE);
+            }
 
-                //卫星拼图
-            case R.id.llSatelite:
-                isShowCloud = !isShowCloud;
-                if (isShowCloud) {
-                    llSatelite.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivSatelite.setImageResource(R.drawable.shawn_icon_satelite_press);
-                    tvSatelite.setTextColor(Color.WHITE);
-                    if (cloudBitmap == null) {
-                        OkHttpCloudChart();
-                    }else {
-                        drawCloud(cloudBitmap);
-                    }
-                }else {
-                    llSatelite.setBackgroundColor(Color.TRANSPARENT);
-                    ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
-                    tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
-                    removeCloud();
+        } else if (i == R.id.ivMapType1) {
+            if (AMapType == AMap.MAP_TYPE_SATELLITE) {
+                return;
+            } else {
+                ivBack.setImageResource(R.drawable.shawn_icon_back);
+                tvBack.setTextColor(Color.WHITE);
+                tvTyphoonName.setTextColor(Color.WHITE);
+                ivMapType1.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
+                ivMapType2.setBackgroundColor(getResources().getColor(R.color.transparent));
+                aMap.setMapType(AMap.MAP_TYPE_SATELLITE);
+                AMapType = AMap.MAP_TYPE_SATELLITE;
+                if (isShowWind) {
+                    reloadWind();
                 }
-                break;
+            }
 
-                //雷达拼图
-            case R.id.llRadar:
-                isShowRadar = !isShowRadar;
-                if (isShowRadar) {
-                    llRadar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivRadar.setImageResource(R.drawable.shawn_icon_radar_press);
-                    tvRadar.setTextColor(Color.WHITE);
-                    if (caiyunList.size() <= 0) {
-                        OkHttpCaiyun();
-                    }else {
-                        removeRadar();
-                        caiyunThread = new CaiyunThread(caiyunList);
-                        caiyunThread.start();
-                    }
-                }else {
-                    llRadar.setBackgroundColor(Color.TRANSPARENT);
-                    ivRadar.setImageResource(R.drawable.shawn_icon_radar);
-                    tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
+        } else if (i == R.id.ivMapType2) {
+            if (AMapType == AMap.MAP_TYPE_NORMAL) {
+                return;
+            } else {
+                ivBack.setImageResource(R.drawable.shawn_icon_arrow_left);
+                tvBack.setTextColor(Color.BLACK);
+                tvTyphoonName.setTextColor(getResources().getColor(R.color.text_color3));
+                ivMapType1.setBackgroundColor(getResources().getColor(R.color.transparent));
+                ivMapType2.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
+                aMap.setMapType(AMap.MAP_TYPE_NORMAL);
+                AMapType = AMap.MAP_TYPE_NORMAL;
+                if (isShowWind) {
+                    reloadWind();
+                }
+            }
+
+
+            //天气实况
+        } else if (i == R.id.llFact) {
+            Toast.makeText(mContext, "开发中，敬请期待~~~", Toast.LENGTH_SHORT).show();
+
+
+            //卫星拼图
+        } else if (i == R.id.llSatelite) {
+            isShowCloud = !isShowCloud;
+            if (isShowCloud) {
+                llSatelite.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivSatelite.setImageResource(R.drawable.shawn_icon_satelite_press);
+                tvSatelite.setTextColor(Color.WHITE);
+                if (cloudBitmap == null) {
+                    OkHttpCloudChart();
+                } else {
+                    drawCloud(cloudBitmap);
+                }
+            } else {
+                llSatelite.setBackgroundColor(Color.TRANSPARENT);
+                ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
+                tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
+                removeCloud();
+            }
+
+
+            //雷达拼图
+        } else if (i == R.id.llRadar) {
+            isShowRadar = !isShowRadar;
+            if (isShowRadar) {
+                llRadar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivRadar.setImageResource(R.drawable.shawn_icon_radar_press);
+                tvRadar.setTextColor(Color.WHITE);
+                if (caiyunList.size() <= 0) {
+                    OkHttpCaiyun();
+                } else {
                     removeRadar();
+                    caiyunThread = new CaiyunThread(caiyunList);
+                    caiyunThread.start();
                 }
-                break;
+            } else {
+                llRadar.setBackgroundColor(Color.TRANSPARENT);
+                ivRadar.setImageResource(R.drawable.shawn_icon_radar);
+                tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
+                removeRadar();
+            }
 
-                //预警
-            case R.id.llWarning:
-                isShowWarning = !isShowWarning;
-                if (isShowWarning) {
-                    layoutWarning.setVisibility(View.VISIBLE);
-                    tvWarningTypeStr.setVisibility(View.VISIBLE);
-                    tvWarningListStr.setVisibility(View.VISIBLE);
-                    sbWarning.setVisibility(View.VISIBLE);
-                    if (gridviewWarning != null) {
-                        gridviewWarning.setVisibility(View.VISIBLE);
-                    }
-                    llWarning.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivWarning.setImageResource(R.drawable.shawn_icon_warning_press);
-                    tvWarning.setTextColor(Color.WHITE);
-                    if (warningList.size() <= 0) {
-                        OkHttpWarning();
-                    }else {
-                        addWarningMarkers();
-                    }
-                }else {
-                    layoutWarning.setVisibility(View.GONE);
-                    tvWarningTypeStr.setVisibility(View.GONE);
-                    tvWarningListStr.setVisibility(View.GONE);
-                    sbWarning.setVisibility(View.GONE);
-                    if (gridviewWarning != null) {
-                        gridviewWarning.setVisibility(View.GONE);
-                    }
-                    llWarning.setBackgroundColor(Color.TRANSPARENT);
-                    ivWarning.setImageResource(R.drawable.shawn_icon_warning);
-                    tvWarning.setTextColor(getResources().getColor(R.color.text_color3));
-                    switchWarningMarkersPolygons();
-                }
-                break;
-            case R.id.tvWaringList:
-                Intent intent = new Intent(mContext, ShawnWarningListActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("warningList", (ArrayList<? extends Parcelable>) warningList);
-                intent.putExtras(bundle);
-                startActivity(intent);
-                break;
-            case R.id.ivWarningClose:
-                if (reWarningPrompt.getVisibility() == View.VISIBLE) {
-                    animationUpToDown(reWarningPrompt);
-                    sbWarning.setChecked(false);
-                }else {
-                    animationDownToUp(reWarningPrompt);
-                    sbWarning.setChecked(true);
-                }
-                break;
 
-                //天气预报
-            case R.id.llFore:
-                isShowFore = !isShowFore;
-                if (isShowFore) {
-                    llFore.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivFore.setImageResource(R.drawable.shawn_icon_fore_press);
-                    tvFore.setTextColor(Color.WHITE);
-                    if (allCitysMap.size() <= 0) {
-                        OkHttpAllCitys();
-                    }else {
-                        moveMapLoadFore(zoom);
-                    }
-                }else {
-                    llFore.setBackgroundColor(Color.TRANSPARENT);
-                    ivFore.setImageResource(R.drawable.shawn_icon_fore);
-                    tvFore.setTextColor(getResources().getColor(R.color.text_color3));
-                    removeForeMarkers();
+            //预警
+        } else if (i == R.id.llWarning) {
+            isShowWarning = !isShowWarning;
+            if (isShowWarning) {
+                layoutWarning.setVisibility(View.VISIBLE);
+                tvWarningTypeStr.setVisibility(View.VISIBLE);
+                tvWarningListStr.setVisibility(View.VISIBLE);
+                sbWarning.setVisibility(View.VISIBLE);
+                if (gridviewWarning != null) {
+                    gridviewWarning.setVisibility(View.VISIBLE);
                 }
-                break;
+                llWarning.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivWarning.setImageResource(R.drawable.shawn_icon_warning_press);
+                tvWarning.setTextColor(Color.WHITE);
+                if (warningList.size() <= 0) {
+                    OkHttpWarning();
+                } else {
+                    addWarningMarkers();
+                }
+            } else {
+                layoutWarning.setVisibility(View.GONE);
+                tvWarningTypeStr.setVisibility(View.GONE);
+                tvWarningListStr.setVisibility(View.GONE);
+                sbWarning.setVisibility(View.GONE);
+                if (gridviewWarning != null) {
+                    gridviewWarning.setVisibility(View.GONE);
+                }
+                llWarning.setBackgroundColor(Color.TRANSPARENT);
+                ivWarning.setImageResource(R.drawable.shawn_icon_warning);
+                tvWarning.setTextColor(getResources().getColor(R.color.text_color3));
+                switchWarningMarkersPolygons();
+            }
 
-                //分钟降水
-            case R.id.llMinute:
-                isShowMinute = !isShowMinute;
-                if (isShowMinute) {
-                    layoutMinute.setVisibility(View.VISIBLE);
+        } else if (i == R.id.tvWaringList) {
+            Intent intent = new Intent(mContext, ShawnWarningListActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putParcelableArrayList("warningList", (ArrayList<? extends Parcelable>) warningList);
+            intent.putExtras(bundle);
+            startActivity(intent);
+
+        } else if (i == R.id.ivWarningClose) {
+            if (reWarningPrompt.getVisibility() == View.VISIBLE) {
+                animationUpToDown(reWarningPrompt);
+                sbWarning.setChecked(false);
+            } else {
+                animationDownToUp(reWarningPrompt);
+                sbWarning.setChecked(true);
+            }
+
+
+            //天气预报
+        } else if (i == R.id.llFore) {
+            isShowFore = !isShowFore;
+            if (isShowFore) {
+                llFore.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivFore.setImageResource(R.drawable.shawn_icon_fore_press);
+                tvFore.setTextColor(Color.WHITE);
+                if (allCitysMap.size() <= 0) {
+                    OkHttpAllCitys();
+                } else {
+                    moveMapLoadFore(zoom);
+                }
+            } else {
+                llFore.setBackgroundColor(Color.TRANSPARENT);
+                ivFore.setImageResource(R.drawable.shawn_icon_fore);
+                tvFore.setTextColor(getResources().getColor(R.color.text_color3));
+                removeForeMarkers();
+            }
+
+
+            //分钟降水
+        } else if (i == R.id.llMinute) {
+            isShowMinute = !isShowMinute;
+            if (isShowMinute) {
+                layoutMinute.setVisibility(View.VISIBLE);
 //                    tvMinuteStr.setVisibility(View.VISIBLE);
 //                    sbMinute.setVisibility(View.VISIBLE);
-                    llMinute.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivMinute.setImageResource(R.drawable.shawn_icon_minute_press);
-                    tvMinute.setTextColor(Color.WHITE);
-                    if (clickLatLng != null) {
-                        addLocationMarker();
-                        searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
-                        OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
-                    }
-                }else {
-                    layoutMinute.setVisibility(View.GONE);
-                    tvMinuteStr.setVisibility(View.GONE);
-                    sbMinute.setVisibility(View.GONE);
-                    llMinute.setBackgroundColor(Color.TRANSPARENT);
-                    ivMinute.setImageResource(R.drawable.shawn_icon_minute);
-                    tvMinute.setTextColor(getResources().getColor(R.color.text_color3));
+                llMinute.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivMinute.setImageResource(R.drawable.shawn_icon_minute_press);
+                tvMinute.setTextColor(Color.WHITE);
+                if (clickLatLng != null) {
+                    addLocationMarker();
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
+                    OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
                 }
-                break;
-            case R.id.ivMinuteClose:
-                if (reMinutePrompt.getVisibility() == View.VISIBLE) {
-                    animationUpToDown(reMinutePrompt);
-                    sbMinute.setChecked(false);
-                }else {
-                    animationDownToUp(reMinutePrompt);
-                    sbMinute.setChecked(true);
-                }
-                break;
+            } else {
+                layoutMinute.setVisibility(View.GONE);
+                tvMinuteStr.setVisibility(View.GONE);
+                sbMinute.setVisibility(View.GONE);
+                llMinute.setBackgroundColor(Color.TRANSPARENT);
+                ivMinute.setImageResource(R.drawable.shawn_icon_minute);
+                tvMinute.setTextColor(getResources().getColor(R.color.text_color3));
+            }
 
-                //风场
-            case R.id.llWind:
-                isShowWind = !isShowWind;
-                if (isShowWind) {
-                    layoutWind.setVisibility(View.VISIBLE);
-                    tvWindTypeStr.setVisibility(View.VISIBLE);
-                    if (gridviewWind != null) {
-                        gridviewWind.setVisibility(View.VISIBLE);
-                    }
-                    llWind.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                    ivWind.setImageResource(R.drawable.shawn_icon_wind_press);
-                    tvWind.setTextColor(Color.WHITE);
-                    initWindTypeGridView();
-                    if (windDataGFS == null) {
-                        OkHttpGFS();
-                    }else {
-                        reloadWind();
-                    }
-                }else {
-                    layoutWind.setVisibility(View.GONE);
-                    tvWindTypeStr.setVisibility(View.GONE);
-                    if (gridviewWind != null) {
-                        gridviewWind.setVisibility(View.GONE);
-                    }
-                    llWind.setBackgroundColor(Color.TRANSPARENT);
-                    ivWind.setImageResource(R.drawable.shawn_icon_wind);
-                    tvWind.setTextColor(getResources().getColor(R.color.text_color3));
-                    windContainer2.removeAllViews();
-                    windContainer1.removeAllViews();
-                }
-                break;
+        } else if (i == R.id.ivMinuteClose) {
+            if (reMinutePrompt.getVisibility() == View.VISIBLE) {
+                animationUpToDown(reMinutePrompt);
+                sbMinute.setChecked(false);
+            } else {
+                animationDownToUp(reMinutePrompt);
+                sbMinute.setChecked(true);
+            }
 
-                //数值预报
-            case R.id.llValue:
-                Toast.makeText(mContext, "开发中，敬请期待~~~", Toast.LENGTH_SHORT).show();
-                break;
+
+            //风场
+        } else if (i == R.id.llWind) {
+            isShowWind = !isShowWind;
+            if (isShowWind) {
+                layoutWind.setVisibility(View.VISIBLE);
+                tvWindTypeStr.setVisibility(View.VISIBLE);
+                if (gridviewWind != null) {
+                    gridviewWind.setVisibility(View.VISIBLE);
+                }
+                llWind.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+                ivWind.setImageResource(R.drawable.shawn_icon_wind_press);
+                tvWind.setTextColor(Color.WHITE);
+                initWindTypeGridView();
+                if (windDataGFS == null) {
+                    OkHttpGFS();
+                } else {
+                    reloadWind();
+                }
+            } else {
+                layoutWind.setVisibility(View.GONE);
+                tvWindTypeStr.setVisibility(View.GONE);
+                if (gridviewWind != null) {
+                    gridviewWind.setVisibility(View.GONE);
+                }
+                llWind.setBackgroundColor(Color.TRANSPARENT);
+                ivWind.setImageResource(R.drawable.shawn_icon_wind);
+                tvWind.setTextColor(getResources().getColor(R.color.text_color3));
+                windContainer2.removeAllViews();
+                windContainer1.removeAllViews();
+            }
+
+
+            //数值预报
+        } else if (i == R.id.llValue) {
+            Toast.makeText(mContext, "开发中，敬请期待~~~", Toast.LENGTH_SHORT).show();
 
         }
     }

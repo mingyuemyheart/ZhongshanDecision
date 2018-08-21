@@ -1,4 +1,12 @@
-apply plugin: 'com.android.application'
+//apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+
+//封装aar包步骤如下：
+//1、apply plugin: 'com.android.application'修改为apply plugin: 'com.android.library'，注释掉applicationId
+//2、去掉启动界面属性
+//3、注释掉打包信息
+//4、minifyEnabled true 代码混淆开启
+//5、注释掉高德地图信息
 
 android {
     compileSdkVersion 27
@@ -7,34 +15,132 @@ android {
     aaptOptions.useNewCruncher = false
 
     defaultConfig {
-        applicationId "com.cxwl.shawn.zhongshan.decision"
+//        applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 6
-        versionName "1.0.5"
+        versionCode 8
+        versionName "1.0.7"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
-            abiFilters 'armeabi-v7a', 'armeabi', 'x86'
+            abiFilters 'armeabi-v7a', 'armeabi', 'x86', 'x86_64', 'arm64-v8a'
         }
 
     }
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true //代码混淆，默认为false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
     //打包，自动追加版本号、名称
-    android.applicationVariants.all {
-        variant ->
-            variant.outputs.all {
-                outputFileName = "ZhongshanDecision" + "_" + "${defaultConfig.versionCode}" + "_V" + "${defaultConfig.versionName}" + "_" + buildType.name + ".apk"
-            }
-    }
+//    android.applicationVariants.all {
+//        variant ->
+//            variant.outputs.all {
+//                outputFileName = "ZhongshanDecision" + "_" + "${defaultConfig.versionCode}" + "_V" + "${defaultConfig.versionName}" + "_" + buildType.name + ".apk"
+//            }
+//    }
 
+
+//    apply from: 'maven-release-aar.gradle'//发布maven所用
+
+}
+
+
+//    1、添加插件
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+//    2、定义版本
+//version = android.defaultConfig.versionName
+version = "0.0.1"
+
+//    3、设置项目地址
+def siteUrl = 'https://github.com/mingyuemyheart/ZhongshanDecision'    // project homepage
+def gitUrl = 'https://github.com/mingyuemyheart/ZhongshanDecision.git' // project git
+
+//    4、定义group
+//group = android.defaultConfig.applicationId
+group = "com.cxwl.shawn.zhongshan.decision"
+
+//    5、定义pom并打包aar
+install {
+    repositories.mavenInstaller {
+        // This generates POM.xml with proper parameters
+        pom {
+            project {
+                packaging 'aar'
+                name 'Shawn Code For Android'//一些描述
+                url siteUrl
+                licenses {
+                    license {
+                        name 'The Apache Software License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+                developers {
+                    developer {//开发者信息
+                        id ''
+                        name ''
+                        email ''
+                    }
+                }
+                scm {
+                    connection gitUrl
+                    developerConnection gitUrl
+                    url siteUrl
+                }
+            }
+        }
+    }
+}
+
+//    6、打包javadoc jar和source jar
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+javadoc {
+    options{
+        encoding 'UTF-8'
+        charSet 'UTF-8'
+        author true
+    }
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+//    7、上传到maven仓库，从local.properties读取user和apikey
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+bintray {
+    user = properties.getProperty("mingyuemyheart")
+    key = properties.getProperty("ef33c14b307b519d5b3a4fc7d43236cb08f16720")
+    configurations = ['archives']
+    pkg {
+        repo = "maven"
+        name = "ZhongshanDecision"                // project name in maven
+        websiteUrl = siteUrl
+        vcsUrl = gitUrl
+        licenses = ["Apache-2.0"]
+        publish = true
+    }
 }
 
 dependencies {
@@ -44,7 +150,9 @@ dependencies {
     implementation 'com.squareup.okio:okio:1.14.1'
     implementation 'com.wang.avi:library:1.0.0'
     //AVLoadingIndicatorView
-    implementation files('libs/AMap3DMap_5.7.0_AMapSearch_5.7.0_AMapLocation_3.7.0_20171229.jar')
     implementation 'com.github.zcweng:switch-button:0.0.3@aar'
+    implementation 'com.amap.api:3dmap:5.7.0'
+    implementation 'com.amap.api:search:5.7.0'
+    implementation 'com.amap.api:location:3.7.0'
     implementation files('libs/ChinaWeatherAPI.jar')
 }

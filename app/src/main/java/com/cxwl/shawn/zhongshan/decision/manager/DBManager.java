@@ -15,17 +15,17 @@ import java.io.InputStream;
 public class DBManager {
 
 	private final int BUFFER_SIZE = 400000;
-	private static final String PACKAGE_NAME = "com.cxwl.shawn.zhongshan.decision";
 	public static final String DB_NAME = "stations.db";
 	public static final String TABLE_NAME1 = "SITES";//站点监测站表名称
 	public static final String TABLE_NAME2 = "WARNING_GUIDE";//预警指南表名称
 	public static final String TABLE_NAME3 = "WARNING_ID";//预警id表名称
-	public static final String DB_PATH = "/data"+ Environment.getDataDirectory().getAbsolutePath() + "/"+ PACKAGE_NAME; // 存放路径
+	public static String DB_PATH;// 存放路径
 	private Context mContext;
 	private SQLiteDatabase database;
 
 	public DBManager(Context context) {
 		this.mContext = context;
+		DB_PATH = "/data"+ Environment.getDataDirectory().getAbsolutePath() + "/"+ context.getPackageName();//存放路径
 	}
 
 	/**

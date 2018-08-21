@@ -70,19 +70,19 @@ public class TyphoonDto {
 				}else if (TextUtils.equals(type, "6")) {
 					strength = context.getString(R.string.typhoon_level6);
 				}
-				buffer.append("中心风力："+ WeatherUtil.getHourWindForce(Float.parseFloat(max_wind_speed))+"("+strength+")"+"\n");
+				buffer.append("中心风力："+ WeatherUtil.getHourWindForce(Float.parseFloat(max_wind_speed))+"("+strength+")，");
 			}
-			buffer.append(context.getString(R.string.chart_biggest_speed)).append(max_wind_speed).append(context.getString(R.string.chart_speed1));
+			buffer.append(max_wind_speed).append(context.getString(R.string.chart_speed1));
 		}
 		if(!TextUtils.isEmpty(pressure)){
 			buffer.append(context.getString(R.string.chart_center_pressure)).append(pressure).append(context.getString(R.string.chart_baipa));
 		}
-		if(!TextUtils.isEmpty(wind_dir)){
-			buffer.append(context.getString(R.string.chart_yidong_direct)).append(wind_dir).append("\n");
-		}
-		if(!TextUtils.isEmpty(move_speed)){
-			buffer.append(context.getString(R.string.chart_yidong_speed)).append(move_speed).append(context.getString(R.string.chart_speed2));
-		}
+//		if(!TextUtils.isEmpty(wind_dir)){
+//			buffer.append(context.getString(R.string.chart_yidong_direct)).append(wind_dir).append("\n");
+//		}
+//		if(!TextUtils.isEmpty(move_speed)){
+//			buffer.append(context.getString(R.string.chart_yidong_speed)).append(move_speed).append(context.getString(R.string.chart_speed2));
+//		}
 		if(!TextUtils.isEmpty(radius_7) && !TextUtils.equals("999999", radius_10)){
 			buffer.append(context.getString(R.string.chart_radius1)).append(radius_7).append(context.getString(R.string.chart_kilometer));
 		}

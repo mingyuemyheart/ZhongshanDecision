@@ -1,4 +1,4 @@
-package com.cxwl.shawn.zhongshan.decision;
+package com.cxwl.shawn.zhongshan.decision.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.adapter.WarningAdapter;
 import com.cxwl.shawn.zhongshan.decision.adapter.WarningListAdapter;
 import com.cxwl.shawn.zhongshan.decision.dto.WarningDto;
@@ -70,8 +71,6 @@ public class ShawnWarningListActivity extends ShawnBaseActivity implements OnCli
 	private void initWidget() {
 		LinearLayout llBack = findViewById(R.id.llBack);
 		llBack.setOnClickListener(this);
-		TextView tvTitle = findViewById(R.id.tvTitle);
-		tvTitle.setText("预警列表");
 		etSearch = findViewById(R.id.etSearch);
 		etSearch.addTextChangedListener(watcher);
 		ivClear = findViewById(R.id.ivClear);
@@ -487,31 +486,29 @@ public class ShawnWarningListActivity extends ShawnBaseActivity implements OnCli
 	
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()) {
-			case R.id.llBack:
-				finish();
-				break;
-			case R.id.ivClear:
-				etSearch.setText("");
-				break;
-			case R.id.ll1:
-				bootAnimation(llContainer1, iv1);
-				closeList(llContainer2, iv2);
-				closeList(llContainer3, iv3);
-				break;
-			case R.id.ll2:
-				bootAnimation(llContainer2, iv2);
-				closeList(llContainer1, iv1);
-				closeList(llContainer3, iv3);
-				break;
-			case R.id.ll3:
-				bootAnimation(llContainer3, iv3);
-				closeList(llContainer1, iv1);
-				closeList(llContainer2, iv2);
-				break;
+		int i = v.getId();
+		if (i == R.id.llBack) {
+			finish();
 
-		default:
-			break;
+		} else if (i == R.id.ivClear) {
+			etSearch.setText("");
+
+		} else if (i == R.id.ll1) {
+			bootAnimation(llContainer1, iv1);
+			closeList(llContainer2, iv2);
+			closeList(llContainer3, iv3);
+
+		} else if (i == R.id.ll2) {
+			bootAnimation(llContainer2, iv2);
+			closeList(llContainer1, iv1);
+			closeList(llContainer3, iv3);
+
+		} else if (i == R.id.ll3) {
+			bootAnimation(llContainer3, iv3);
+			closeList(llContainer1, iv1);
+			closeList(llContainer2, iv2);
+
+		} else {
 		}
 	}
 

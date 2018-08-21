@@ -1,4 +1,4 @@
-package com.cxwl.shawn.zhongshan.decision;
+package com.cxwl.shawn.zhongshan.decision.activity;
 
 import android.app.Activity;
 import android.os.Bundle;

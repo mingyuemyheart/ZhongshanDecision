@@ -1,4 +1,4 @@
-package com.cxwl.shawn.zhongshan.decision;
+package com.cxwl.shawn.zhongshan.decision.activity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.adapter.ForecastWeeklyAdapter;
 import com.cxwl.shawn.zhongshan.decision.dto.WeatherDto;
 import com.cxwl.shawn.zhongshan.decision.util.CommonUtil;
@@ -313,24 +314,22 @@ public class ShawnForecastActivity extends ShawnBaseActivity implements OnClickL
 	
 	@Override
 	public void onClick(View v) {
-		switch (v.getId()) {
-		case R.id.llBack:
+		int i = v.getId();
+		if (i == R.id.llBack) {
 			finish();
-			break;
-		case R.id.ivSwitcher:
+
+		} else if (i == R.id.ivSwitcher) {
 			if (mListView.getVisibility() == View.VISIBLE) {
 				ivSwitcher.setImageResource(R.drawable.shawn_iv_trend);
 				mListView.setVisibility(View.GONE);
 				llContainer2.setVisibility(View.VISIBLE);
-			}else {
+			} else {
 				ivSwitcher.setImageResource(R.drawable.shawn_iv_list);
 				mListView.setVisibility(View.VISIBLE);
 				llContainer2.setVisibility(View.GONE);
 			}
-			break;
 
-		default:
-			break;
+		} else {
 		}
 	}
 
