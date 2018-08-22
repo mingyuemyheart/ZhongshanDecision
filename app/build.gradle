@@ -7,6 +7,8 @@ apply plugin: 'com.android.library'
 //3、注释掉打包信息
 //4、minifyEnabled true 代码混淆开启
 //5、注释掉高德地图信息
+//6、根目录增加classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5' //用于打包Maven所需文件
+//maven { url 'https://www.jitpack.io' }
 
 android {
     compileSdkVersion 27
@@ -18,8 +20,8 @@ android {
 //        applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 8
-        versionName "1.0.7"
+        versionCode 11
+        versionName "1.1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -79,8 +81,7 @@ dependencies {
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.squareup.okio:okio:1.14.1'
-    implementation 'com.wang.avi:library:1.0.0'
-    //AVLoadingIndicatorView
+    implementation 'com.wang.avi:library:1.0.0'//AVLoadingIndicatorView
     implementation 'com.github.zcweng:switch-button:0.0.3@aar'
     implementation 'com.amap.api:3dmap:5.7.0'
     implementation 'com.amap.api:search:5.7.0'

@@ -225,17 +225,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private boolean isShowWarning = false;//是否显示预警layout
     private ImageView ivWarningClose;
     private List<WarningDto> warningList = new ArrayList<>();
-    private List<Marker> warningMarkers = new ArrayList<>();
+    private Map<String, Marker> warningMarkers = new HashMap<>();
     private TextView tvWarningPrompt,tvWaringList;
     private LinearLayout llWarningContainer;
-    private Map<String, WarningDto> warningInfoMap = new HashMap<>();//定位点对应生效预警
     private ListView warningListView;
     private WarningStatisticAdapter warningAdapter;
     private List<WarningDto> warningStatistics = new ArrayList<>();//统计
     private RelativeLayout reWarningPrompt,layoutWarning;
     private Map<String, List<List<Polygon>>> warningPolaygonsMap = new HashMap<>();
     private Map<String, String> adCodeMap = new HashMap<>();//以adCode为key
-    private Map<String, String> warningIdMap = new HashMap<>();//以预警id为key
 
     //天气预报
     private boolean isShowFore = false;//是否显示天气预报layout
@@ -549,7 +547,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         String[] disArray = getResources().getStringArray(R.array.guangdong_district);
         for (String value : disArray) {
             String[] values = value.split(",");
-            warningIdMap.put(values[1], value);
             adCodeMap.put(values[0], value);
         }
 
@@ -1932,7 +1929,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
             }
 
-            marker.showInfoWindow();
+            if (marker.isInfoWindowShown()) {
+                marker.hideInfoWindow();
+            }else {
+                marker.showInfoWindow();
+            }
             clickMarker = marker;
 
         }
@@ -1949,14 +1950,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             ranging(null);
         }
 
-        if (isShowMinute) {
+        if (isShowMinute) {//分钟降水
             clickLatLng = latLng;
             addLocationMarker();
             searchAddrByLatLng(latLng.latitude, latLng.longitude);
             OkHttpMinute(latLng.longitude, latLng.latitude);
         }
 
-        if (isShowWarning) {
+        if (isShowWarning) {//预警
             clickLatLng = latLng;
             addLocationMarker();
             searchAddrByLatLng(latLng.latitude, latLng.longitude);
@@ -2807,12 +2808,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 切换预警图标、图层显示或隐藏
      */
     private void switchWarningMarkersPolygons() {
-        for (Marker marker : warningMarkers) {
-            String[] title = marker.getTitle().split(",");
-            if (isShowWarning && selectWarningTypes.contains(title[2])) {
-                marker.setVisible(true);
-            }else {
-                marker.setVisible(false);
+        for (String key : warningMarkers.keySet()) {
+            if (warningMarkers.containsKey(key)) {
+                Marker marker = warningMarkers.get(key);
+                String[] title = marker.getTitle().split(",");
+                if (isShowWarning && selectWarningTypes.contains(title[2])) {
+                    marker.setVisible(true);
+                }else {
+                    marker.setVisible(false);
+                }
             }
         }
 
@@ -2847,7 +2851,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         double lat = Double.valueOf(dto.lat);
                         double lng = Double.valueOf(dto.lng);
                         MarkerOptions optionsTemp = new MarkerOptions();
-                        optionsTemp.title(dto.lat+","+dto.lng+","+dto.type);
+                        optionsTemp.title(dto.lat+","+dto.lng+","+dto.type+","+dto.item0);
                         optionsTemp.snippet(TYPE_WARNING);
                         optionsTemp.anchor(0.5f, 0.5f);
                         optionsTemp.position(new LatLng(lat, lng));
@@ -2885,7 +2889,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         optionsTemp.icon(BitmapDescriptorFactory.fromView(mView));
 
                         Marker marker = aMap.addMarker(optionsTemp);
-                        warningMarkers.add(marker);
+                        warningMarkers.put(marker.getTitle(), marker);
                     }
 
                     List<WarningDto> list = new ArrayList<>(warningList);
@@ -2909,63 +2913,152 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                             color = 0x99D5202A;
                         }
 
-                        String wId = dto.item0;
-                        if (warningIdMap.containsKey(wId)) {
-                            String[] value = warningIdMap.get(wId).split(",");
-                            drawOfflineDistrict(wId+"|"+dto.type, value[0], color);
-                        }
+                        drawGuangdongDistrict(dto.item0+"|"+dto.type, dto.item0, color);
                     }
                 }else {
                     switchWarningMarkersPolygons();
                 }
             }
         }).start();
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String[] array1 = getResources().getStringArray(R.array.guangdong_district);
+//                for (int i = 0; i < array1.length; i++) {
+//                    String[] value = array1[i].split(",");
+//                    drawOfflineDistrict(value[2], value[0], 0x80FFFF0C);
+//                }
+//            }
+//        }).start();
+
+//        drawOfflineDistrict("440117"+"|"+"", "440117", 0x80FFFF0C);
     }
 
     /**
-     * 离线绘制预警对应区域
+     * 绘制高德地图对应行政区划数据
      * @param key 预警id+"-"+预警类型
      * @param adCode
      * @param color
      */
-    private void drawOfflineDistrict(final String key, final String adCode, final int color) {
+//    private void drawAmapDistrict(final String key, final String adCode, final int color) {
+//        if (color == 0) {
+//            return;
+//        }
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String result = CommonUtil.getFromAssets(mContext, "json/amap/"+adCode+".json");
+//                if (!TextUtils.isEmpty(result)) {
+//                    try {
+//                        JSONObject obj = new JSONObject(result);
+//                        JSONArray array1 = obj.getJSONArray("coordinates");
+//                        String name = obj.getString("name");
+//                        String id = obj.getString("id");
+//                        double latitude = 0,longitude = 0;
+//                        Log.e("district", name+"-"+id+"-"+array1.length());
+//                        List<List<Polygon>> warningPolygons = new ArrayList<>();
+//                        for (int i = 0; i < array1.length(); i++) {
+//                            List<Polygon> polygons = new ArrayList<>();
+//                            JSONArray array2 = array1.getJSONArray(i);
+//                            PolygonOptions polygonOptions = new PolygonOptions();
+//                            polygonOptions.fillColor(color);
+//                            polygonOptions.strokeColor(Color.WHITE).strokeWidth(5);
+//                            for (int j = 0; j < array2.length(); j++) {
+//                                JSONArray itemArray = array2.getJSONArray(j);
+//                                double lng = itemArray.getDouble(0);
+//                                double lat = itemArray.getDouble(1);
+//                                polygonOptions.add(new LatLng(lat, lng));
+//
+//                                if (j == 0) {
+//                                    latitude = lat;
+//                                    longitude = lng;
+//                                }
+//                            }
+//                            Polygon polygon = aMap.addPolygon(polygonOptions);
+//                            if (adCode.endsWith("00")) {//市级行政区划绘制在区县级下面
+//                                polygon.setZIndex(10);
+//                            }else {
+//                                polygon.setZIndex(20);
+//                            }
+//                            polygons.add(polygon);
+//                            warningPolygons.add(polygons);
+//                        }
+//                        warningPolaygonsMap.put(key, warningPolygons);
+//
+//                        TextOptions options = new TextOptions();
+//                        options.position(new LatLng(latitude, longitude));
+//                        options.fontSize(25);
+//                        options.fontColor(Color.GREEN);
+//                        options.text(name+"\n"+id);
+//                        aMap.addText(options);
+//
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//            }
+//        }).start();
+//    }
+
+    /**
+     * 绘制广东提供对应的行政区划数据
+     * @param key 预警id+"-"+预警类型
+     * @param adCode
+     * @param color
+     */
+    private void drawGuangdongDistrict(final String key, final String adCode, final int color) {
         if (color == 0) {
             return;
         }
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String result = CommonUtil.getFromAssets(mContext, "json/"+adCode+".json");
+                String result = CommonUtil.getFromAssets(mContext, "json/guangdong/" +adCode+".json");
                 if (!TextUtils.isEmpty(result)) {
                     try {
-                        JSONObject obj = new JSONObject(result);
-                        JSONArray array1 = obj.getJSONArray("coordinates");
-                        String name = obj.getString("name");
-                        String id = obj.getString("id");
-                        Log.e("district", name+"-"+id+"-"+array1.length());
+                        double latitude = 0,longitude = 0;
                         List<List<Polygon>> warningPolygons = new ArrayList<>();
+                        JSONArray array1 = new JSONArray(result);
                         for (int i = 0; i < array1.length(); i++) {
-                            List<Polygon> polygons = new ArrayList<>();
                             JSONArray array2 = array1.getJSONArray(i);
-                            PolygonOptions polygonOptions = new PolygonOptions();
-                            polygonOptions.fillColor(color);
-                            polygonOptions.strokeColor(Color.WHITE).strokeWidth(5);
                             for (int j = 0; j < array2.length(); j++) {
-                                JSONArray itemArray = array2.getJSONArray(j);
-                                double lng = itemArray.getDouble(0);
-                                double lat = itemArray.getDouble(1);
-                                polygonOptions.add(new LatLng(lat, lng));
+                                List<Polygon> polygons = new ArrayList<>();
+                                PolygonOptions polygonOptions = new PolygonOptions();
+                                polygonOptions.fillColor(color);
+                                polygonOptions.strokeColor(Color.WHITE).strokeWidth(5);
+                                JSONArray array3 = array2.getJSONArray(j);
+                                for (int k = 0; k < array3.length(); k++) {
+                                    JSONArray itemArray = array3.getJSONArray(k);
+                                    double lat = itemArray.getDouble(0);
+                                    double lng = itemArray.getDouble(1);
+                                    polygonOptions.add(new LatLng(lat, lng));
+
+                                    if (j == 0 && k == 0) {
+                                        latitude = lat;
+                                        longitude = lng;
+                                    }
+                                }
+                                Polygon polygon = aMap.addPolygon(polygonOptions);
+                                if (adCode.endsWith("00")) {//市级行政区划绘制在区县级下面
+                                    polygon.setZIndex(10);
+                                }else {
+                                    polygon.setZIndex(20);
+                                }
+                                polygons.add(polygon);
+                                warningPolygons.add(polygons);
                             }
-                            Polygon polygon = aMap.addPolygon(polygonOptions);
-                            if (adCode.endsWith("00")) {//市级行政区划绘制在区县级下面
-                                polygon.setZIndex(10);
-                            }else {
-                                polygon.setZIndex(20);
-                            }
-                            polygons.add(polygon);
-                            warningPolygons.add(polygons);
                         }
                         warningPolaygonsMap.put(key, warningPolygons);
+
+//                        TextOptions options = new TextOptions();
+//                        options.position(new LatLng(latitude, longitude));
+//                        options.fontSize(25);
+//                        options.fontColor(Color.GREEN);
+//                        options.text(key+adCode);
+//                        aMap.addText(options);
+
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -2979,69 +3072,72 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 增加当前定位点对应预警信息
      */
     private void addLocationWarnings() {
-        warningInfoMap.clear();
-        for (WarningDto dto : warningList) {
-            if (adCodeMap.containsKey(clickAdcode)) {
-                String[] value = adCodeMap.get(clickAdcode).split(",");
-                String warningId = value[1];
-                if (TextUtils.equals(dto.item0, warningId)) {
-                    warningInfoMap.put(dto.html, dto);
-                }
-            }
-        }
+        llWarningContainer.removeAllViews();
+        llWarningContainer.setVisibility(View.GONE);
+        //判断点击点是否在预警区域内并显示气泡
+        for (String key : warningPolaygonsMap.keySet()) {
+            String[] keys = key.split("\\|");
+            List<List<Polygon>> warningPolygons = warningPolaygonsMap.get(key);
+            for (List<Polygon> polygons : warningPolygons) {
+                for (Polygon polygon : polygons) {
+                    if (polygon != null && polygon.contains(clickLatLng)) {
+                        //判断选中区域后，是否显示对应区域marker hideInfo或者showInfo
+                        for (String str : warningMarkers.keySet()) {
+                            if (warningMarkers.containsKey(str)) {
+                                String wId = str.split(",")[3];
+                                Marker marker = warningMarkers.get(str);
+                                if (TextUtils.equals(keys[0], wId)) {
+                                    clickMarker = marker;
+                                    if (!marker.isInfoWindowShown() && TextUtils.equals(marker.getSnippet(), TYPE_WARNING)) {
+                                        marker.showInfoWindow();
+                                    }
+                                }else {
+                                    marker.hideInfoWindow();
+                                }
+                            }
+                        }
 
-        //如果对应区县级有预警，就不用判断对应地市级预警，反之需要
-        if (warningInfoMap.size() <= 0) {
-            for (WarningDto dto : warningList) {
-                if (adCodeMap.containsKey(clickAdcode)) {
-                    String[] value = adCodeMap.get(clickAdcode).split(",");
-                    String warningId = value[1];
-                    if (TextUtils.equals(dto.item0, warningId.substring(0,4)+"00")) {
-                        warningInfoMap.put(dto.html, dto);
+                        //增加底部选中区域生效预警显示
+                        for (WarningDto dto : warningList) {
+                            if (TextUtils.equals(keys[0], dto.item0)) {
+                                TextView tvWarning = new TextView(mContext);
+                                tvWarning.setText(dto.name);
+                                tvWarning.setTag(dto);
+                                tvWarning.setTextColor(getResources().getColor(R.color.text_color3));
+                                tvWarning.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
+                                Paint paint = tvWarning.getPaint();
+                                paint.setUnderlineText(true);
+                                paint.setAntiAlias(true);
+                                tvWarning.setLayerPaint(paint);
+                                llWarningContainer.addView(tvWarning);
+                                llWarningContainer.setVisibility(View.VISIBLE);
+
+                                tvWarning.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        for (int i = 0; i < llWarningContainer.getChildCount(); i++) {
+                                            TextView tvWarning = (TextView) llWarningContainer.getChildAt(i);
+                                            if (tvWarning.getTag() == v.getTag()) {
+                                                WarningDto dto = (WarningDto) v.getTag();
+                                                Intent intentDetail = new Intent(mContext, ShawnWarningDetailActivity.class);
+                                                Bundle bundle = new Bundle();
+                                                bundle.putParcelable("data", dto);
+                                                intentDetail.putExtras(bundle);
+                                                startActivity(intentDetail);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
+
+                        }
+
                     }
                 }
             }
         }
 
-        llWarningContainer.removeAllViews();
-        llWarningContainer.setVisibility(View.GONE);
-        if (warningInfoMap.size() > 0) {
-            llWarningContainer.setVisibility(View.VISIBLE);
-            for (String html : warningInfoMap.keySet()) {
-                if (warningInfoMap.containsKey(html)) {
-                    WarningDto dto = warningInfoMap.get(html);
-                    TextView tvWarning = new TextView(mContext);
-                    tvWarning.setText(dto.name);
-                    tvWarning.setTag(dto.html);
-                    tvWarning.setTextColor(getResources().getColor(R.color.text_color3));
-                    tvWarning.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
-                    Paint paint = tvWarning.getPaint();
-                    paint.setUnderlineText(true);
-                    paint.setAntiAlias(true);
-                    tvWarning.setLayerPaint(paint);
-                    llWarningContainer.addView(tvWarning);
-
-                    tvWarning.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            for (String html : warningInfoMap.keySet()) {
-                                if (warningInfoMap.containsKey(html)) {
-                                    if (TextUtils.equals(html, (String)v.getTag())) {
-                                        WarningDto dto = warningInfoMap.get(html);
-                                        Intent intentDetail = new Intent(mContext, ShawnWarningDetailActivity.class);
-                                        Bundle bundle = new Bundle();
-                                        bundle.putParcelable("data", dto);
-                                        intentDetail.putExtras(bundle);
-                                        startActivity(intentDetail);
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        }
     }
 
     /**
@@ -3112,13 +3208,16 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
 
                 //判断显示地图上预警类型对应marker
-                for (Marker marker : warningMarkers) {
-                    String[] title = marker.getTitle().split(",");
-                    if (TextUtils.equals(dto.type, title[2])) {
-                        if (dto.isSelected) {
-                            marker.setVisible(true);
-                        }else {
-                            marker.setVisible(false);
+                for (String key : warningMarkers.keySet()) {
+                    if (warningMarkers.containsKey(key)) {
+                        Marker marker = warningMarkers.get(key);
+                        String[] title = marker.getTitle().split(",");
+                        if (TextUtils.equals(dto.type, title[2])) {
+                            if (dto.isSelected) {
+                                marker.setVisible(true);
+                            }else {
+                                marker.setVisible(false);
+                            }
                         }
                     }
                 }
@@ -3426,7 +3525,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
             if (isShowTyphoon) {
                 typhoonPointAddr = result.getRegeocodeAddress().getProvince()+result.getRegeocodeAddress().getCity();
-                if (clickMarker != null) {//为了显示"参考位置"
+                if (clickMarker != null && TextUtils.equals(clickMarker.getSnippet(), TYPE_TYPHOON)) {//为了显示"参考位置"
                     clickMarker.showInfoWindow();
                 }
             }
