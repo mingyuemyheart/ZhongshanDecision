@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Environment;
 import android.util.Log;
@@ -14,9 +13,6 @@ import android.view.View;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
-import com.amap.api.maps.model.LatLng;
-import com.amap.api.maps.model.Polygon;
-import com.amap.api.maps.model.PolygonOptions;
 import com.amap.api.services.district.DistrictItem;
 import com.amap.api.services.district.DistrictResult;
 import com.amap.api.services.district.DistrictSearch;
@@ -38,10 +34,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class CommonUtil {
