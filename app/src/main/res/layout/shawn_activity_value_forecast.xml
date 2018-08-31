@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/white"
+                android:orientation="vertical">
+
+    <include
+        android:id="@+id/reTitle"
+        layout="@layout/shawn_layout_title"/>
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/reTitle"
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"/>
+
+    <TextView
+        android:id="@+id/divider3"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/imageView"
+        android:background="@color/light_gray"/>
+
+    <LinearLayout
+        android:id="@+id/llSwitch"
+        android:layout_width="60dp"
+        android:layout_height="35dp"
+        android:layout_below="@+id/divider3"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvSwitch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:text="EC"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_4"/>
+
+        <ImageView
+            android:id="@+id/ivSwitch"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/shawn_icon_arrow_bottom"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/divider2"
+        android:layout_width="5dp"
+        android:layout_height="35dp"
+        android:layout_below="@+id/imageView"
+        android:layout_toEndOf="@+id/llSwitch"
+        android:background="@drawable/shawn_bg_horizontal_divider"/>
+
+    <HorizontalScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/imageView"
+        android:scrollbarSize="2dp"
+        android:scrollbarThumbHorizontal="@color/colorPrimary"
+        android:layout_toEndOf="@+id/divider2">
+
+        <LinearLayout
+            android:id="@+id/llContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"/>
+
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/divider1"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:layout_below="@+id/llSwitch"
+        android:background="@color/light_gray"/>
+
+    <TextView
+        android:id="@+id/tvTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/divider1"
+        android:layout_centerHorizontal="true"
+        android:padding="5dp"
+        android:textColor="@color/text_color2"
+        android:textSize="@dimen/level_5"/>
+
+    <GridView
+        android:id="@+id/gridView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/tvTime"
+        android:cacheColorHint="@color/transparent"
+        android:fadingEdge="none"
+        android:gravity="center"
+        android:horizontalSpacing="1dp"
+        android:listSelector="@color/transparent"
+        android:numColumns="5"
+        android:overScrollMode="never"
+        android:padding="1dp"
+        android:scrollbars="none"
+        android:stretchMode="columnWidth"
+        android:verticalSpacing="1dp"/>
+
+    <LinearLayout
+        android:id="@+id/llGroup"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/llSwitch"
+        android:background="@color/colorPrimary"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="1dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvEc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="EC"
+            android:textColor="@color/white"
+            android:textSize="@dimen/level_4"/>
+
+        <TextView
+            android:id="@+id/tvNc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:gravity="center"
+            android:padding="5dp"
+            android:text="NC"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_4"/>
+
+    </LinearLayout>
+
+    <com.wang.avi.AVLoadingIndicatorView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/loadingView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="visible"
+        app:indicator="LineScalePulseOutRapid"
+        app:indicator_color="@color/colorPrimary"/>
+
+    <RelativeLayout
+        android:id="@+id/reViewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="gone">
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"/>
+
+        <TextView
+            android:id="@+id/tvCount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginStart="10dp"
+            android:textColor="@color/black"
+            android:textSize="@dimen/level_3"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

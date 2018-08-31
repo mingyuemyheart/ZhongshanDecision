@@ -67,7 +67,7 @@
     <RelativeLayout
         android:id="@+id/reTyphoonList"
         android:layout_width="match_parent"
-        android:layout_height="190dp"
+        android:layout_height="220dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="60dp"
@@ -75,6 +75,7 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/shawn_bg_corner_normal"
         android:clickable="true"
+        android:focusable="true"
         android:visibility="gone">
 
         <LinearLayout
@@ -121,7 +122,7 @@
             android:scrollbars="none"/>
 
         <ListView
-            android:id="@+id/yearListView"
+            android:id="@+id/publishListView"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ll"
@@ -137,7 +138,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/ll"
-            android:layout_toEndOf="@+id/yearListView"
+            android:layout_toEndOf="@+id/publishListView"
             android:cacheColorHint="@color/transparent"
             android:divider="@null"
             android:listSelector="@color/transparent"

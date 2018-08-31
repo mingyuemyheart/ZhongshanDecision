@@ -11,7 +11,7 @@ import java.util.GregorianCalendar;
 
 public class TyphoonDto {
 
-	public int yearly;//哪年的台风
+	public String publishName,publishCode;//发布单位名称、编号
 	public String name;//台风名称
 	public String id;//台风id
 	public String code;//台风code
@@ -45,16 +45,7 @@ public class TyphoonDto {
 	
 	public String content(Context context) {
 		StringBuffer buffer = new StringBuffer();
-		GregorianCalendar calendar = new GregorianCalendar(year, month-1, day, hour,0);
-
-		if(TextUtils.isEmpty(type)){
-			String time = DateFormat.format("yyyy/MM/dd kk"+context.getString(R.string.chart_hour), calendar.getTime()).toString();
-			buffer.append(time).append(context.getString(R.string.chart_china_forecast));
-		}else{
-			String time = DateFormat.format(context.getString(R.string.chart_time1), calendar.getTime()).toString();
-			buffer.append(context.getString(R.string.chart_time11111)).append(time).append("\n");
-		}
-
+		buffer.append("时间：").append(time).append("\n");
 		if(!TextUtils.isEmpty(max_wind_speed)){
 			if (!TextUtils.isEmpty(type)) {
 				if (TextUtils.equals(type, "1")) {
