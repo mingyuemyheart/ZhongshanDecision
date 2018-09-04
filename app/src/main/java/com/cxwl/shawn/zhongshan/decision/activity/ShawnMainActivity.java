@@ -1147,7 +1147,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     lyoutTyphoon.setVisibility(View.VISIBLE);
                                     //防止多个台风绘制不全
                                     try {
-                                        drawTyphoon(selectPublishCode+typhoonId,false, allPoints);
+                                        drawTyphoon(typhoonId,false, allPoints);
                                         Thread.sleep(300);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
