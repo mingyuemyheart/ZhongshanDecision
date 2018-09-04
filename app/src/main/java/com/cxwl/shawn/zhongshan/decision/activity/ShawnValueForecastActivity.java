@@ -37,8 +37,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -56,6 +59,9 @@ public class ShawnValueForecastActivity extends ShawnBaseActivity implements Vie
     private TextView tvSwitch,tvEc,tvNc,tvTime,tvCount;
     private int width;
     private float density;
+    private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHH", Locale.CHINA);
+    private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy-MM-dd HH", Locale.CHINA);
+    private String startTime;
     private ValueForecastAdapter adapter;
     private List<ValueDto> dataList = new ArrayList<>();
     private List<String> ecElementList = new ArrayList<>();//存放标签
@@ -128,6 +134,15 @@ public class ShawnValueForecastActivity extends ShawnBaseActivity implements Vie
                 params.width = width;
                 params.height = width*3/4;
                 imageView.setLayoutParams(params);
+
+                if (!TextUtils.isEmpty(startTime)) {
+                    try {
+                        long t = sdf1.parse(startTime).getTime()+1000*60*60*Integer.valueOf(dto.time);
+                        tvTime.setText("起报："+sdf2.format(sdf1.parse(startTime))+"    "+"预报："+sdf2.format(t));
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 for (int i = 0; i < dataList.size(); i++) {
                     ValueDto data = dataList.get(i);
@@ -242,9 +257,7 @@ public class ShawnValueForecastActivity extends ShawnBaseActivity implements Vie
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -258,15 +271,15 @@ public class ShawnValueForecastActivity extends ShawnBaseActivity implements Vie
                                     try {
                                         JSONObject obj = new JSONObject(result);
 
-                                        String startTime = "",endTime = "";
                                         if (!obj.isNull("startTime")) {
                                             startTime = obj.getString("startTime");
-                                        }
-                                        if (!obj.isNull("endTime")) {
-                                            endTime = obj.getString("endTime");
-                                        }
-                                        if (!TextUtils.isEmpty(startTime) && !TextUtils.isEmpty(endTime)) {
-                                            tvTime.setText("起报："+startTime+"    "+"预报："+endTime);
+                                            if (!TextUtils.isEmpty(startTime)) {
+                                                try {
+                                                    tvTime.setText("起报："+sdf2.format(sdf1.parse(startTime))+"    "+"预报："+sdf2.format(sdf1.parse(startTime)));
+                                                } catch (ParseException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
                                         }
 
                                         if (!obj.isNull("data")) {

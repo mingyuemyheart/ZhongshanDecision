@@ -19,25 +19,13 @@ public class TyphoonDto {
 	public String status;//台风状态,stop、start
 	public double lat;
 	public double lng;
-	public int year; 
-	public int month;
-	public int day;
-	public int hour;
 	public String pressure;//气压
-	public String max_wind_speed;//最大风速
-	public String move_speed;//移动速度
+	public String max_wind_speed = "";//最大风速
+	public String move_speed = "";//移动速度
 	public String wind_dir;//移动方向
 	public String type;//台风类型
 	public String radius_7;
 	public String radius_10;
-	public String en_radius_7;
-	public String es_radius_7;
-	public String wn_radius_7;
-	public String ws_radius_7;
-	public String en_radius_10;
-	public String es_radius_10;
-	public String wn_radius_10;
-	public String ws_radius_10;
 	public String time;
 	public boolean isFactPoint = true;//true为实况点，false为预报点
 	public String strength;//台风强度

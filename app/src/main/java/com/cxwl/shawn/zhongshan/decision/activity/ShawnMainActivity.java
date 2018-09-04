@@ -786,10 +786,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         dto.publishName = "关岛";
         dto.publishCode = "PGTW";
         publishList.add(dto);
-        dto = new TyphoonDto();
-        dto.publishName = "欧洲";
-        dto.publishCode = "ECMF";
-        publishList.add(dto);
+//        dto = new TyphoonDto();
+//        dto.publishName = "欧洲";
+//        dto.publishCode = "ECMF";
+//        publishList.add(dto);
 //        dto = new TyphoonDto();
 //        dto.publishName = "广州热带所KM";
 //        dto.publishCode = "GZRD";
@@ -917,9 +917,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -1023,9 +1021,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -1151,7 +1147,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     lyoutTyphoon.setVisibility(View.VISIBLE);
                                     //防止多个台风绘制不全
                                     try {
-                                        drawTyphoon(typhoonId,false, allPoints);
+                                        drawTyphoon(selectPublishCode+typhoonId,false, allPoints);
                                         Thread.sleep(300);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
@@ -1489,11 +1485,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     break;
                 }
 
-                if (i == len-1) {
-                    Message msg = typhoonHandler.obtainMessage(DRAW_TYPHOON_COMPLETE);
-                    msg.obj = allPoints;
-                    typhoonHandler.sendMessage(msg);
-                }
+//                if (i == len-1) {
+//                    Message msg = typhoonHandler.obtainMessage(DRAW_TYPHOON_COMPLETE);
+//                    msg.obj = allPoints;
+//                    typhoonHandler.sendMessage(msg);
+//                }
 
                 if (isAnimate) {
                     try {
@@ -1630,6 +1626,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                 //绘制最后一个实况点对应的七级、十级风圈
                 drawWindCircle(firstPoint.radius_7, firstPoint.radius_10, firstLatLng);
+
+                //最后一个实况点处于屏幕中心
+                aMap.animateCamera(CameraUpdateFactory.newLatLng(firstLatLng));
             }
 
             //绘制最后一个实况点对应的时间
@@ -1935,20 +1934,26 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                 //预报结论
                 String[] title2 = titles[1].split("\\|");
-                float currentSpeed = Float.parseFloat(title2[0]);
-                float nextSpeed = Float.parseFloat(title2[1]);
 
                 String strength = "";
-                if (currentSpeed > nextSpeed) {
-                    strength = "强度逐渐减弱。";
-                }else {
-                    strength = "强度逐渐增强。";
+                float currentSpeed = 0, nextSpeed;
+                if (!TextUtils.isEmpty(title2[0]) && !TextUtils.isEmpty(title2[1])) {
+                    currentSpeed = Float.valueOf(title2[0]);
+                    nextSpeed = Float.valueOf(title2[1]);
+                    if (currentSpeed > nextSpeed) {
+                        strength = "强度逐渐减弱。";
+                    }else {
+                        strength = "强度逐渐增强。";
+                    }
                 }
+
                 String time = "";
-                try {
-                    time = "(下次更新时间为"+sdf5.format(sdf3.parse(title2[2]))+")";
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                if (!TextUtils.isEmpty(title2[2])) {
+                    try {
+                        time = "(下次更新时间为"+sdf5.format(sdf3.parse(title2[2]))+")";
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 String content = tvInfo.getText().toString();
@@ -1957,7 +1962,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
                 String position = "参考位置："+typhoonPointAddr+"\n";
 
-                String result = "";
+                String result;
                 if (!TextUtils.isEmpty(title2[3]) && !TextUtils.equals(title2[3], "null")) {
                     result = "预报结论：将以每小时"+currentSpeed+"公里左右\n的速度偏"+title2[3]+"方向移动，\n"+strength+"\n";
                 }else {
@@ -2786,6 +2791,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             public void run() {
                 if (warningMarkers.size() <= 0 || warningPolaygonsMap.size() <= 0) {//预警marker、图层没有添加绘制国
                     LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                    LatLngBounds.Builder builder = LatLngBounds.builder();
                     for (WarningDto dto : warningList) {
                         if (!warningMarkers.containsKey(dto.html)) {
                             double lat = Double.valueOf(dto.lat);
@@ -2794,7 +2800,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                             optionsTemp.title(dto.lat+","+dto.lng+","+dto.html);
                             optionsTemp.snippet(TYPE_WARNING);
                             optionsTemp.anchor(0.5f, 0.5f);
-                            optionsTemp.position(new LatLng(lat, lng));
+                            LatLng latLng = new LatLng(lat, lng);
+                            optionsTemp.position(latLng);
+                            builder.include(latLng);
                             View mView = inflater.inflate(R.layout.shawn_warning_marker_icon, null);
                             ImageView ivMarker = mView.findViewById(R.id.ivMarker);
 
@@ -2833,6 +2841,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         }
 
                     }
+                    aMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
 
                     List<WarningDto> list = new ArrayList<>(warningList);
                     Collections.sort(list, new Comparator<WarningDto>() {//按照预警等级排序，保证同一个区域绘制在最上层的是最高等级预警
@@ -3401,8 +3410,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
             if (isShowWarning) {
                 addLocationWarnings();
-//                Toast.makeText(mContext, clickAdcode+"-"+result.getRegeocodeAddress().getCity()+result.getRegeocodeAddress().getDistrict(), Toast.LENGTH_LONG).show();
             }
+
         }
     }
 
