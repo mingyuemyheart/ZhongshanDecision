@@ -12,6 +12,7 @@ import java.util.GregorianCalendar;
 public class TyphoonDto {
 
 	public String publishName,publishCode;//发布单位名称、编号
+	public String createTime;//台风创建时间
 	public String name;//台风名称
 	public String id;//台风id
 	public String code;//台风code
@@ -24,8 +25,7 @@ public class TyphoonDto {
 	public String move_speed = "";//移动速度
 	public String wind_dir;//移动方向
 	public String type;//台风类型
-	public String radius_7;
-	public String radius_10;
+	public String radius_7,radius_10;
 	public String time;
 	public boolean isFactPoint = true;//true为实况点，false为预报点
 	public String strength;//台风强度

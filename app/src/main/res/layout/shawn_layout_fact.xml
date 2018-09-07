@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingBottom="10dp"
+                android:paddingEnd="50dp">
+
+    <RelativeLayout
+        android:id="@+id/reFactPrompt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:background="@drawable/shawn_bg_corner_normal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvFactTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
+            android:textSize="@dimen/level_5"
+            android:textColor="@color/text_color3"/>
+
+        <LinearLayout
+            android:id="@+id/llFactContainer"
+            android:layout_below="@+id/tvFactTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="25dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"/>
+
+        <LinearLayout
+            android:id="@+id/llFactContainerRain"
+            android:layout_below="@+id/llFactContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"/>
+
+        <ImageView
+            android:id="@+id/ivFactClose"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_marginEnd="5dp"
+            android:layout_marginTop="5dp"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/shawn_icon_close"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>

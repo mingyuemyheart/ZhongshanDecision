@@ -6,10 +6,10 @@
                 android:paddingBottom="10dp">
 
     <TextView
-        android:layout_marginTop="35dp"
         android:id="@+id/tvTyphoonName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="35dp"
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="@dimen/level_5"/>
@@ -40,8 +40,8 @@
         android:layout_height="35dp"
         android:layout_above="@+id/ivLegend"
         android:layout_alignParentEnd="true"
-        android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
         android:src="@drawable/shawn_icon_location"/>
 
     <ImageView
@@ -67,7 +67,7 @@
     <RelativeLayout
         android:id="@+id/reTyphoonList"
         android:layout_width="match_parent"
-        android:layout_height="190dp"
+        android:layout_height="220dp"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="60dp"
@@ -121,11 +121,22 @@
             android:overScrollMode="never"
             android:scrollbars="none"/>
 
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/tvTyphoonYear"
+            android:layout_below="@+id/ll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/level_4"
+            android:layout_centerHorizontal="true"/>
+
         <ListView
             android:id="@+id/publishListView"
             android:layout_width="80dp"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll"
+            android:layout_below="@+id/tvTyphoonYear"
             android:cacheColorHint="@color/transparent"
             android:divider="@null"
             android:listSelector="@color/transparent"
@@ -137,7 +148,7 @@
             android:id="@+id/nameListView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/ll"
+            android:layout_below="@+id/tvTyphoonYear"
             android:layout_toEndOf="@+id/publishListView"
             android:cacheColorHint="@color/transparent"
             android:divider="@null"
@@ -391,10 +402,10 @@
         android:id="@+id/scrollViewMore"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="50dp"
-        android:layout_marginBottom="10dp"
         android:layout_alignBottom="@+id/ivMore"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="50dp"
         android:overScrollMode="never"
         android:scrollbars="none"
         android:visibility="gone">
@@ -478,9 +489,9 @@
                 android:id="@+id/tvWarningTypeStr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
                 android:layout_marginTop="15dp"
                 android:text="预警类型选择"
-                android:layout_marginBottom="2dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/level_4"
                 android:visibility="gone"/>
@@ -504,29 +515,29 @@
                 android:id="@+id/tvWarningListStr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
                 android:layout_marginBottom="2dp"
+                android:layout_marginTop="10dp"
                 android:text="预警列表显示"
                 android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/level_4"
                 android:visibility="gone"/>
 
             <com.suke.widget.SwitchButton
-                android:visibility="gone"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/sbWarning"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:sb_checked_color="@color/colorPrimary"
-                app:sb_checked="true"/>
+                android:visibility="gone"
+                app:sb_checked="true"
+                app:sb_checked_color="@color/colorPrimary"/>
 
             <TextView
                 android:id="@+id/tvWindTypeStr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
                 android:layout_marginTop="15dp"
                 android:text="风场数据"
-                android:layout_marginBottom="2dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/level_4"
                 android:visibility="gone"/>
@@ -550,21 +561,21 @@
                 android:id="@+id/tvMinuteStr"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
                 android:layout_marginTop="15dp"
                 android:text="分钟降水图显示"
-                android:layout_marginBottom="2dp"
                 android:textColor="@color/colorPrimary"
                 android:textSize="@dimen/level_4"
                 android:visibility="gone"/>
 
             <com.suke.widget.SwitchButton
-                android:visibility="gone"
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/sbMinute"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:sb_checked_color="@color/colorPrimary"
-                app:sb_checked="true"/>
+                android:visibility="gone"
+                app:sb_checked="true"
+                app:sb_checked_color="@color/colorPrimary"/>
 
         </LinearLayout>
     </ScrollView>

@@ -83,8 +83,6 @@
 
         <RelativeLayout
             android:id="@+id/reControl"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
             android:background="@drawable/shawn_bg_corner_normal"
             android:layout_width="45dp"
             android:layout_height="wrap_content"
@@ -324,6 +322,13 @@
     <include
         android:id="@+id/layoutWarning"
         layout="@layout/shawn_layout_warning"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/layoutFact"
+        layout="@layout/shawn_layout_fact"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"/>

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.os.Environment;
 import android.util.Log;
@@ -17,6 +18,7 @@ import com.amap.api.services.district.DistrictItem;
 import com.amap.api.services.district.DistrictResult;
 import com.amap.api.services.district.DistrictSearch;
 import com.amap.api.services.district.DistrictSearchQuery;
+import com.cxwl.shawn.zhongshan.decision.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -431,6 +433,282 @@ public class CommonUtil {
         }
 
         return week;
+    }
+
+    /**
+     * 1小时降水颜色
+     * @param rain
+     * @return
+     */
+    public static int factRain1Color(double rain) {
+        int color;
+        if (rain <= 2) {
+            color = 0xffa5f38d;
+        }if (rain <= 4) {
+            color = 0xff35af0e;
+        }if (rain <= 6) {
+            color = 0xff63b9ff;
+        }if (rain <= 8) {
+            color = 0xff0101f9;
+        }if (rain <= 10) {
+            color = 0xff0c6b4b;
+        }if (rain <= 20) {
+            color = 0xfff008fa;
+        }if (rain <= 50) {
+            color = 0xfff14800;
+        }else {
+            color = 0xff770000;
+        }
+        return color;
+    }
+
+    /**
+     * 3小时降水颜色
+     * @param rain
+     * @return
+     */
+    public static int factRain3Color(double rain) {
+        int color;
+        if (rain <= 3) {
+            color = 0xffa5f38d;
+        }if (rain <= 10) {
+            color = 0xff35af0e;
+        }if (rain <= 20) {
+            color = 0xff63b9ff;
+        }if (rain <= 50) {
+            color = 0xff0101f9;
+        }if (rain <= 70) {
+            color = 0xfffb02fb;
+        }else {
+            color = 0xff770000;
+        }
+        return color;
+    }
+
+    /**
+     * 6小时降水颜色
+     * @param rain
+     * @return
+     */
+    public static int factRain6Color(double rain) {
+        int color;
+        if (rain <= 4) {
+            color = 0xffa5f38d;
+        }if (rain <= 13) {
+            color = 0xff64bb4c;
+        }if (rain <= 25) {
+            color = 0xff63b9ff;
+        }if (rain <= 60) {
+            color = 0xff5068d5;
+        }else {
+            color = 0xffc100cb;
+        }
+        return color;
+    }
+
+    /**
+     * 12小时降水颜色
+     * @param rain
+     * @return
+     */
+    public static int factRain12Color(double rain) {
+        int color;
+        if (rain <= 10) {
+            color = 0xffa5f38d;
+        }if (rain <= 25) {
+            color = 0xff35af0e;
+        }if (rain <= 50) {
+            color = 0xff63b9ff;
+        }if (rain <= 100) {
+            color = 0xff0101f9;
+        }if (rain <= 250) {
+            color = 0xfffb02fb;
+        }else {
+            color = 0xff6e0604;
+        }
+        return color;
+    }
+
+    /**
+     * 24小时降水颜色
+     * @param rain
+     * @return
+     */
+    public static int factRain24Color(double rain) {
+        int color;
+        if (rain <= 10) {
+            color = 0xffa5f38d;
+        }if (rain <= 25) {
+            color = 0xff35af0e;
+        }if (rain <= 50) {
+            color = 0xff63b9ff;
+        }if (rain <= 100) {
+            color = 0xff0101f9;
+        }if (rain <= 250) {
+            color = 0xfffb02fb;
+        }else {
+            color = 0xff6e0604;
+        }
+        return color;
+    }
+
+    /**
+     * 1小时温度颜色
+     * @param temp
+     * @return
+     */
+    public static int factTemp1Color(double temp) {
+        int color;
+        if (temp <= -8) {
+            color = 0xffF2C3F9;
+        }if (temp <= -6) {
+            color = 0xffE7A3F0;
+        }if (temp <= -4) {
+            color = 0xffD696E4;
+        }if (temp <= -2) {
+            color = 0xffC787DD;
+        }if (temp <= 0) {
+            color = 0xffB775CF;
+        }if (temp <= 2) {
+            color = 0xffA361CB;
+        }if (temp <= 4) {
+            color = 0xff8550C4;
+        }if (temp <= 6) {
+            color = 0xff6E45AD;
+        }if (temp <= 8) {
+            color = 0xff565EA7;
+        }if (temp <= 10) {
+            color = 0xff3C7DC1;
+        }if (temp <= 12) {
+            color = 0xff35B2E0;
+        }if (temp <= 14) {
+            color = 0xff33C5F4;
+        }if (temp <= 16) {
+            color = 0xff2DD9C3;
+        }if (temp <= 18) {
+            color = 0xff2FD073;
+        }if (temp <= 20) {
+            color = 0xff3FBF44;
+        }if (temp <= 22) {
+            color = 0xff67CB37;
+        }if (temp <= 24) {
+            color = 0xffBBD83E;
+        }if (temp <= 26) {
+            color = 0xffE6E638;
+        }if (temp <= 28) {
+            color = 0xffECEB2F;
+        }if (temp <= 30) {
+            color = 0xffEACA39;
+        }if (temp <= 32) {
+            color = 0xffE9983C;
+        }if (temp <= 34) {
+            color = 0xffE66136;
+        }if (temp <= 36) {
+            color = 0xffDB583C;
+        }if (temp <= 38) {
+            color = 0xffC44C3B;
+        }if (temp <= 40) {
+            color = 0xffBA3F37;
+        }else {
+            color = 0xffAB3737;
+        }
+        return color;
+    }
+
+    /**
+     * 1小时风速颜色
+     * @param wind
+     * @return
+     */
+    public static int factWind1Color(double wind) {
+        int color;
+        if (wind <= 0.3) {
+            color = 0xff98B3BA;
+        }if (wind <= 5.5) {
+            color = 0xff73E0DB;
+        }if (wind <= 10.8) {
+            color = 0xff61A6DD;
+        }if (wind <= 17.2) {
+            color = 0xff3086D3;
+        }if (wind <= 24.5) {
+            color = 0xff0063CF;
+        }if (wind <= 32.7) {
+            color = 0xff00339D;
+        }if (wind <= 41.5) {
+            color = 0xffFBFF01;
+        }if (wind <= 51.0) {
+            color = 0xffFF9800;
+        }if (wind <= 61.3) {
+            color = 0xffD02ED2;
+        }else {
+            color = 0xffF80400;
+        }
+        return color;
+    }
+
+    /**
+     * 通过旋转角度获取风向字符串
+     * @param fx
+     * @return
+     */
+    public static String getWindDirection(float fx) {
+        String wind_dir;
+        if(fx >= 22.5 && fx < 67.5){
+            wind_dir = "东北";
+        }else if(fx >= 67.5 && fx < 112.5){
+            wind_dir = "东";
+        }else if(fx >= 112.5 && fx < 157.5){
+            wind_dir = "东南";
+        }else if(fx >= 157.5 && fx < 202.5){
+            wind_dir = "南";
+        }else if(fx >= 202.5 && fx < 247.5){
+            wind_dir = "西南";
+        }else if(fx >= 247.5 && fx < 292.5){
+            wind_dir = "西";
+        }else if(fx >= 292.5 && fx < 337.5){
+            wind_dir = "西北";
+        }else {
+            wind_dir = "北";
+        }
+        return wind_dir;
+    }
+
+    /**
+     * 根据风速获取风向标
+     * @param context
+     * @param speed
+     * @return
+     */
+    public static Bitmap getWindMarker(Context context, double speed) {
+        Bitmap bitmap = null;
+        if (speed <= 0.2) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_12_black);
+        }else if (speed > 0.2 && speed <= 1.5) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_12_black);
+        }else if (speed > 1.5 && speed <= 3.3) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_12_black);
+        }else if (speed > 3.3 && speed <= 5.4) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_34_black);
+        }else if (speed > 5.4 && speed <= 7.9) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_34_black);
+        }else if (speed > 7.9 && speed <= 10.7) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_56_black);
+        }else if (speed > 10.7 && speed <= 13.8) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_56_black);
+        }else if (speed > 13.8 && speed <= 17.1) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_78_black);
+        }else if (speed > 17.1 && speed <= 20.7) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_78_black);
+        }else if (speed > 20.7 && speed <= 24.4) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+        }else if (speed > 24.4 && speed <= 28.4) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+        }else if (speed > 28.4 && speed <= 32.6) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+        }else if (speed > 32.6 && speed < 99999.0) {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.wind_8_black);
+        }
+        return bitmap;
     }
 
 }
