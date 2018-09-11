@@ -19,24 +19,44 @@
             android:id="@+id/tvFactTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:textSize="@dimen/level_5"
-            android:textColor="@color/text_color3"/>
+            android:padding="5dp"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/level_5"/>
+
+        <TextView
+            android:id="@+id/tvFactList"
+            android:layout_width="50dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginTop="5dp"
+            android:layout_toStartOf="@+id/ivFactClose"
+            android:background="@drawable/shawn_bg_warning_list"
+            android:gravity="center"
+            android:text="列表"
+            android:textColor="@color/white"
+            android:textSize="@dimen/level_5"/>
 
         <LinearLayout
-            android:id="@+id/llFactContainer"
-            android:layout_below="@+id/tvFactTime"
+            android:id="@+id/llFactContainerRain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="25dp"
+            android:layout_below="@+id/tvFactTime"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>
 
         <LinearLayout
-            android:id="@+id/llFactContainerRain"
-            android:layout_below="@+id/llFactContainer"
+            android:id="@+id/llFactContainerTemp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/llFactContainerRain"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"/>
+
+        <LinearLayout
+            android:id="@+id/llFactContainerWind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/llFactContainerTemp"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>
 
@@ -44,9 +64,9 @@
             android:id="@+id/ivFactClose"
             android:layout_width="15dp"
             android:layout_height="15dp"
+            android:layout_alignParentEnd="true"
             android:layout_marginEnd="5dp"
             android:layout_marginTop="5dp"
-            android:layout_alignParentEnd="true"
             android:src="@drawable/shawn_icon_close"/>
 
     </RelativeLayout>

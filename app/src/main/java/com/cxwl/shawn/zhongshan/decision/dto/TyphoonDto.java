@@ -1,6 +1,8 @@
 package com.cxwl.shawn.zhongshan.decision.dto;
 
 import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 
@@ -9,12 +11,13 @@ import com.cxwl.shawn.zhongshan.decision.util.WeatherUtil;
 
 import java.util.GregorianCalendar;
 
-public class TyphoonDto {
+public class TyphoonDto implements Parcelable {
 
 	public String publishName,publishCode;//发布单位名称、编号
 	public String createTime;//台风创建时间
 	public String name;//台风名称
-	public String id;//台风id
+	public String id;//台风id，idea平台
+	public String tId;//台风id，台风网，只有北京台才使用
 	public String code;//台风code
 	public String enName;//台风应为名称
 	public String status;//台风状态,stop、start
@@ -89,5 +92,75 @@ public class TyphoonDto {
 		}
 		return R.drawable.typhoon_yb;
 	}
-	
+
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeString(this.publishName);
+		dest.writeString(this.publishCode);
+		dest.writeString(this.createTime);
+		dest.writeString(this.name);
+		dest.writeString(this.id);
+		dest.writeString(this.tId);
+		dest.writeString(this.code);
+		dest.writeString(this.enName);
+		dest.writeString(this.status);
+		dest.writeDouble(this.lat);
+		dest.writeDouble(this.lng);
+		dest.writeString(this.pressure);
+		dest.writeString(this.max_wind_speed);
+		dest.writeString(this.move_speed);
+		dest.writeString(this.wind_dir);
+		dest.writeString(this.type);
+		dest.writeString(this.radius_7);
+		dest.writeString(this.radius_10);
+		dest.writeString(this.time);
+		dest.writeByte(this.isFactPoint ? (byte) 1 : (byte) 0);
+		dest.writeString(this.strength);
+		dest.writeByte(this.isSelected ? (byte) 1 : (byte) 0);
+	}
+
+	public TyphoonDto() {
+	}
+
+	protected TyphoonDto(Parcel in) {
+		this.publishName = in.readString();
+		this.publishCode = in.readString();
+		this.createTime = in.readString();
+		this.name = in.readString();
+		this.id = in.readString();
+		this.tId = in.readString();
+		this.code = in.readString();
+		this.enName = in.readString();
+		this.status = in.readString();
+		this.lat = in.readDouble();
+		this.lng = in.readDouble();
+		this.pressure = in.readString();
+		this.max_wind_speed = in.readString();
+		this.move_speed = in.readString();
+		this.wind_dir = in.readString();
+		this.type = in.readString();
+		this.radius_7 = in.readString();
+		this.radius_10 = in.readString();
+		this.time = in.readString();
+		this.isFactPoint = in.readByte() != 0;
+		this.strength = in.readString();
+		this.isSelected = in.readByte() != 0;
+	}
+
+	public static final Parcelable.Creator<TyphoonDto> CREATOR = new Parcelable.Creator<TyphoonDto>() {
+		@Override
+		public TyphoonDto createFromParcel(Parcel source) {
+			return new TyphoonDto(source);
+		}
+
+		@Override
+		public TyphoonDto[] newArray(int size) {
+			return new TyphoonDto[size];
+		}
+	};
 }
