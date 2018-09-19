@@ -12,16 +12,10 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="10dp"
+        android:focusable="true"
+        android:clickable="true"
         android:background="@drawable/shawn_bg_corner_normal"
         android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/tvFactTime"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:textColor="@color/colorPrimary"
-            android:textSize="@dimen/level_5"/>
 
         <TextView
             android:id="@+id/tvFactList"
@@ -29,6 +23,7 @@
             android:layout_height="20dp"
             android:layout_marginEnd="20dp"
             android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:layout_toStartOf="@+id/ivFactClose"
             android:background="@drawable/shawn_bg_warning_list"
             android:gravity="center"
@@ -40,7 +35,7 @@
             android:id="@+id/llFactContainerRain"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/tvFactTime"
+            android:layout_below="@+id/tvFactList"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>
 

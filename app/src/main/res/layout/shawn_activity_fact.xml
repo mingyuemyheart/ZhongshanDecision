@@ -4,42 +4,6 @@
                 android:background="@color/white"
                 android:orientation="vertical">
 
-    <include
-        android:id="@+id/reTitle"
-        layout="@layout/shawn_layout_title"/>
-
-    <HorizontalScrollView
-        android:id="@+id/hScrollView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/reTitle"
-        android:scrollbars="none">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:id="@+id/llContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/llContainer1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </HorizontalScrollView>
-
     <TextView
         android:id="@+id/divider1"
         android:layout_width="match_parent"
@@ -158,6 +122,107 @@
         android:listSelector="@color/transparent"
         android:overScrollMode="never"
         android:scrollbars="none"/>
+
+    <LinearLayout
+        android:id="@+id/llGridView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/divider1"
+        android:background="#90000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:cacheColorHint="@color/transparent"
+            android:fadingEdge="none"
+            android:gravity="center"
+            android:horizontalSpacing="0dp"
+            android:listSelector="@color/transparent"
+            android:numColumns="4"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="10dp"/>
+
+    </LinearLayout>
+
+    <include
+        android:id="@+id/reTitle"
+        layout="@layout/shawn_layout_title"/>
+
+    <LinearLayout
+        android:id="@+id/llSwitch"
+        android:layout_width="80dp"
+        android:layout_height="30dp"
+        android:layout_below="@+id/reTitle"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvSwitch"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="全省"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_4"/>
+
+        <ImageView
+            android:id="@+id/ivSwitch"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginEnd="5dp"
+            android:src="@drawable/shawn_icon_arrow_bottom"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/divider4"
+        android:layout_width="5dp"
+        android:layout_height="30dp"
+        android:layout_toEndOf="@+id/llSwitch"
+        android:layout_below="@+id/reTitle"
+        android:background="@drawable/shawn_bg_horizontal_divider"/>
+
+    <HorizontalScrollView
+        android:id="@+id/hScrollView"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_toEndOf="@+id/divider4"
+        android:layout_below="@+id/reTitle"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/llContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/llContainer1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </HorizontalScrollView>
 
     <com.wang.avi.AVLoadingIndicatorView
         xmlns:app="http://schemas.android.com/apk/res-auto"

@@ -12,6 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_margin="10dp"
+        android:clickable="true"
+        android:focusable="true"
         android:background="@drawable/shawn_bg_corner_normal"
         android:orientation="vertical">
 

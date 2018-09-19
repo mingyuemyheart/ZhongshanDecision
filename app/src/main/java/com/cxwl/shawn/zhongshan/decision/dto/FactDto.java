@@ -8,7 +8,11 @@ public class FactDto implements Parcelable {
     public double lat, lng, rain, temp, windS;
     public float windD;
     public String pro, city, dis, town, vill;
-    public String stationId, stationName,time,columnName,unit;
+    public String stationId, stationName,time,columnName,unit,level;
+    public boolean isSelected;
+
+    public FactDto() {
+    }
 
     @Override
     public int describeContents() {
@@ -33,9 +37,8 @@ public class FactDto implements Parcelable {
         dest.writeString(this.time);
         dest.writeString(this.columnName);
         dest.writeString(this.unit);
-    }
-
-    public FactDto() {
+        dest.writeString(this.level);
+        dest.writeByte(this.isSelected ? (byte) 1 : (byte) 0);
     }
 
     protected FactDto(Parcel in) {
@@ -55,6 +58,8 @@ public class FactDto implements Parcelable {
         this.time = in.readString();
         this.columnName = in.readString();
         this.unit = in.readString();
+        this.level = in.readString();
+        this.isSelected = in.readByte() != 0;
     }
 
     public static final Creator<FactDto> CREATOR = new Creator<FactDto>() {

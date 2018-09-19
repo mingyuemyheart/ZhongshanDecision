@@ -119,31 +119,6 @@
     <string name="line_24h">24\n小\n时\n警\n戒\n线</string>
     <string name="line_48h">48\n小\n时\n警\n戒\n线</string>
     <string name="no_typhoon">当前无台风</string>
-    <string name="chart_hour">时</string>
-    <string name="chart_north">北</string>
-    <string name="chart_north_east">东北</string>
-    <string name="chart_east">东</string>
-    <string name="chart_south_east">东南</string>
-    <string name="chart_south">南</string>
-    <string name="chart_south_west">西南</string>
-    <string name="chart_west">西</string>
-    <string name="chart_north_west">西北</string>
-    <string name="chart_china_forecast"> 中国预报\n</string>
-    <string name="chart_time1">yyyy年MM月dd日 kk时</string>
-    <string name="chart_time11111">时间：</string>
-    <string name="chart_biggest_speed">最大风速：</string>
-    <string name="chart_speed1">米/秒\n</string>
-    <string name="chart_center_pressure">中心气压：</string>
-    <string name="chart_baipa">百帕\n</string>
-    <string name="chart_yidong_direct">移动方向：</string>
-    <string name="chart_yidong_speed">移动速度：</string>
-    <string name="chart_speed2">公里/小时\n</string>
-    <string name="chart_radius1">7级风圈半径：</string>
-    <string name="chart_kilometer">公里\n</string>
-    <string name="chart_radius2">10级风圈半径：</string>
-    <string name="chart_di">第</string>
-    <string name="chart_haotaifeng">号台风</string>
-    <string name="chart_propt">提示</string>
 
     <!-- 天气统计 -->
     <string name="no_statics">未统计</string>

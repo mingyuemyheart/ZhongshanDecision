@@ -23,7 +23,7 @@ public class WeatherUtil {
 		String value = (vs == null || vs.length <= 0) ? null : vs[vs.length - 1];
 		return value;
 	}
-	
+
 	/**
 	 * 获取空气质量
 	 * @param context
@@ -46,7 +46,7 @@ public class WeatherUtil {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * 获取空气质量描述
 	 * @param context
@@ -69,7 +69,7 @@ public class WeatherUtil {
 		}
 		return "";
 	}
-	
+
 	/**
 	 * 根据天气现象code获取天气现象字符串
 	 * @param code

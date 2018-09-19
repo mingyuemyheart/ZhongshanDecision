@@ -9,6 +9,11 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -16,6 +21,7 @@ import android.widget.TextView;
 
 import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.adapter.FactAdapter;
+import com.cxwl.shawn.zhongshan.decision.adapter.FactCityAdapter;
 import com.cxwl.shawn.zhongshan.decision.dto.FactDto;
 import com.cxwl.shawn.zhongshan.decision.util.OkHttpUtil;
 import com.wang.avi.AVLoadingIndicatorView;
@@ -45,28 +51,20 @@ import okhttp3.Response;
 public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClickListener {
 
     private Context mContext;
-    private TextView tvFactTime,tvValue;
-    private LinearLayout llContainer,llContainer1;
-    private ImageView ivValue;
+    private TextView tvSwitch,tvFactTime,tvValue;
+    private LinearLayout llGridView,llContainer,llContainer1;
+    private ImageView ivSwitch,ivValue;
     private boolean isDesc = true;//是否为降序
     private String RAIN1 = "1h降水",RAIN3 = "3h降水",RAIN6 = "6h降水",RAIN12 = "12h降水",RAIN24 = "24h降水",
             TEMP1 = "1h温度",WINDJD1 = "1h极大风",WINDJD24 = "24h极大风",WINDZD1 = "1h最大风",WINDZD24 = "24h最大风";
+    private String selectedColumnName = RAIN1;
+    private String selectedCityName = "全省";
     private SimpleDateFormat sdf1 = new SimpleDateFormat("MM/dd HH时", Locale.CHINA);
     private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMddHH", Locale.CHINA);
     private int width;
     private float density;
     private FactAdapter mAdapter;
     private List<FactDto> dataList = new ArrayList<>();
-    private List<FactDto> rain1s = new ArrayList<>();
-    private List<FactDto> rain3s = new ArrayList<>();
-    private List<FactDto> rain6s = new ArrayList<>();
-    private List<FactDto> rain12s = new ArrayList<>();
-    private List<FactDto> rain24s = new ArrayList<>();
-    private List<FactDto> temp1s = new ArrayList<>();
-    private List<FactDto> windjd1s = new ArrayList<>();
-    private List<FactDto> windjd24s = new ArrayList<>();
-    private List<FactDto> windzd1s = new ArrayList<>();
-    private List<FactDto> windzd24s = new ArrayList<>();
     private AVLoadingIndicatorView loadingView;
 
     @Override
@@ -75,6 +73,7 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         setContentView(R.layout.shawn_activity_fact);
         mContext = this;
         initWidget();
+        initGridView();
         initListView();
     }
 
@@ -91,6 +90,11 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         ivValue = findViewById(R.id.ivValue);
         TextView tvTitle = findViewById(R.id.tvTitle);
         tvTitle.setText("天气实况");
+        LinearLayout llSwitch = findViewById(R.id.llSwitch);
+        llSwitch.setOnClickListener(this);
+        tvSwitch = findViewById(R.id.tvSwitch);
+        ivSwitch = findViewById(R.id.ivSwitch);
+        llGridView = findViewById(R.id.llGridView);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -98,6 +102,46 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         density = dm.density;
 
         addColumns();
+    }
+
+    private void initGridView() {
+        final List<FactDto> cityList = new ArrayList<>();
+        String[] citys = getResources().getStringArray(R.array.fact_citys);
+        for (int i = 0; i < citys.length; i++) {
+            FactDto dto = new FactDto();
+            if (i == 0) {
+                dto.isSelected = true;
+                selectedCityName = "全省";
+            }else {
+                dto.isSelected = false;
+            }
+            dto.city = citys[i];
+            cityList.add(dto);
+        }
+        GridView gridView = findViewById(R.id.gridView);
+        final FactCityAdapter cityAdapter = new FactCityAdapter(mContext, cityList);
+        gridView.setAdapter(cityAdapter);
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                final FactDto dto = cityList.get(position);
+                dto.isSelected = true;
+                selectedCityName = dto.city;
+                for (int i = 0; i < cityList.size(); i++) {
+                    if (i == position) {
+                        cityList.get(i).isSelected = true;
+                    }else {
+                        cityList.get(i).isSelected = false;
+                    }
+                }
+                cityAdapter.notifyDataSetChanged();
+                tvSwitch.setText(dto.city);
+                closeList();
+
+                OkHttpList(selectedColumnName, selectedCityName);
+
+            }
+        });
     }
 
     private void initListView() {
@@ -126,15 +170,17 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         llContainer1.removeAllViews();
         int columnSize = list.size();
         for (int i = 0; i < columnSize; i++) {
-            String name = list.get(i);
+            String columnName = list.get(i);
             TextView tvName = new TextView(mContext);
             tvName.setGravity(Gravity.CENTER);
             tvName.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 13);
             tvName.setPadding(0, (int)(density*5), 0, (int)(density*5));
-            tvName.setText(name);
-            tvName.setTag(name);
+            tvName.setText(columnName);
+            tvName.setTag(columnName);
             if (i == 0) {
+                selectedColumnName = columnName;
                 tvName.setTextColor(getResources().getColor(R.color.colorPrimary));
+                OkHttpList(columnName, selectedCityName);
             }else {
                 tvName.setTextColor(getResources().getColor(R.color.text_color3));
             }
@@ -145,10 +191,9 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
 
             TextView tvBar = new TextView(mContext);
             tvBar.setGravity(Gravity.CENTER);
-            tvBar.setTag(name);
+            tvBar.setTag(columnName);
             if (i == 0) {
                 tvBar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
-                OkHttpList(name);
             }else {
                 tvBar.setBackgroundColor(getResources().getColor(R.color.transparent));
             }
@@ -166,8 +211,9 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                         TextView tvName = (TextView) llContainer.getChildAt(j);
                         String name = v.getTag()+"";
                         if (TextUtils.equals(tvName.getTag()+"", name)) {
+                            selectedColumnName = name;
                             tvName.setTextColor(getResources().getColor(R.color.colorPrimary));
-                            OkHttpList(name);
+                            OkHttpList(name, selectedCityName);
                         }else {
                             tvName.setTextColor(getResources().getColor(R.color.text_color3));
                         }
@@ -188,7 +234,7 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         }
     }
 
-    private String getDataUrl(String name) {
+    private String getDataUrl(String columnName) {
         String url = "";
         try {
             String endTime = sdf2.format(new Date());
@@ -198,43 +244,43 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
             String startTime12 = sdf2.format(sdf2.parse(endTime).getTime()-1000*60*60*12);
             String startTime24 = sdf2.format(sdf2.parse(endTime).getTime()-1000*60*60*24);
             String factTime = "";
-            if (TextUtils.equals(name, RAIN1)) {//1小时降水
+            if (TextUtils.equals(columnName, RAIN1)) {//1小时降水
                 factTime = "广东省1小时降水实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 tvValue.setText("降水mm");
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js", startTime1, endTime);
-            }else if (TextUtils.equals(name, RAIN3)) {//3小时降水
+            }else if (TextUtils.equals(columnName, RAIN3)) {//3小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省3小时降水实况["+sdf1.format(sdf2.parse(startTime3))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js3", startTime3, endTime);
-            }else if (TextUtils.equals(name, RAIN6)) {//6小时降水
+            }else if (TextUtils.equals(columnName, RAIN6)) {//6小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省6小时降水实况["+sdf1.format(sdf2.parse(startTime6))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js6", startTime6, endTime);
-            }else if (TextUtils.equals(name, RAIN12)) {//12小时降水
+            }else if (TextUtils.equals(columnName, RAIN12)) {//12小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省12小时降水实况["+sdf1.format(sdf2.parse(startTime12))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js12", startTime12, endTime);
-            }else if (TextUtils.equals(name, RAIN24)) {//24小时降水
+            }else if (TextUtils.equals(columnName, RAIN24)) {//24小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省24小时降水实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js24", startTime24, endTime);
-            }else if (TextUtils.equals(name, TEMP1)) {//1小时温度
+            }else if (TextUtils.equals(columnName, TEMP1)) {//1小时温度
                 tvValue.setText("温度℃");
                 factTime = "广东省1小时温度实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd?statime=%s&endtime=%s", startTime1, endTime);
-            }else if (TextUtils.equals(name, WINDJD1)) {//1小时极大风
+            }else if (TextUtils.equals(columnName, WINDJD1)) {//1小时极大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省1小时极大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime1, endTime);
-            }else if (TextUtils.equals(name, WINDJD24)) {//24小时极大风
+            }else if (TextUtils.equals(columnName, WINDJD24)) {//24小时极大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省24小时极大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime24, endTime);
-            }else if (TextUtils.equals(name, WINDZD1)) {//1小时最大风
+            }else if (TextUtils.equals(columnName, WINDZD1)) {//1小时最大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省1小时最大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime1, endTime);
-            }else if (TextUtils.equals(name, WINDZD24)) {//24小时最大风
+            }else if (TextUtils.equals(columnName, WINDZD24)) {//24小时最大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省24小时最大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime24, endTime);
@@ -246,120 +292,11 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         return url;
     }
 
-    private void OkHttpList(final String name) {
-        dataList.clear();
-        if (mAdapter != null) {
-            mAdapter.notifyDataSetChanged();
-        }
-        final String url = getDataUrl(name);
+    private void OkHttpList(final String columnName, final String cityName) {
+        final String url = getDataUrl(columnName);
         if (TextUtils.isEmpty(url)) {
             return;
         }
-
-        //判断如果已经加载过就不重新加载了
-        if (TextUtils.equals(name, RAIN1)) {//1小时降水
-            if (rain1s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(rain1s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, RAIN3)) {//3小时降水
-            if (rain3s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(rain3s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, RAIN6)) {//6小时降水
-            if (rain6s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(rain6s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, RAIN12)) {//12小时降水
-            if (rain12s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(rain12s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, RAIN24)) {//24小时降水
-            if (rain24s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(rain24s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, TEMP1)) {//1小时温度
-            if (temp1s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(temp1s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, WINDJD1)) {//1小时极大风
-            if (windjd1s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(windjd1s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, WINDJD24)) {//24小时极大风
-            if (windjd24s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(windjd24s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, WINDZD1)) {//1小时最大风
-            if (windzd1s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(windzd1s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }else if (TextUtils.equals(name, WINDZD24)) {//24小时最大风
-            if (windzd24s.size() > 0) {
-                dataList.clear();
-                dataList.addAll(windzd24s);
-                if (mAdapter != null) {
-                    mAdapter.notifyDataSetChanged();
-                }
-                loadingView.setVisibility(View.GONE);
-                return;
-            }
-        }
-        //判断如果已经加载过就不重新加载了
-
         loadingView.setVisibility(View.VISIBLE);
         new Thread(new Runnable() {
             @Override
@@ -382,21 +319,11 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                         JSONObject obj = new JSONObject(result);
                                         if (!obj.isNull("data")) {
                                             dataList.clear();
-                                            rain1s.clear();
-                                            rain3s.clear();
-                                            rain6s.clear();
-                                            rain12s.clear();
-                                            rain24s.clear();
-                                            temp1s.clear();
-                                            windjd1s.clear();
-                                            windjd24s.clear();
-                                            windzd1s.clear();
-                                            windzd24s.clear();
                                             JSONArray array = obj.getJSONArray("data");
                                             if (isDesc) {
                                                 for (int i = 0; i < array.length(); i++) {
                                                     FactDto dto = new FactDto();
-                                                    dto.columnName = name;
+                                                    dto.columnName = columnName;
                                                     JSONObject itemObj = array.getJSONObject(i);
                                                     if (!itemObj.isNull("Lat")) {
                                                         dto.lat = itemObj.getDouble("Lat");
@@ -440,35 +367,38 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                     if (!itemObj.isNull("Prcode")) {
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
-                                                    dataList.add(dto);
 
-                                                    if (TextUtils.equals(name, RAIN1)) {//1小时降水
-                                                        rain1s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN3)) {//3小时降水
-                                                        rain3s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN6)) {//6小时降水
-                                                        rain6s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN12)) {//12小时降水
-                                                        rain12s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN24)) {//24小时降水
-                                                        rain24s.add(dto);
-                                                    }else if (TextUtils.equals(name, TEMP1)) {//1小时温度
-                                                        temp1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDJD1)) {//1小时极大风
-                                                        windjd1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDJD24)) {//24小时极大风
-                                                        windjd24s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDZD1)) {//1小时最大风
-                                                        windzd1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDZD24)) {//24小时最大风
-                                                        windzd24s.add(dto);
+                                                    if (TextUtils.equals(cityName, "全省")) {
+                                                        if (columnName.endsWith("降水")) {
+                                                            if (dto.rain > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        }else if (columnName.endsWith("大风")) {
+                                                            if (dto.windS > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        } else {
+                                                            dataList.add(dto);
+                                                        }
+                                                    }else if (TextUtils.equals(cityName, dto.city)) {
+                                                        if (columnName.endsWith("降水")) {
+                                                            if (dto.rain > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        }else if (columnName.endsWith("大风")) {
+                                                            if (dto.windS > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        } else {
+                                                            dataList.add(dto);
+                                                        }
                                                     }
 
                                                 }
                                             }else {
                                                 for (int i = array.length()-1; i >= 0; i--) {
                                                     FactDto dto = new FactDto();
-                                                    dto.columnName = name;
+                                                    dto.columnName = columnName;
                                                     JSONObject itemObj = array.getJSONObject(i);
                                                     if (!itemObj.isNull("Lat")) {
                                                         dto.lat = itemObj.getDouble("Lat");
@@ -512,28 +442,31 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                     if (!itemObj.isNull("Prcode")) {
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
-                                                    dataList.add(dto);
 
-                                                    if (TextUtils.equals(name, RAIN1)) {//1小时降水
-                                                        rain1s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN3)) {//3小时降水
-                                                        rain3s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN6)) {//6小时降水
-                                                        rain6s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN12)) {//12小时降水
-                                                        rain12s.add(dto);
-                                                    }else if (TextUtils.equals(name, RAIN24)) {//24小时降水
-                                                        rain24s.add(dto);
-                                                    }else if (TextUtils.equals(name, TEMP1)) {//1小时温度
-                                                        temp1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDJD1)) {//1小时极大风
-                                                        windjd1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDJD24)) {//24小时极大风
-                                                        windjd24s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDZD1)) {//1小时最大风
-                                                        windzd1s.add(dto);
-                                                    }else if (TextUtils.equals(name, WINDZD24)) {//24小时最大风
-                                                        windzd24s.add(dto);
+                                                    if (TextUtils.equals(cityName, "全省")) {
+                                                        if (columnName.endsWith("降水")) {
+                                                            if (dto.rain > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        }else if (columnName.endsWith("大风")) {
+                                                            if (dto.windS > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        } else {
+                                                            dataList.add(dto);
+                                                        }
+                                                    }else if (TextUtils.equals(cityName, dto.city)) {
+                                                        if (columnName.endsWith("降水")) {
+                                                            if (dto.rain > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        }else if (columnName.endsWith("大风")) {
+                                                            if (dto.windS > 0) {
+                                                                dataList.add(dto);
+                                                            }
+                                                        } else {
+                                                            dataList.add(dto);
+                                                        }
                                                     }
 
                                                 }
@@ -560,11 +493,58 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         }).start();
     }
 
+    /**
+     * @param flag false为显示map，true为显示list
+     */
+    private void startAnimation(boolean flag, final View view) {
+        AnimationSet animationSet = new AnimationSet(true);
+        AlphaAnimation animation;
+        if (!flag) {
+            animation = new AlphaAnimation(0.0f, 1.0f);
+        }else {
+            animation = new AlphaAnimation(1.0f, 0.0f);
+        }
+        animation.setDuration(300);
+        animationSet.addAnimation(animation);
+        animationSet.setFillAfter(true);
+        view.startAnimation(animationSet);
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation arg0) {
+            }
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+            }
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                view.clearAnimation();
+            }
+        });
+    }
+
+    private void openList() {
+        startAnimation(false, llGridView);
+        llGridView.setVisibility(View.VISIBLE);
+        ivSwitch.setImageResource(R.drawable.shawn_icon_arrow_top);
+    }
+
+    private void closeList() {
+        startAnimation(true, llGridView);
+        llGridView.setVisibility(View.GONE);
+        ivSwitch.setImageResource(R.drawable.shawn_icon_arrow_bottom);
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.llBack) {
             finish();
+        }else if (id == R.id.llSwitch) {
+            if (llGridView.getVisibility() == View.GONE) {
+                openList();
+            }else {
+                closeList();
+            }
         }else if (id == R.id.llValue) {
             isDesc = !isDesc;
             if (isDesc) {

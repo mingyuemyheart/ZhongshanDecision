@@ -31,8 +31,6 @@ import java.util.List;
 
 /**
  * 预警列表
- * @author shawn_sun
- *
  */
 public class ShawnWarningListActivity extends ShawnBaseActivity implements OnClickListener {
 	
@@ -442,7 +440,7 @@ public class ShawnWarningListActivity extends ShawnBaseActivity implements OnCli
 					Animation.RELATIVE_TO_SELF,0f,
 					Animation.RELATIVE_TO_SELF,-1.0f);
 		}
-		animation.setDuration(400);
+		animation.setDuration(300);
 		animationSet.addAnimation(animation);
 		animationSet.setFillAfter(true);
 		view.startAnimation(animationSet);

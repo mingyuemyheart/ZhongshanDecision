@@ -40,6 +40,25 @@
             android:textSize="@dimen/level_4"/>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvTyphoonName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="35dp"
+        android:gravity="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="@dimen/level_5"/>
+
+    <TextView
+        android:layout_below="@+id/tvTyphoonName"
+        android:id="@+id/tvFactTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimary"
+        android:textSize="@dimen/level_5"/>
+
     <ImageView
         android:visibility="gone"
         android:id="@+id/ivRefresh"

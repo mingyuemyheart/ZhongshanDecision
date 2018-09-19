@@ -122,12 +122,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 
 import cn.com.weather.api.WeatherAPI;
 import cn.com.weather.beans.Weather;
@@ -148,7 +150,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private TextureMapView mapView;
     private AMap aMap;//高德地图
     private int AMapType = AMap.MAP_TYPE_SATELLITE;
-    private float zoom = 4.0f;
+    private float zoom = 4.0f,zoom1 = 7.0f,zoom2 = 9.0f;
     private Bundle savedInstanceState;
     private LinearLayout llBack,llMenu,llTyphoon,llFact,llSatelite,llRadar,llWarning,llFore,llMinute,llWind,llValue;
     private ImageView ivBack,ivRefresh,ivMenu,ivTyphoon,ivFact,ivSatelite,ivRadar,ivWarning,ivFore,ivMinute,ivWind,ivValue;
@@ -216,8 +218,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private ScrollviewGridview gridviewWind;
     private WindMapTypeAdapter windMapTypeAdapter;
     private List<WindDto> windTypeList = new ArrayList<>();
-    private TextView tvWarningTypeStr,tvWarningListStr,tvWindTypeStr,tvMinuteStr;//预警类型字符串，风场数据字符串
-    private SwitchButton sbWarning,sbMinute;
+    private TextView tvFactStr,tvWarningTypeStr,tvWarningListStr,tvWindTypeStr,tvMinuteStr;//预警类型字符串，风场数据字符串
+    private SwitchButton sbFact,sbWarning,sbMinute;
 
     //实况
     private boolean isShowFact = false;//是否显示实况
@@ -237,7 +239,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private List<FactDto> factWindsJd24 = new ArrayList<>();
     private List<FactDto> factWindsZd1 = new ArrayList<>();
     private List<FactDto> factWindsZd24 = new ArrayList<>();
-    private Map<String, Marker> factMarkerMap = new LinkedHashMap<>();//按站点号区分
+    private List<Marker> factMarkers = new ArrayList<>();
     private String currentFactChartImgUrl;//当前选中的实况图层imgurl
 
     //卫星拼图
@@ -271,8 +273,12 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     //天气预报
     private boolean isShowFore = false;//是否显示天气预报layout
-    private List<WeatherDto> foreDataList = new ArrayList<>();//所有城市天气信息
-    private List<Marker> foreMarkers = new ArrayList<>();//所有城市天气信息marker
+    private List<WeatherDto> foreDataList1 = new ArrayList<>();//所有城市天气信息
+    private List<WeatherDto> foreDataList2 = new ArrayList<>();//所有城市天气信息
+    private List<WeatherDto> foreDataList3 = new ArrayList<>();//所有城市天气信息
+    private final String level1 = "level1", level2 = "level2", level3 = "level3";
+    private List<Marker> foreMarkers = new ArrayList<>();
+//    private Map<String, Marker> foreMarkersMap = new LinkedHashMap<>();//按区域id区分
     private LatLng leftlatlng = new LatLng(-16.305714763804854,75.13831436634065);
     private LatLng rightLatlng = new LatLng(63.681687310440864,135.21788656711578);
 
@@ -544,12 +550,24 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         ivMapType1.setOnClickListener(this);
         ivMapType2 = findViewById(R.id.ivMapType2);
         ivMapType2.setOnClickListener(this);
+        tvFactStr = findViewById(R.id.tvFactStr);
         tvWarningTypeStr = findViewById(R.id.tvWarningTypeStr);
         tvWarningListStr = findViewById(R.id.tvWarningListStr);
         tvWindTypeStr = findViewById(R.id.tvWindTypeStr);
         tvMinuteStr = findViewById(R.id.tvMinuteStr);
+        sbFact = findViewById(R.id.sbFact);
         sbWarning = findViewById(R.id.sbWarning);
         sbMinute = findViewById(R.id.sbMinute);
+        sbFact.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                if (isChecked) {
+                    animationDownToUp(reFactPrompt);
+                }else {
+                    animationUpToDown(reFactPrompt);
+                }
+            }
+        });
         sbWarning.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(SwitchButton view, boolean isChecked) {
@@ -917,7 +935,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     for (TyphoonDto dto : selectList) {
                         isShowInfoWindow = true;
                         String name = dto.code+" "+dto.name+" "+dto.enName;
-                        if (!TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(data.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             OkHttpTyphoonDetailBABJ(data.publishName, data.publishCode, dto.tId, name);
                         }else {
                             OkHttpTyphoonDetailIdea(data.publishName, data.publishCode, dto.id, name);
@@ -925,7 +943,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     }
                 }else {//清除选择的数据源对应的所有台风
                     for (TyphoonDto dto : selectList) {
-                        if (!TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(data.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             clearAllPoints(data.publishCode+dto.tId);
                         }else {
                             clearAllPoints(data.publishCode+dto.id);
@@ -983,7 +1001,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     isShowInfoWindow = true;
                     for (TyphoonDto pub : publishList) {
                         if (pub.isSelected) {
-                            if (!TextUtils.isEmpty(dto.tId)) {
+                            if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                                 OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, name);
                             }else {
                                 OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, name);
@@ -992,7 +1010,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     }
                 }else {
                     for (TyphoonDto pub : publishList) {
-                        if (!TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(dto.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             clearAllPoints(pub.publishCode+dto.tId);
                         }else {
                             clearAllPoints(pub.publishCode+dto.id);
@@ -1033,7 +1051,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 isShowInfoWindow = true;
                 for (TyphoonDto pub : publishList) {
                     if (pub.isSelected) {
-                        if (!TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, tvTyphoonName.getText().toString());
                         }else {
                             OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, tvTyphoonName.getText().toString());
@@ -1128,7 +1146,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             String name = dto.code+" "+dto.name+" "+dto.enName;
                                             for (TyphoonDto pub : publishList) {
                                                 if (pub.isSelected) {
-                                                    if (!TextUtils.isEmpty(dto.tId)) {
+                                                    if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                                                         OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, name);
                                                     }else {
                                                         OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, name);
@@ -1369,6 +1387,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                     if (!TextUtils.isEmpty(typhoonName)) {
                                                         dto.name = typhoonName;
                                                     }
+                                                    if (!TextUtils.isEmpty(publishName)) {
+                                                        dto.publishName = publishName;
+                                                    }
                                                     long longTime = itemArray2.getLong(2);
                                                     dto.time = sdf3.format(new Date(longTime));
 
@@ -1424,7 +1445,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                     }
                                                     allPoints.add(dto);
 
-                                                    if (!itemArray2.get(11).equals("null")) {
+                                                    if (!itemArray2.get(11).equals("null") && !itemArray2.get(11).equals(null)) {
                                                         JSONObject obj11 = itemArray2.getJSONObject(11);
                                                         JSONArray array11 = obj11.getJSONArray("BABJ");
                                                         if (array11.length() > 0) {
@@ -1437,10 +1458,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                 if (!TextUtils.isEmpty(typhoonName)) {
                                                                     data.name = typhoonName;
                                                                 }
+                                                                if (!TextUtils.isEmpty(publishName)) {
+                                                                    data.publishName = publishName;
+                                                                }
                                                                 data.lng = itemArray11.getDouble(2);
                                                                 data.lat = itemArray11.getDouble(3);
                                                                 data.pressure = itemArray11.getString(4);
-                                                                data.move_speed = itemArray11.getString(5);
+                                                                data.max_wind_speed = itemArray11.getString(5);
 
                                                                 long t2 = itemArray11.getLong(0)*3600*1000;
                                                                 long ttt = longTime+t2;
@@ -1939,7 +1963,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             ivPoint.setImageResource(R.drawable.typhoon_yb);
         }
         MarkerOptions options = new MarkerOptions();
-        String title1 = firstPoint.name+"|"+firstPoint.content(mContext)+";";
+        String title1 = "("+publishName+")"+firstPoint.name+"|"+firstPoint.content(mContext)+";";
         String title2 = firstPoint.move_speed+"|"+lastPoint.move_speed+"|"+lastPoint.time+"|"+firstPoint.wind_dir+";";//前后两个点速度，为计算强度字符串所用
         String title3 = firstPoint.radius_7+"|"+firstPoint.radius_10;
         options.title(title1+title2+title3);
@@ -2237,7 +2261,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         if (clickMarker != null && clickMarker.isInfoWindowShown()) {
             clickMarker.hideInfoWindow();
         }
-        removeWindCircle();
     }
 
     @Override
@@ -2289,11 +2312,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 if (TextUtils.isEmpty(typhoonPointAddr)) {
                     typhoonPointAddr = marker.getPosition().latitude+","+marker.getPosition().longitude;
                 }
-                String position = "参考位置："+typhoonPointAddr;
+                String position = "\n参考位置："+typhoonPointAddr;
 
                 String result;
                 if (!TextUtils.isEmpty(title2[3]) && !TextUtils.equals(title2[3], "null")) {
-                    result = "\n预报结论：将以每小时"+currentSpeed+"公里左右\n的速度偏"+title2[3]+"方向移动，"+strength;
+                    result = "\n预报结论：将以每小时"+currentSpeed+"公里左右\n的速度向"+title2[3]+"方向移动";
                 }else {
                     result = "";
                 }
@@ -2373,12 +2396,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             TextView tvName = view.findViewById(R.id.tvName);
             TextView tvInfo = view.findViewById(R.id.tvInfo);
 
-            String[] title = marker.getTitle().split(",");
-            if (!TextUtils.isEmpty(title[0])) {
-                tvName.setText(title[0]);
+            String[] titles = marker.getTitle().split("\\|");
+            String[] title0 = titles[0].split(",");
+            if (!TextUtils.isEmpty(title0[0])) {
+                tvName.setText(title0[0]);
             }
-            if (!TextUtils.isEmpty(title[1])) {
-                tvInfo.setText(title[1]);
+            if (!TextUtils.isEmpty(title0[1])) {
+                tvInfo.setText(title0[1]);
             }
         }
 
@@ -2392,11 +2416,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        String[] titles = marker.getTitle().split(",");
-        Intent intent = new Intent(mContext, ShawnForecastActivity.class);
-        intent.putExtra("cityName", titles[1]);
-        intent.putExtra("cityId", titles[0]);
-        startActivity(intent);
+        if (TextUtils.equals(marker.getSnippet(), TYPE_FORE)) {//天气预报
+            String[] titles = marker.getTitle().split(",");
+            Intent intent = new Intent(mContext, ShawnForecastActivity.class);
+            intent.putExtra("cityName", titles[1]);
+            intent.putExtra("cityId", titles[0]);
+            startActivity(intent);
+        }
     }
 
     /**
@@ -2551,6 +2577,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         TextView tvName = (TextView) llFactContainerRain.getChildAt(j);
                                                         String imgUrl = v.getTag()+"";
                                                         if (TextUtils.equals(tvName.getTag()+"", imgUrl)) {
+                                                            if (TextUtils.equals(currentFactChartImgUrl, imgUrl)) {
+                                                                return;
+                                                            }
                                                             tvName.setTextColor(Color.WHITE);
                                                             tvName.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                                                             //加载图片数据
@@ -2566,6 +2595,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         TextView tvName = (TextView) llFactContainerTemp.getChildAt(j);
                                                         String imgUrl = v.getTag()+"";
                                                         if (TextUtils.equals(tvName.getTag()+"", imgUrl)) {
+                                                            if (TextUtils.equals(currentFactChartImgUrl, imgUrl)) {
+                                                                return;
+                                                            }
                                                             tvName.setTextColor(Color.WHITE);
                                                             tvName.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                                                             //加载图片数据
@@ -2581,6 +2613,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         TextView tvName = (TextView) llFactContainerWind.getChildAt(j);
                                                         String imgUrl = v.getTag()+"";
                                                         if (TextUtils.equals(tvName.getTag()+"", imgUrl)) {
+                                                            if (TextUtils.equals(currentFactChartImgUrl, imgUrl)) {
+                                                                return;
+                                                            }
                                                             tvName.setTextColor(Color.WHITE);
                                                             tvName.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                                                             //加载图片数据
@@ -2615,7 +2650,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 绘制实况图
      */
     private void drawFactBitmap(Bitmap bitmap, boolean isAutoBound) {
-        if (zoom > 10.0f || bitmap == null) {
+        if (bitmap == null) {
             return;
         }
         BitmapDescriptor fromView = BitmapDescriptorFactory.fromBitmap(bitmap);
@@ -2692,7 +2727,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         removeFactMarkers();
         if (imgUrl.endsWith("gd_1js.png")) {//1小时降水
             if (factRains1.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2701,7 +2735,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_3js.png")) {//3小时降水
             if (factRains3.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2710,7 +2743,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_6js.png")) {//6小时降水
             if (factRains6.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2719,7 +2751,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_12js.png")) {//12小时降水
             if (factRains12.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2728,7 +2759,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_24js.png")) {//24小时降水
             if (factRains24.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2737,7 +2767,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_temp.png")) {//1小时温度
             if (factTemps1.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2746,7 +2775,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_jd_wind_1h.png")) {//1小时极大风
             if (factWindsJd1.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2755,7 +2783,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_jd_wind_24h.png")) {//24小时极大风
             if (factWindsJd24.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2764,7 +2791,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_zd_wind_1h.png")) {//1小时最大风
             if (factWindsZd1.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2773,7 +2799,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }else if (imgUrl.endsWith("gd_zd_wind_24h.png")) {//24小时最大风
             if (factWindsZd24.size() > 0) {
-                switchFactMarkers();
                 drawFactMarkers(imgUrl);
                 loadingView.setVisibility(View.GONE);
                 return;
@@ -2798,34 +2823,34 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                             String startTime24 = sdf2.format(sdf2.parse(endTime).getTime()-1000*60*60*24);
                             String factTime = "";
                             if (imgUrl.endsWith("gd_1js.png")) {//1小时降水
-                                factTime = "广东省1小时降水实况\n["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省1小时降水实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js", startTime1, endTime);
                             }else if (imgUrl.endsWith("gd_3js.png")) {//3小时降水
-                                factTime = "广东省3小时降水实况\n["+sdf1.format(sdf2.parse(startTime3))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省3小时降水实况["+sdf1.format(sdf2.parse(startTime3))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js3", startTime3, endTime);
                             }else if (imgUrl.endsWith("gd_6js.png")) {//6小时降水
-                                factTime = "广东省6小时降水实况\n["+sdf1.format(sdf2.parse(startTime6))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省6小时降水实况["+sdf1.format(sdf2.parse(startTime6))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js6", startTime6, endTime);
                             }else if (imgUrl.endsWith("gd_12js.png")) {//12小时降水
-                                factTime = "广东省12小时降水实况\n["+sdf1.format(sdf2.parse(startTime12))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省12小时降水实况["+sdf1.format(sdf2.parse(startTime12))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js12", startTime12, endTime);
                             }else if (imgUrl.endsWith("gd_24js.png")) {//24小时降水
-                                factTime = "广东省24小时降水实况\n["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省24小时降水实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js24", startTime24, endTime);
                             }else if (imgUrl.endsWith("gd_temp.png")) {//1小时温度
-                                factTime = "广东省1小时温度实况\n["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省1小时温度实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd?statime=%s&endtime=%s", startTime1, endTime);
                             }else if (imgUrl.endsWith("gd_jd_wind_1h.png")) {//1小时极大风
-                                factTime = "广东省1小时极大风速实况\n["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省1小时极大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime1, endTime);
                             }else if (imgUrl.endsWith("gd_jd_wind_24h.png")) {//24小时极大风
-                                factTime = "广东省24小时极大风速实况\n["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省24小时极大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime24, endTime);
                             }else if (imgUrl.endsWith("gd_zd_wind_1h.png")) {//1小时最大风
-                                factTime = "广东省1小时最大风速实况\n["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省1小时最大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime1, endTime);
                             }else if (imgUrl.endsWith("gd_zd_wind_24h.png")) {//24小时最大风
-                                factTime = "广东省24小时最大风速实况\n["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
+                                factTime = "广东省24小时最大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                                 url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime24, endTime);
                             }
                             tvFactTime.setText(factTime);
@@ -2893,6 +2918,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 if (!itemObj.isNull("Prcode")) {
                                                     dto.pro = itemObj.getString("Prcode");
                                                 }
+                                                int[] nums = {1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};//1:8:17
+                                                Random random = new Random();
+                                                int level = random.nextInt(nums.length);
+                                                dto.level = nums[level]+"";
+                                                Log.e("level", dto.level);
 
                                                 if (imgUrl.endsWith("gd_1js.png")) {//1小时降水
                                                     factRains1.add(dto);
@@ -2943,57 +2973,63 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 绘制实况点marker
      */
     private void drawFactMarkers(final String imgUrl) {
-        if (TextUtils.isEmpty(imgUrl) || zoom <= 10.0f) {
+        removeFactMarkers();
+        if (TextUtils.isEmpty(imgUrl)) {
             return;
         }
         new Thread(new Runnable() {
             @Override
             public void run() {
-                List<FactDto> list = new ArrayList<>();
-                if (imgUrl.endsWith("gd_1js.png")) {//1小时降水
-                    list.addAll(factRains1);
-                }else if (imgUrl.endsWith("gd_3js.png")) {//3小时降水
-                    list.addAll(factRains3);
-                }else if (imgUrl.endsWith("gd_6js.png")) {//6小时降水
-                    list.addAll(factRains6);
-                }else if (imgUrl.endsWith("gd_12js.png")) {//12小时降水
-                    list.addAll(factRains12);
-                }else if (imgUrl.endsWith("gd_24js.png")) {//24小时降水
-                    list.addAll(factRains24);
-                }else if (imgUrl.endsWith("gd_temp.png")) {//1小时温度
-                    list.addAll(factTemps1);
-                }else if (imgUrl.endsWith("gd_jd_wind_1h.png")) {//1小时极大风
-                    list.addAll(factWindsJd1);
-                }else if (imgUrl.endsWith("gd_jd_wind_24h.png")) {//24小时极大风
-                    list.addAll(factWindsJd24);
-                }else if (imgUrl.endsWith("gd_zd_wind_1h.png")) {//1小时最大风
-                    list.addAll(factWindsZd1);
-                }else if (imgUrl.endsWith("gd_zd_wind_24h.png")) {//24小时最大风
-                    list.addAll(factWindsZd24);
-                }
-                Map<String, Marker> markers = new LinkedHashMap<>();//为防止ConcurrentModificationException异常，待循环执行完毕后，再对markerMap进行修改
-                for (FactDto dto : list) {
-                    if (factMarkerMap.containsKey(dto.stationId)) {
-                        Marker m = factMarkerMap.get(dto.stationId);
-                        if (m != null && m.isVisible()) {
-                            //已经在可是区域添加过了，就不重复绘制了
-                        }else {
-                            addVisibleAreaFactMarker(dto, markers, imgUrl);
+                try {
+                    List<FactDto> list = new ArrayList<>();
+                    if (imgUrl.endsWith("gd_1js.png")) {//1小时降水
+                        list.addAll(factRains1);
+                    }else if (imgUrl.endsWith("gd_3js.png")) {//3小时降水
+                        list.addAll(factRains3);
+                    }else if (imgUrl.endsWith("gd_6js.png")) {//6小时降水
+                        list.addAll(factRains6);
+                    }else if (imgUrl.endsWith("gd_12js.png")) {//12小时降水
+                        list.addAll(factRains12);
+                    }else if (imgUrl.endsWith("gd_24js.png")) {//24小时降水
+                        list.addAll(factRains24);
+                    }else if (imgUrl.endsWith("gd_temp.png")) {//1小时温度
+                        list.addAll(factTemps1);
+                    }else if (imgUrl.endsWith("gd_jd_wind_1h.png")) {//1小时极大风
+                        list.addAll(factWindsJd1);
+                    }else if (imgUrl.endsWith("gd_jd_wind_24h.png")) {//24小时极大风
+                        list.addAll(factWindsJd24);
+                    }else if (imgUrl.endsWith("gd_zd_wind_1h.png")) {//1小时最大风
+                        list.addAll(factWindsZd1);
+                    }else if (imgUrl.endsWith("gd_zd_wind_24h.png")) {//24小时最大风
+                        list.addAll(factWindsZd24);
+                    }
+
+                    if (zoom <= 9.0f) {
+                        for (FactDto dto : list) {
+                            if (TextUtils.equals(dto.level, "1")) {//添加对应1级别站点
+                                addSingleFactMarker(dto, imgUrl);
+                            }
+                        }
+                    }else if (zoom > 9.0f && zoom <= 11.0f ) {
+                        for (FactDto dto : list) {
+                            if (TextUtils.equals(dto.level, "1") || TextUtils.equals(dto.level, "2")) {//添加对应1、2级别站点
+                                addSingleFactMarker(dto, imgUrl);
+                            }
                         }
                     }else {
-                        addVisibleAreaFactMarker(dto, markers, imgUrl);
+                        for (FactDto dto : list) {//添加对应1、2、3级别站点
+                            addSingleFactMarker(dto, imgUrl);
+                        }
                     }
+
+                }catch (ConcurrentModificationException e) {
+                    e.printStackTrace();
                 }
-                factMarkerMap.putAll(markers);
             }
         }).start();
     }
 
-    /**
-     * 添加可视区域对应的marker
-     * @param dto
-     */
-    private void addVisibleAreaFactMarker(FactDto dto, Map<String, Marker> markers, String imgUrl) {
+    private void addSingleFactMarker(FactDto dto, String imgUrl) {
         if (dto.lat > leftlatlng.latitude && dto.lat < rightLatlng.latitude && dto.lng > leftlatlng.longitude && dto.lng < rightLatlng.longitude) {
             if (imgUrl.endsWith("js.png") && dto.rain <= 0) {//过滤掉降水为0、风速为0的点
                 return;
@@ -3002,7 +3038,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 return;
             }
             MarkerOptions options = new MarkerOptions();
-            String value = "";
+            String value;
             if (imgUrl.endsWith("js.png")) {//降水
                 value = dto.rain+"mm";
             }else if (imgUrl.endsWith("gd_temp.png")) {//温度
@@ -3010,13 +3046,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {//风速
                 value = CommonUtil.getWindDirection(dto.windD)+"风 "+dto.windS+"m/s";
             }
-            options.title(dto.pro+dto.city+dto.dis+"\n"+dto.stationName+","+value);
+            options.title(dto.pro+dto.city+dto.dis+"\n"+dto.stationName+","+value+"|"+dto.level);
             options.snippet(TYPE_FACT);
             options.anchor(0.5f, 0.5f);
             options.position(new LatLng(dto.lat, dto.lng));
             options.icon(BitmapDescriptorFactory.fromView(drawFactMarkerBitmap(dto, imgUrl)));
             Marker marker = aMap.addMarker(options);
-            markers.put(dto.stationId, marker);
+            factMarkers.add(marker);
         }
     }
 
@@ -3070,38 +3106,22 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         return view;
     }
 
-    private void switchFactMarkers() {
-        if (zoom <= 10.0f) {
-            return;
-        }
+    private void removeFactMarkers() {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                for (String stationId : factMarkerMap.keySet()) {
-                    if (!TextUtils.isEmpty(stationId) && factMarkerMap.containsKey(stationId)) {
-                        Marker marker = factMarkerMap.get(stationId);
-                        double lat = marker.getPosition().latitude;
-                        double lng = marker.getPosition().longitude;
-                        if (lat > leftlatlng.latitude && lat < rightLatlng.latitude && lng > leftlatlng.longitude && lng < rightLatlng.longitude) {
-                            //已经在可是范围内则不处理
-                        }else {
+                try {
+                    for (Marker marker : factMarkers) {
+                        if (marker != null) {
                             marker.remove();
                         }
                     }
+                    factMarkers.clear();
+                }catch (ConcurrentModificationException e) {
+                    e.printStackTrace();
                 }
             }
         }).start();
-    }
-
-    private void removeFactMarkers() {
-        for (String stationId : factMarkerMap.keySet()) {
-            if (!TextUtils.isEmpty(stationId) && factMarkerMap.containsKey(stationId)) {
-                Marker marker = factMarkerMap.get(stationId);
-                if (marker != null) {
-                    marker.remove();
-                }
-            }
-        }
     }
 
     //卫星拼图
@@ -3117,9 +3137,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -3166,9 +3184,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(imgUrl).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -3240,9 +3256,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -4113,26 +4127,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         }
                         String result = response.body().string();
                         if (!TextUtils.isEmpty(result)) {
-                            try {
-                                JSONObject obj = new JSONObject(result);
-                                foreDataList.clear();
-                                if (!obj.isNull("level1")) {
-                                    JSONArray array = new JSONArray(obj.getString("level1"));
-                                    for (int i = 0; i < array.length(); i++) {
-                                        WeatherDto dto = new WeatherDto();
-                                        JSONObject itemObj = array.getJSONObject(i);
-                                        dto.cityId = itemObj.getString("areaid");
-                                        dto.cityName = itemObj.getString("name");
-                                        dto.lat = itemObj.getDouble("lat");
-                                        dto.lng = itemObj.getDouble("lon");
-                                        dto.level = itemObj.getString("level");
-                                        foreDataList.add(dto);
-                                    }
-                                    addForeMarkers();
-                                }
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                            foreDataList1.clear();
+                            foreDataList2.clear();
+                            foreDataList3.clear();
+                            parseStationInfo(result, level1);
+                            parseStationInfo(result, level2);
+                            parseStationInfo(result, level3);
+                            addForeMarkers();
 
                             runOnUiThread(new Runnable() {
                                 @Override
@@ -4140,11 +4141,50 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     loadingView.setVisibility(View.GONE);
                                 }
                             });
+
                         }
                     }
                 });
             }
         }).start();
+    }
+
+    /**
+     * 解析数据
+     */
+    private void parseStationInfo(String result, String level) {
+        try {
+            JSONObject obj = new JSONObject(result);
+            if (!obj.isNull(level)) {
+                JSONArray array = new JSONArray(obj.getString(level));
+                for (int i = 0; i < array.length(); i++) {
+                    WeatherDto dto = new WeatherDto();
+                    JSONObject itemObj = array.getJSONObject(i);
+                    dto.cityId = itemObj.getString("areaid");
+                    dto.cityName = itemObj.getString("name");
+                    dto.lat = itemObj.getDouble("lat");
+                    dto.lng = itemObj.getDouble("lon");
+                    dto.level = itemObj.getString("level");
+
+                    if (TextUtils.equals(level, level1)) {
+                        foreDataList1.add(dto);
+                    }else if (TextUtils.equals(level, level2)) {
+                        foreDataList2.add(dto);
+                    }else if (TextUtils.equals(level, level3)) {//把四个直辖市的区划入地市级
+                        if (dto.cityId.contains("10101") || dto.cityId.contains("10102") || dto.cityId.contains("10103") || dto.cityId.contains("10104")) {
+                            dto.level = "2";
+                            foreDataList2.add(dto);
+                        }else {
+                            foreDataList3.add(dto);
+                        }
+                    }
+
+                }
+
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -4154,29 +4194,55 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (foreMarkers.size() <= 0) {
-                    for (WeatherDto dto : foreDataList) {
-                        getWeatherInfo(dto);
-                    }
+                List<WeatherDto> list = new ArrayList<>();
+                if (zoom <= zoom1) {
+                    list.addAll(foreDataList1);
+                }else if (zoom > zoom1 && zoom <= zoom2){
+                    list.addAll(foreDataList1);
+                    list.addAll(foreDataList2);
                 }else {
-                    for (Marker marker : foreMarkers) {
-                        marker.setVisible(true);
-                        markerExpandAnimation(marker);
-                    }
+                    list.addAll(foreDataList1);
+                    list.addAll(foreDataList2);
+                    list.addAll(foreDataList3);
+                }
+
+                for (WeatherDto dto : list) {
+                    addVisibleAreaMarker(dto);
                 }
             }
         }).start();
     }
 
-    /**
-     * 清除预报markers
-     */
     private void removeForeMarkers() {
         for (Marker marker : foreMarkers) {
-            marker.setVisible(false);
-            markerColloseAnimation(marker);
+            marker.remove();
+        }
+        foreMarkers.clear();
+    }
+
+    /**
+     * 添加可视区域对应的marker
+     * @param dto
+     */
+    private void addVisibleAreaMarker(WeatherDto dto) {
+        if (dto.lat > leftlatlng.latitude && dto.lat < rightLatlng.latitude && dto.lng > leftlatlng.longitude && dto.lng < rightLatlng.longitude) {
+            getWeatherInfo(dto);
         }
     }
+
+    @SuppressLint("HandlerLeak")
+    private Handler foreHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 1001:
+                    removeForeMarkers();
+                    addForeMarkers();
+                    break;
+            }
+        }
+    };
 
     /**
      * 获取某个城市天气数据
@@ -4346,9 +4412,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -4631,7 +4695,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     @Override
     public void onCameraChangeFinish(CameraPosition arg0) {
-        //通用
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         Point leftPoint = new Point(0, dm.heightPixels);
@@ -4642,14 +4705,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         zoom = arg0.zoom;
 
         if (isShowFact) {//选中实况状态下
-            if (zoom <= 10.0f) {
-                drawFactBitmap(factBitmap, false);
-                removeFactMarkers();
-            }else {
-                removeFact();
-                switchFactMarkers();
-                drawFactMarkers(currentFactChartImgUrl);
-            }
+            drawFactBitmap(factBitmap, false);
+            drawFactMarkers(currentFactChartImgUrl);
+        }
+
+        if (isShowFore) {//选中预报状态下
+            foreHandler.removeMessages(1001);
+            Message msg = foreHandler.obtainMessage();
+            msg.what = 1001;
+            foreHandler.sendMessageDelayed(msg, 1000);
         }
 
         if (isShowWind) {//选中风场状态下
@@ -4779,7 +4843,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     }
                     for (TyphoonDto pub : publishList) {
                         if (pub.isSelected) {
-                            if (!TextUtils.isEmpty(dto.tId)) {
+                            if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                                 OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, name);
                             }else {
                                 OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, name);
@@ -4853,7 +4917,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 String name = dto.code + " " + dto.name + " " + dto.enName;
                 for (TyphoonDto pub : publishList) {
                     if (pub.isSelected) {
-                        if (!TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, name);
                         }else {
                             OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, name);
@@ -4967,7 +5031,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 ivBack.setImageResource(R.drawable.shawn_icon_back);
                 tvBack.setTextColor(Color.WHITE);
                 ivRefresh.setImageResource(R.drawable.shawn_icon_refresh_white);
-                tvTyphoonName.setTextColor(Color.WHITE);
                 ivMapType1.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
                 ivMapType2.setBackgroundColor(getResources().getColor(R.color.transparent));
                 aMap.setMapType(AMap.MAP_TYPE_SATELLITE);
@@ -4984,7 +5047,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 ivBack.setImageResource(R.drawable.shawn_icon_arrow_left);
                 tvBack.setTextColor(Color.BLACK);
                 ivRefresh.setImageResource(R.drawable.shawn_icon_refresh_black);
-                tvTyphoonName.setTextColor(getResources().getColor(R.color.text_color3));
                 ivMapType1.setBackgroundColor(getResources().getColor(R.color.transparent));
                 ivMapType2.setBackgroundResource(R.drawable.shawn_bg_corner_map_press);
                 aMap.setMapType(AMap.MAP_TYPE_NORMAL);
@@ -4999,24 +5061,31 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         } else if (i == R.id.llFact) {
             isShowFact = !isShowFact;
             if (isShowFact) {
+                tvFactTime.setVisibility(View.VISIBLE);
                 layoutFact.setVisibility(View.VISIBLE);
                 llFact.setBackgroundResource(R.drawable.shawn_bg_corner_fact_press);
                 ivFact.setImageResource(R.drawable.shawn_icon_fact_press);
                 tvFact.setTextColor(Color.WHITE);
+                tvFactStr.setVisibility(View.VISIBLE);
+                sbFact.setVisibility(View.VISIBLE);
                 if (factBitmap == null) {
                     OkHttpFactChart();
                 }else {
                     drawFactBitmap(factBitmap, true);
                     if (reFactPrompt.getVisibility() != View.VISIBLE) {
                         animationDownToUp(reFactPrompt);
+                        sbFact.setChecked(true);
                     }
                     drawFactMarkers(currentFactChartImgUrl);
                 }
             }else {
+                tvFactTime.setVisibility(View.GONE);
                 layoutFact.setVisibility(View.GONE);
                 llFact.setBackgroundColor(Color.TRANSPARENT);
                 ivFact.setImageResource(R.drawable.shawn_icon_fact);
                 tvFact.setTextColor(getResources().getColor(R.color.text_color3));
+                tvFactStr.setVisibility(View.GONE);
+                sbFact.setVisibility(View.GONE);
                 removeFact();
                 removeFactMarkers();
             }
@@ -5025,8 +5094,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         }else if (i == R.id.ivFactClose) {
             if (reFactPrompt.getVisibility() == View.VISIBLE) {
                 animationUpToDown(reFactPrompt);
+                sbFact.setChecked(false);
             } else {
                 animationDownToUp(reFactPrompt);
+                sbFact.setChecked(true);
             }
 
 
@@ -5131,7 +5202,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 llFore.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 ivFore.setImageResource(R.drawable.shawn_icon_fore_press);
                 tvFore.setTextColor(Color.WHITE);
-                if (foreDataList.size() <= 0) {
+                if (foreMarkers.size() <= 0) {
                     OkHttpAllCitys();
                 } else {
                     addForeMarkers();

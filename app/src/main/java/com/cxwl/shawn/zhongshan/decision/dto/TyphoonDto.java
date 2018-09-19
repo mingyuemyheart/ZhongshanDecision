@@ -36,7 +36,7 @@ public class TyphoonDto implements Parcelable {
 	
 	public String content(Context context) {
 		StringBuffer buffer = new StringBuffer();
-		buffer.append("时间：").append(time).append("\n");
+		buffer.append("时间：").append(time);
 		if(!TextUtils.isEmpty(max_wind_speed)){
 			if (!TextUtils.isEmpty(type)) {
 				if (TextUtils.equals(type, "1")) {
@@ -52,24 +52,18 @@ public class TyphoonDto implements Parcelable {
 				}else if (TextUtils.equals(type, "6")) {
 					strength = context.getString(R.string.typhoon_level6);
 				}
-				buffer.append("中心风力："+ WeatherUtil.getHourWindForce(Float.parseFloat(max_wind_speed))+"("+strength+")，");
+				buffer.append("\n").append("中心风力："+ WeatherUtil.getHourWindForce(Float.parseFloat(max_wind_speed))+"("+strength+")，");
 			}
-			buffer.append(max_wind_speed).append(context.getString(R.string.chart_speed1));
+			buffer.append(max_wind_speed).append("米/秒");
 		}
 		if(!TextUtils.isEmpty(pressure)){
-			buffer.append(context.getString(R.string.chart_center_pressure)).append(pressure).append(context.getString(R.string.chart_baipa));
+			buffer.append("\n").append("中心气压：").append(pressure).append("hPa");
 		}
-//		if(!TextUtils.isEmpty(wind_dir)){
-//			buffer.append(context.getString(R.string.chart_yidong_direct)).append(wind_dir).append("\n");
-//		}
-//		if(!TextUtils.isEmpty(move_speed)){
-//			buffer.append(context.getString(R.string.chart_yidong_speed)).append(move_speed).append(context.getString(R.string.chart_speed2));
-//		}
-		if(!TextUtils.isEmpty(radius_7) && !TextUtils.equals("999999", radius_10)){
-			buffer.append(context.getString(R.string.chart_radius1)).append(radius_7).append(context.getString(R.string.chart_kilometer));
+		if(!TextUtils.isEmpty(radius_7)){
+			buffer.append("\n").append("7级风圈半径：").append(radius_7).append("公里");
 		}
-		if(!TextUtils.isEmpty(radius_10) && !TextUtils.equals("999999", radius_10)){
-			buffer.append(context.getString(R.string.chart_radius2)).append(radius_10).append(context.getString(R.string.chart_kilometer));
+		if(!TextUtils.isEmpty(radius_10)){
+			buffer.append("\n").append("10级风圈半径：").append(radius_10).append("公里");
 		}
 				
 		return buffer.toString();
