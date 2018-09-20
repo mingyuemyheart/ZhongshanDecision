@@ -4,7 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.cxwl.shawn.zhongshan.decision.dto.MinuteFallDto;
+import com.cxwl.shawn.zhongshan.decision.dto.RadarDto;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,23 +15,23 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 
-public class CaiyunManager {
-	
+public class FactManager {
+
 	private Context mContext;
 	private LoadThread mLoadThread;
-	
+
 	public interface RadarListener {
 		int RESULT_SUCCESSED = 1;
 		int RESULT_FAILED = 2;
-		void onResult(int result, List<MinuteFallDto> images);
+		void onResult(int result, List<RadarDto> images);
 		void onProgress(String url, int progress);
 	}
-	
-	public CaiyunManager(Context context) {
+
+	public FactManager(Context context) {
 		mContext = context.getApplicationContext();
 	}
 	
-	public void loadImagesAsyn(List<MinuteFallDto> radars, RadarListener listener) {
+	public void loadImagesAsyn(List<RadarDto> radars, RadarListener listener) {
 		if (mLoadThread != null) {
 			mLoadThread.cancel();
 			mLoadThread = null;
@@ -41,11 +41,11 @@ public class CaiyunManager {
 	}
 	
 	private class LoadThread extends Thread {
-		private List<MinuteFallDto> radars;
+		private List<RadarDto> radars;
 		private RadarListener listener;
 		private int count;
 
-		private LoadThread(List<MinuteFallDto> radars, RadarListener listener) {
+		private LoadThread(List<RadarDto> radars, RadarListener listener) {
 			this.radars = radars;
 			this.listener = listener;
 		}
@@ -55,13 +55,13 @@ public class CaiyunManager {
 			super.run();
 			int len = count = radars.size();
 			for (int i = 0; i < len ; i++) {
-				MinuteFallDto radar = radars.get(i);
+				RadarDto radar = radars.get(i);
 				String url = radar.imgUrl;
 				loadImage(i, url, radars);
 			}
 		}
 		
-		private void loadImage(final int index, final String url, final List<MinuteFallDto> radars) {
+		private void loadImage(final int index, final String url, final List<RadarDto> radars) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -81,7 +81,7 @@ public class CaiyunManager {
 		    	connection.connect();
 		    	
 				try {
-					File file = new File(getDir() + "/"+index+".png");
+					File file = new File(getDir() + "/fact"+index+".png");
 					FileOutputStream os = new FileOutputStream(file);
 			    	InputStream is = connection.getInputStream();
 			    	byte[] buffer = new byte[8 * 1024];
@@ -102,7 +102,7 @@ public class CaiyunManager {
 		    return null;
 		}
 		
-		private synchronized void finished(String path, List<MinuteFallDto> radars) {
+		private synchronized void finished(String path, List<RadarDto> radars) {
 			int max = radars.size();
 			count -- ;
 			int progress = (int) (((max - count) * 1.0 / max) * 100);

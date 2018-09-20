@@ -44,6 +44,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -88,13 +89,14 @@ import com.cxwl.shawn.zhongshan.decision.adapter.WarningStatisticAdapter;
 import com.cxwl.shawn.zhongshan.decision.adapter.WindMapTypeAdapter;
 import com.cxwl.shawn.zhongshan.decision.common.CONST;
 import com.cxwl.shawn.zhongshan.decision.dto.FactDto;
-import com.cxwl.shawn.zhongshan.decision.dto.MinuteFallDto;
+import com.cxwl.shawn.zhongshan.decision.dto.RadarDto;
 import com.cxwl.shawn.zhongshan.decision.dto.TyphoonDto;
 import com.cxwl.shawn.zhongshan.decision.dto.WarningDto;
 import com.cxwl.shawn.zhongshan.decision.dto.WeatherDto;
 import com.cxwl.shawn.zhongshan.decision.dto.WindData;
 import com.cxwl.shawn.zhongshan.decision.dto.WindDto;
-import com.cxwl.shawn.zhongshan.decision.manager.CaiyunManager;
+import com.cxwl.shawn.zhongshan.decision.manager.CloudManager;
+import com.cxwl.shawn.zhongshan.decision.manager.RadarManager;
 import com.cxwl.shawn.zhongshan.decision.util.AuthorityUtil;
 import com.cxwl.shawn.zhongshan.decision.util.CommonUtil;
 import com.cxwl.shawn.zhongshan.decision.util.OkHttpUtil;
@@ -167,6 +169,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private SimpleDateFormat sdf6 = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.CHINA);
     private SimpleDateFormat sdf7 = new SimpleDateFormat("HH", Locale.CHINA);
     private SimpleDateFormat sdf8 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0", Locale.CHINA);
+    private SimpleDateFormat sdf9 = new SimpleDateFormat("HH:mm", Locale.CHINA);
+    private SimpleDateFormat sdf10 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
     private String TYPE_TYPHOON = "type_typhoon", TYPE_FACT = "type_fact", TYPE_WARNING= "type_warning", TYPE_FORE = "type_fore";
     private int width, height;
 
@@ -218,8 +222,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private ScrollviewGridview gridviewWind;
     private WindMapTypeAdapter windMapTypeAdapter;
     private List<WindDto> windTypeList = new ArrayList<>();
-    private TextView tvFactStr,tvWarningTypeStr,tvWarningListStr,tvWindTypeStr,tvMinuteStr;//预警类型字符串，风场数据字符串
-    private SwitchButton sbFact,sbWarning,sbMinute;
+    private TextView tvFactStr,tvCloudStr,tvRadarStr,tvWarningTypeStr,tvWarningListStr,tvWindTypeStr,tvMinuteStr;//预警类型字符串，风场数据字符串
+    private SwitchButton sbFact,sbCloud,sbRadar,sbWarning,sbMinute;
 
     //实况
     private boolean isShowFact = false;//是否显示实况
@@ -244,19 +248,25 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     //卫星拼图
     private boolean isShowCloud = false;//是否显示卫星拼图
-    private Bitmap cloudBitmap;
+    private RelativeLayout layoutCloud,reCloudPrompt;
+    private ImageView ivCloudClose,ivCloudPlay;
+    private SeekBar cloudSeekbar;
+    private TextView tvCloudTime;
+    private List<RadarDto> cloudList = new ArrayList<>();
     private GroundOverlay cloudOverlay;
+    private CloudManager cloudManager;
+    private CloudThread cloudThread;
 
     //雷达拼图
     private boolean isShowRadar = false;//是否显示雷达拼图
-    private List<MinuteFallDto> caiyunList = new ArrayList<>();
+    private RelativeLayout layoutRadar,reRadarPrompt;
+    private ImageView ivRadarClose,ivRadarPlay;
+    private SeekBar radarSeekbar;
+    private TextView tvRadarTime;
+    private List<RadarDto> radarList = new ArrayList<>();
     private GroundOverlay radarOverlay;
-    private CaiyunManager caiyunManager;
-    private CaiyunThread caiyunThread;
-    private static final int HANDLER_SHOW_RADAR = 1;
-    private static final int HANDLER_PROGRESS = 2;
-    private static final int HANDLER_LOAD_FINISHED = 3;
-    private static final int HANDLER_PAUSE = 4;
+    private RadarManager radarManager;
+    private RadarThread radarThread;
 
     //预警
     private boolean isShowWarning = false;//是否显示预警layout
@@ -278,7 +288,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private List<WeatherDto> foreDataList3 = new ArrayList<>();//所有城市天气信息
     private final String level1 = "level1", level2 = "level2", level3 = "level3";
     private List<Marker> foreMarkers = new ArrayList<>();
-//    private Map<String, Marker> foreMarkersMap = new LinkedHashMap<>();//按区域id区分
     private LatLng leftlatlng = new LatLng(-16.305714763804854,75.13831436634065);
     private LatLng rightLatlng = new LatLng(63.681687310440864,135.21788656711578);
 
@@ -551,11 +560,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         ivMapType2 = findViewById(R.id.ivMapType2);
         ivMapType2.setOnClickListener(this);
         tvFactStr = findViewById(R.id.tvFactStr);
+        tvCloudStr = findViewById(R.id.tvCloudStr);
+        tvRadarStr = findViewById(R.id.tvRadarStr);
         tvWarningTypeStr = findViewById(R.id.tvWarningTypeStr);
         tvWarningListStr = findViewById(R.id.tvWarningListStr);
         tvWindTypeStr = findViewById(R.id.tvWindTypeStr);
         tvMinuteStr = findViewById(R.id.tvMinuteStr);
         sbFact = findViewById(R.id.sbFact);
+        sbCloud = findViewById(R.id.sbCloud);
+        sbRadar = findViewById(R.id.sbRadar);
         sbWarning = findViewById(R.id.sbWarning);
         sbMinute = findViewById(R.id.sbMinute);
         sbFact.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
@@ -565,6 +578,26 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     animationDownToUp(reFactPrompt);
                 }else {
                     animationUpToDown(reFactPrompt);
+                }
+            }
+        });
+        sbCloud.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                if (isChecked) {
+                    animationDownToUp(reCloudPrompt);
+                }else {
+                    animationUpToDown(reCloudPrompt);
+                }
+            }
+        });
+        sbRadar.setOnCheckedChangeListener(new SwitchButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(SwitchButton view, boolean isChecked) {
+                if (isChecked) {
+                    animationDownToUp(reRadarPrompt);
+                }else {
+                    animationUpToDown(reRadarPrompt);
                 }
             }
         });
@@ -601,9 +634,69 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvFactList = findViewById(R.id.tvFactList);
         tvFactList.setOnClickListener(this);
 
-        //雷达拼图
-        caiyunManager = new CaiyunManager(mContext);
+        //卫星拼图
+        layoutCloud = findViewById(R.id.layoutCloud);
+        reCloudPrompt = findViewById(R.id.reCloudPrompt);
+        ivCloudClose = findViewById(R.id.ivCloudClose);
+        ivCloudClose.setOnClickListener(this);
+        ivCloudPlay = findViewById(R.id.ivCloudPlay);
+        ivCloudPlay.setOnClickListener(this);
+        tvCloudTime = findViewById(R.id.tvCloudTime);
+        cloudSeekbar = findViewById(R.id.cloudSeekbar);
+        cloudSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (cloudThread != null) {
+                    cloudThread.setCurrent(seekBar.getProgress());
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                if (cloudThread != null) {
+                    cloudThread.startTracking();
+                }
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (cloudThread != null) {
+                    cloudThread.stopTracking();
+                }
+            }
+        });
 
+        cloudManager = new CloudManager(mContext);
+
+        //雷达拼图
+        layoutRadar = findViewById(R.id.layoutRadar);
+        reRadarPrompt = findViewById(R.id.reRadarPrompt);
+        ivRadarClose = findViewById(R.id.ivRadarClose);
+        ivRadarClose.setOnClickListener(this);
+        ivRadarPlay = findViewById(R.id.ivRadarPlay);
+        ivRadarPlay.setOnClickListener(this);
+        tvRadarTime = findViewById(R.id.tvRadarTime);
+        radarSeekbar = findViewById(R.id.radarSeekbar);
+        radarSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (radarThread != null) {
+                    radarThread.setCurrent(seekBar.getProgress());
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                if (radarThread != null) {
+                    radarThread.startTracking();
+                }
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (radarThread != null) {
+                    radarThread.stopTracking();
+                }
+            }
+        });
+
+        radarManager = new RadarManager(mContext);
         geocoderSearch = new GeocodeSearch(mContext);
         geocoderSearch.setOnGeocodeSearchListener(this);
 
@@ -3128,7 +3221,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     /**
      * 获取云图数据
      */
-    private void OkHttpCloudChart() {
+    private void OkHttpCloud() {
         loadingView.setVisibility(View.VISIBLE);
         final String url = "http://decision-admin.tianqi.cn/Home/other/getDecisionCloudImages";
         new Thread(new Runnable() {
@@ -3150,12 +3243,35 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                 if (!TextUtils.isEmpty(result)) {
                                     try {
                                         JSONObject obj = new JSONObject(result);
+                                        double p1 = 0,p2 = 0,p3 = 0,p4 = 0;
+                                        if (!obj.isNull("rect")) {
+                                            JSONArray rect = obj.getJSONArray("rect");
+                                            p1 = rect.getDouble(2);
+                                            p2 = rect.getDouble(1);
+                                            p3 = rect.getDouble(0);
+                                            p4 = rect.getDouble(3);
+                                        }
                                         if (!obj.isNull("l")) {
+                                            cloudList.clear();
                                             JSONArray array = obj.getJSONArray("l");
-                                            if (array.length() > 0) {
-                                                JSONObject itemObj = array.getJSONObject(0);
-                                                String imgUrl = itemObj.getString("l2");
-                                                OkHttpCloudImg(imgUrl);
+                                            for (int i = array.length()-1; i >= 0; i--) {
+                                                RadarDto dto = new RadarDto();
+                                                JSONObject itemObj = array.getJSONObject(i);
+                                                dto.imgUrl = itemObj.getString("l2");
+                                                try {
+                                                    String time = itemObj.getString("l1");
+                                                    dto.time = sdf9.format(sdf10.parse(time));
+                                                } catch (ParseException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                dto.p1 = p1;
+                                                dto.p2 = p2;
+                                                dto.p3 = p3;
+                                                dto.p4 = p4;
+                                                cloudList.add(dto);
+                                            }
+                                            if (cloudList.size() > 0) {
+                                                startDownloadCloudImgs(cloudList);
                                             }
                                         }
                                     } catch (JSONException e) {
@@ -3171,52 +3287,66 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     }
 
     /**
-     * 下载云图
-     * @param imgUrl
+     * 下载图片
+     * @param list
      */
-    private void OkHttpCloudImg(final String imgUrl) {
-        if (TextUtils.isEmpty(imgUrl)) {
-            return;
-        }
-        new Thread(new Runnable() {
+    private void startDownloadCloudImgs(List<RadarDto> list) {
+        cloudManager.loadImagesAsyn(list, new CloudManager.CloudListener() {
             @Override
-            public void run() {
-                OkHttpUtil.enqueue(new Request.Builder().url(imgUrl).build(), new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
+            public void onResult(int result, final List<RadarDto> images) {
+                if (result == CloudManager.CloudListener.RESULT_SUCCESSED) {
+                    if (cloudThread == null) {
+                        cloudThread = new CloudThread(images);
                     }
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            return;
-                        }
-                        final byte[] bytes = response.body().bytes();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                                cloudBitmap = bitmap;
-                                drawCloud(bitmap);
+
+                    //把最新的一张降雨图片覆盖在地图上
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            RadarDto dto = images.get(images.size()-1);
+                            if (!TextUtils.isEmpty(dto.path)) {
+                                Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                                if (bitmap != null) {
+                                    drawCloud(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                                }
                             }
-                        });
-                    }
-                });
+                            changeCloudSeekbarProgress(dto.time, images.size(), images.size());
+                            loadingView.setVisibility(View.GONE);
+                        }
+                    });
+
+                }
             }
-        }).start();
+
+            @Override
+            public void onProgress(String url, int progress) {
+            }
+        });
+    }
+
+    private void changeCloudSeekbarProgress(String time, int progress, int max) {
+        if (cloudSeekbar != null) {
+            cloudSeekbar.setMax(max);
+            cloudSeekbar.setProgress(progress);
+        }
+        if (!TextUtils.isEmpty(time)) {
+            tvCloudTime.setText(time);
+        }
     }
 
     /**
-     * 绘制卫星拼图
+     * 绘制雷达图层
+     * @param bitmap
+     * @param p1
+     * @param p2
+     * @param p3
+     * @param p4
      */
-    private void drawCloud(Bitmap bitmap) {
-        loadingView.setVisibility(View.GONE);
-        if (bitmap == null) {
-            return;
-        }
+    private void drawCloud(Bitmap bitmap, double p1, double p2, double p3, double p4) {
         BitmapDescriptor fromView = BitmapDescriptorFactory.fromBitmap(bitmap);
         LatLngBounds bounds = new LatLngBounds.Builder()
-                .include(new LatLng(-10.787277369124666, 62.8820698883665))
-                .include(new LatLng(56.385845314127209, 161.69675114151386))
+                .include(new LatLng(p3, p2))
+                .include(new LatLng(p1, p4))
                 .build();
 
         if (cloudOverlay == null) {
@@ -3224,21 +3354,124 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     .anchor(0.5f, 0.5f)
                     .positionFromBounds(bounds)
                     .image(fromView)
-                    .transparency(0.2f));
+                    .zIndex(1000)
+                    .transparency(0.25f));
         } else {
             cloudOverlay.setImage(null);
             cloudOverlay.setPositionFromBounds(bounds);
             cloudOverlay.setImage(fromView);
+        }
+        aMap.runOnDrawFrame();
+    }
+
+    private class CloudThread extends Thread {
+
+        static final int STATE_NONE = 0;
+        static final int STATE_PLAYING = 1;
+        static final int STATE_PAUSE = 2;
+        static final int STATE_CANCEL = 3;
+        private List<RadarDto> images;
+        private int state;
+        private int index;
+        private int count;
+        private boolean isTracking;
+
+        private CloudThread(List<RadarDto> images) {
+            this.images = images;
+            this.count = images.size();
+            this.index = 0;
+            this.state = STATE_NONE;
+            this.isTracking = false;
+        }
+
+        private int getCurrentState() {
+            return state;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            this.state = STATE_PLAYING;
+            while (true) {
+                if (state == STATE_CANCEL) {
+                    break;
+                }
+                if (state == STATE_PAUSE) {
+                    continue;
+                }
+                if (isTracking) {
+                    continue;
+                }
+                sendCloud();
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        private void sendCloud() {
+            if (index >= count || index < 0) {
+                index = 0;
+            }else {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RadarDto dto = images.get(index);
+                        if (!TextUtils.isEmpty(dto.path)) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                            if (bitmap != null) {
+                                drawCloud(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                            }
+                        }
+                        changeCloudSeekbarProgress(dto.time, index++, count-1);
+                    }
+                });
+            }
+        }
+
+        private void cancel() {
+            this.state = STATE_CANCEL;
+        }
+        private void pause() {
+            this.state = STATE_PAUSE;
+        }
+        private void play() {
+            this.state = STATE_PLAYING;
+        }
+
+        public void setCurrent(int index) {
+            this.index = index;
+            sendCloud();
+        }
+
+        public void startTracking() {
+            isTracking = true;
+        }
+
+        public void stopTracking() {
+            isTracking = false;
+            if (this.state == STATE_PAUSE) {
+                sendCloud();
+            }
         }
     }
 
     /**
      * 清除云图
      */
-    private void removeCloud() {
+    private void removeCloudOverlay() {
         if (cloudOverlay != null) {
             cloudOverlay.remove();
             cloudOverlay = null;
+        }
+    }
+
+    private void removeCloudThread() {
+        if (cloudThread != null) {
+            cloudThread.cancel();
+            cloudThread = null;
         }
     }
 
@@ -3247,7 +3480,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     /**
      * 获取彩云数据
      */
-    private void OkHttpCaiyun() {
+    private void OkHttpRadar() {
         loadingView.setVisibility(View.VISIBLE);
         final String url = "http://api.tianqi.cn:8070/v1/img.py";
         new Thread(new Runnable() {
@@ -3270,21 +3503,23 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     if (obj.getString("status").equals("ok")) {
                                         if (!obj.isNull("radar_img")) {
                                             JSONArray array = new JSONArray(obj.getString("radar_img"));
-                                            caiyunList.clear();
+                                            radarList.clear();
                                             for (int i = 0; i < array.length(); i++) {
                                                 JSONArray array0 = array.getJSONArray(i);
-                                                MinuteFallDto dto = new MinuteFallDto();
+                                                RadarDto dto = new RadarDto();
                                                 dto.imgUrl = array0.optString(0);
-                                                dto.time = array0.optLong(1);
+                                                long time = array0.optLong(1)*1000;
+                                                dto.time = sdf9.format(new Date(time));
+
                                                 JSONArray itemArray = array0.getJSONArray(2);
                                                 dto.p1 = itemArray.optDouble(0);
                                                 dto.p2 = itemArray.optDouble(1);
                                                 dto.p3 = itemArray.optDouble(2);
                                                 dto.p4 = itemArray.optDouble(3);
-                                                caiyunList.add(dto);
+                                                radarList.add(dto);
                                             }
-                                            if (caiyunList.size() > 0) {
-                                                startDownloadCaiyunImgs(caiyunList);
+                                            if (radarList.size() > 0) {
+                                                startDownloadRadarImgs(radarList);
                                             }
                                         }
                                     }
@@ -3303,73 +3538,49 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 下载图片
      * @param list
      */
-    private void startDownloadCaiyunImgs(List<MinuteFallDto> list) {
-        caiyunManager.loadImagesAsyn(list, new CaiyunManager.RadarListener() {
+    private void startDownloadRadarImgs(List<RadarDto> list) {
+        radarManager.loadImagesAsyn(list, new RadarManager.RadarListener() {
             @Override
-            public void onResult(int result, List<MinuteFallDto> images) {
-                radarHandler.sendEmptyMessage(HANDLER_LOAD_FINISHED);
-                if (result == CaiyunManager.RadarListener.RESULT_SUCCESSED) {
-                    removeRadar();
-                    caiyunThread = new CaiyunThread(images);
-                    caiyunThread.start();
+            public void onResult(int result, final List<RadarDto> images) {
+                if (result == RadarManager.RadarListener.RESULT_SUCCESSED) {
+                    if (radarThread == null) {
+                        radarThread = new RadarThread(images);
+                    }
 
                     //把最新的一张降雨图片覆盖在地图上
-//			MinuteFallDto radar = images.get(images.size()-1);
-//			Message message = mHandler.obtainMessage();
-//			message.what = HANDLER_SHOW_RADAR;
-//			message.obj = radar;
-//			message.arg1 = 100;
-//			message.arg2 = 100;
-//			mHandler.sendMessage(message);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            RadarDto dto = images.get(images.size()-1);
+                            if (!TextUtils.isEmpty(dto.path)) {
+                                Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                                if (bitmap != null) {
+                                    drawRadar(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                                }
+                            }
+                            changeRadarSeekbarProgress(dto.time, images.size(), images.size());
+                            loadingView.setVisibility(View.GONE);
+                        }
+                    });
+
                 }
             }
 
             @Override
             public void onProgress(String url, int progress) {
-                Message msg = new Message();
-                msg.obj = progress;
-                msg.what = HANDLER_PROGRESS;
-                radarHandler.sendMessage(msg);
             }
         });
     }
 
-    @SuppressLint("HandlerLeak")
-    private Handler radarHandler = new Handler(){
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case HANDLER_SHOW_RADAR:
-                    if (msg.obj != null) {
-                        MinuteFallDto dto = (MinuteFallDto) msg.obj;
-                        if (!TextUtils.isEmpty(dto.path)) {
-                            Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
-                            if (bitmap != null) {
-                                drawRadar(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
-                            }
-                        }
-                    }
-                    break;
-                case HANDLER_PROGRESS:
-//				if (mDialog != null) {
-//					if (msg.obj != null) {
-//						int progress = (Integer) msg.obj;
-//						mDialog.setPercent(progress);
-//					}
-//				}
-                    break;
-                case HANDLER_LOAD_FINISHED:
-                    loadingView.setVisibility(View.GONE);
-                    break;
-                case HANDLER_PAUSE:
-
-                    break;
-
-                default:
-                    break;
-            }
-
-        };
-    };
+    private void changeRadarSeekbarProgress(String time, int progress, int max) {
+        if (radarSeekbar != null) {
+            radarSeekbar.setMax(max);
+            radarSeekbar.setProgress(progress);
+        }
+        if (!TextUtils.isEmpty(time)) {
+            tvRadarTime.setText(time);
+        }
+    }
 
     /**
      * 绘制雷达图层
@@ -3391,8 +3602,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     .anchor(0.5f, 0.5f)
                     .positionFromBounds(bounds)
                     .image(fromView)
-                    .zIndex(10000)
-                    .transparency(0.0f));
+                    .zIndex(1001)
+                    .transparency(0.25f));
         } else {
             radarOverlay.setImage(null);
             radarOverlay.setPositionFromBounds(bounds);
@@ -3401,18 +3612,19 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         aMap.runOnDrawFrame();
     }
 
-    private class CaiyunThread extends Thread {
+    private class RadarThread extends Thread {
+        
         static final int STATE_NONE = 0;
         static final int STATE_PLAYING = 1;
         static final int STATE_PAUSE = 2;
         static final int STATE_CANCEL = 3;
-        private List<MinuteFallDto> images;
+        private List<RadarDto> images;
         private int state;
         private int index;
         private int count;
         private boolean isTracking;
 
-        public CaiyunThread(List<MinuteFallDto> images) {
+        private RadarThread(List<RadarDto> images) {
             this.images = images;
             this.count = images.size();
             this.index = 0;
@@ -3420,7 +3632,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             this.isTracking = false;
         }
 
-        public int getCurrentState() {
+        private int getCurrentState() {
             return state;
         }
 
@@ -3440,7 +3652,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
                 sendRadar();
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(200);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -3450,40 +3662,36 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         private void sendRadar() {
             if (index >= count || index < 0) {
                 index = 0;
-
-//				if (mRadarThread != null) {
-//					mRadarThread.pause();
-//
-//					Message message = mHandler.obtainMessage();
-//					message.what = HANDLER_PAUSE;
-//					mHandler.sendMessage(message);
-//					if (seekBar != null) {
-//						seekBar.setProgress(100);
-//					}
-//				}
             }else {
-                MinuteFallDto radar = images.get(index);
-                Message message = radarHandler.obtainMessage();
-                message.what = HANDLER_SHOW_RADAR;
-                message.obj = radar;
-                message.arg1 = count - 1;
-                message.arg2 = index ++;
-                radarHandler.sendMessage(message);
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        RadarDto dto = images.get(index);
+                        if (!TextUtils.isEmpty(dto.path)) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                            if (bitmap != null) {
+                                drawRadar(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                            }
+                        }
+                        changeRadarSeekbarProgress(dto.time, index++, count-1);
+                    }
+                });
             }
         }
 
-        public void cancel() {
+        private void cancel() {
             this.state = STATE_CANCEL;
         }
-        public void pause() {
+        private void pause() {
             this.state = STATE_PAUSE;
         }
-        public void play() {
+        private void play() {
             this.state = STATE_PLAYING;
         }
 
         public void setCurrent(int index) {
             this.index = index;
+            sendRadar();
         }
 
         public void startTracking() {
@@ -3501,14 +3709,17 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     /**
      * 清除雷达拼图，取消线程
      */
-    private void removeRadar() {
-        if (caiyunThread != null) {
-            caiyunThread.cancel();
-            caiyunThread = null;
-        }
+    private void removeRadarOverlay() {
         if (radarOverlay != null) {
             radarOverlay.remove();
             radarOverlay = null;
+        }
+    }
+
+    private void removeRadarThread() {
+        if (radarThread != null) {
+            radarThread.cancel();
+            radarThread = null;
         }
     }
 
@@ -5105,19 +5316,63 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         } else if (i == R.id.llSatelite) {
             isShowCloud = !isShowCloud;
             if (isShowCloud) {
+                layoutCloud.setVisibility(View.VISIBLE);
                 llSatelite.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 ivSatelite.setImageResource(R.drawable.shawn_icon_satelite_press);
                 tvSatelite.setTextColor(Color.WHITE);
-                if (cloudBitmap == null) {
-                    OkHttpCloudChart();
+                tvCloudStr.setVisibility(View.VISIBLE);
+                sbCloud.setVisibility(View.VISIBLE);
+                if (cloudList.size() <= 0) {
+                    OkHttpCloud();
                 } else {
-                    drawCloud(cloudBitmap);
+                    if (reCloudPrompt.getVisibility() != View.VISIBLE) {
+                        animationDownToUp(reCloudPrompt);
+                        sbCloud.setChecked(true);
+                    }
+                    if (cloudThread != null) {
+                        int index = cloudThread.index;
+                        if (index >= cloudList.size()-1) {
+                            index = cloudList.size()-1;
+                        }
+                        RadarDto dto = cloudList.get(index);
+                        if (!TextUtils.isEmpty(dto.path)) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                            if (bitmap != null) {
+                                drawCloud(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                            }
+                        }
+                        changeCloudSeekbarProgress(dto.time, index, cloudList.size()-1);
+                    }
                 }
             } else {
+                layoutCloud.setVisibility(View.GONE);
                 llSatelite.setBackgroundColor(Color.TRANSPARENT);
                 ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
                 tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
-                removeCloud();
+                tvCloudStr.setVisibility(View.GONE);
+                sbCloud.setVisibility(View.GONE);
+                removeCloudOverlay();
+            }
+        }else if (i == R.id.ivCloudPlay) {
+            if (cloudThread != null) {
+                if (cloudThread.getCurrentState() == RadarThread.STATE_NONE) {
+                    cloudThread.start();
+                    ivCloudPlay.setImageResource(R.drawable.shawn_icon_pause);
+                }else if (cloudThread.getCurrentState() == RadarThread.STATE_PLAYING) {
+                    cloudThread.pause();
+                    ivCloudPlay.setImageResource(R.drawable.shawn_icon_play);
+                }else if (cloudThread.getCurrentState() == RadarThread.STATE_PAUSE) {
+                    cloudThread.play();
+                    ivCloudPlay.setImageResource(R.drawable.shawn_icon_pause);
+                }
+            }
+        }else if (i == R.id.ivCloudClose) {
+            if (reCloudPrompt.getVisibility() == View.VISIBLE) {
+                animationUpToDown(reCloudPrompt);
+                sbCloud.setChecked(false);
+            } else {
+                animationDownToUp(reCloudPrompt);
+                sbCloud.setChecked(true);
             }
 
 
@@ -5125,21 +5380,63 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         } else if (i == R.id.llRadar) {
             isShowRadar = !isShowRadar;
             if (isShowRadar) {
+                layoutRadar.setVisibility(View.VISIBLE);
                 llRadar.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                 ivRadar.setImageResource(R.drawable.shawn_icon_radar_press);
                 tvRadar.setTextColor(Color.WHITE);
-                if (caiyunList.size() <= 0) {
-                    OkHttpCaiyun();
+                tvRadarStr.setVisibility(View.VISIBLE);
+                sbRadar.setVisibility(View.VISIBLE);
+                if (radarList.size() <= 0) {
+                    OkHttpRadar();
                 } else {
-                    removeRadar();
-                    caiyunThread = new CaiyunThread(caiyunList);
-                    caiyunThread.start();
+                    if (reRadarPrompt.getVisibility() != View.VISIBLE) {
+                        animationDownToUp(reRadarPrompt);
+                        sbRadar.setChecked(true);
+                    }
+                    if (radarThread != null) {
+                        int index = radarThread.index;
+                        if (index >= radarList.size()-1) {
+                            index = radarList.size()-1;
+                        }
+                        RadarDto dto = radarList.get(index);
+                        if (!TextUtils.isEmpty(dto.path)) {
+                            Bitmap bitmap = BitmapFactory.decodeFile(dto.path);
+                            if (bitmap != null) {
+                                drawRadar(bitmap, dto.p1, dto.p2, dto.p3, dto.p4);
+                            }
+                        }
+                        changeRadarSeekbarProgress(dto.time, index, radarList.size()-1);
+                    }
                 }
             } else {
+                layoutRadar.setVisibility(View.GONE);
                 llRadar.setBackgroundColor(Color.TRANSPARENT);
                 ivRadar.setImageResource(R.drawable.shawn_icon_radar);
                 tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
-                removeRadar();
+                tvRadarStr.setVisibility(View.GONE);
+                sbRadar.setVisibility(View.GONE);
+                removeRadarOverlay();
+            }
+        }else if (i == R.id.ivRadarPlay) {
+            if (radarThread != null) {
+                if (radarThread.getCurrentState() == RadarThread.STATE_NONE) {
+                    radarThread.start();
+                    ivRadarPlay.setImageResource(R.drawable.shawn_icon_pause);
+                }else if (radarThread.getCurrentState() == RadarThread.STATE_PLAYING) {
+                    radarThread.pause();
+                    ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
+                }else if (radarThread.getCurrentState() == RadarThread.STATE_PAUSE) {
+                    radarThread.play();
+                    ivRadarPlay.setImageResource(R.drawable.shawn_icon_pause);
+                }
+            }
+        }else if (i == R.id.ivRadarClose) {
+            if (reRadarPrompt.getVisibility() == View.VISIBLE) {
+                animationUpToDown(reRadarPrompt);
+                sbRadar.setChecked(false);
+            } else {
+                animationDownToUp(reRadarPrompt);
+                sbRadar.setChecked(true);
             }
 
 
@@ -5232,8 +5529,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 }
             } else {
                 layoutMinute.setVisibility(View.GONE);
-                tvMinuteStr.setVisibility(View.GONE);
-                sbMinute.setVisibility(View.GONE);
+//                tvMinuteStr.setVisibility(View.GONE);
+//                sbMinute.setVisibility(View.GONE);
                 llMinute.setBackgroundColor(Color.TRANSPARENT);
                 ivMinute.setImageResource(R.drawable.shawn_icon_minute);
                 tvMinute.setTextColor(getResources().getColor(R.color.text_color3));
@@ -5329,7 +5626,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         if (mapView != null) {
             mapView.onDestroy();
         }
-        removeRadar();
+        removeCloudOverlay();
+        removeCloudThread();
+        removeRadarOverlay();
+        removeRadarThread();
     }
 
     /**

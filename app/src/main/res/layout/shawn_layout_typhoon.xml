@@ -170,6 +170,7 @@
         android:layout_marginTop="10dp"
         android:background="@drawable/shawn_bg_corner_normal"
         android:clickable="true"
+        android:focusable="true"
         android:visibility="gone">
 
         <LinearLayout
@@ -490,6 +491,46 @@
             <com.suke.widget.SwitchButton
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/sbFact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:sb_checked="true"
+                app:sb_checked_color="@color/colorPrimary"/>
+
+            <TextView
+                android:id="@+id/tvCloudStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginTop="10dp"
+                android:text="卫星拼图"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.suke.widget.SwitchButton
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/sbCloud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:sb_checked="true"
+                app:sb_checked_color="@color/colorPrimary"/>
+
+            <TextView
+                android:id="@+id/tvRadarStr"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="2dp"
+                android:layout_marginTop="10dp"
+                android:text="雷达拼图"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/level_4"
+                android:visibility="gone"/>
+
+            <com.suke.widget.SwitchButton
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/sbRadar"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:visibility="gone"

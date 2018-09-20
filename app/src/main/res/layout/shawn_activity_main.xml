@@ -339,6 +339,20 @@
     </ScrollView>
 
     <include
+        android:id="@+id/layoutCloud"
+        layout="@layout/shawn_layout_cloud"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/layoutRadar"
+        layout="@layout/shawn_layout_radar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <include
         android:id="@+id/layoutWarning"
         layout="@layout/shawn_layout_warning"
         android:layout_width="match_parent"
