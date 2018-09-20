@@ -310,6 +310,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:visibility="gone"
                 android:id="@+id/llValue"
                 android:layout_width="45dp"
                 android:layout_height="45dp"

@@ -523,6 +523,18 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvWind = findViewById(R.id.tvWind);
         tvValue = findViewById(R.id.tvValue);
 
+        //判断是否为专业用户
+        if (getIntent().hasExtra("type")) {
+            String type = getIntent().getStringExtra("type");
+            if (TextUtils.equals(type, "3")) {
+                llValue.setVisibility(View.VISIBLE);
+            }else {
+                llValue.setVisibility(View.GONE);
+            }
+        }else {
+            llValue.setVisibility(View.GONE);
+        }
+
         //台风
         tvTyphoonName = findViewById(R.id.tvTyphoonName);
         ivRange = findViewById(R.id.ivRange);
