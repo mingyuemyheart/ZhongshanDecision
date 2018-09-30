@@ -11,7 +11,6 @@
 		<item>11B06,大风</item>
 		<item>11B07,沙尘暴</item>
 		<item>11B09,高温</item>
-		<item>11B22,干旱</item>
 		<item>11B14,雷电</item>
 		<item>11B15,冰雹</item>
 		<item>11B16,霜冻</item>
@@ -19,6 +18,10 @@
 		<item>11B19,霾</item>
 		<item>11B20,雷雨大风</item>
 		<item>11B21,道路结冰</item>
+		<item>11B22,干旱</item>
+		<item>11B23,海上大风</item>
+		<item>11B25,森林火险</item>
+		<item>11D00,地质灾害</item>
     </string-array>
     
 	<!-- 预警等级 -->

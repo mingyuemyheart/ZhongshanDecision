@@ -143,7 +143,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 
 public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClickListener, AMapLocationListener, AMap.OnMarkerClickListener,
-        AMap.OnMapClickListener, AMap.InfoWindowAdapter, AMap.OnInfoWindowClickListener, AMap.OnCameraChangeListener, GeocodeSearch.OnGeocodeSearchListener {
+        AMap.OnMapClickListener, AMap.InfoWindowAdapter, AMap.OnInfoWindowClickListener, AMap.OnCameraChangeListener {
 
     private Context mContext;
     private AVLoadingIndicatorView loadingView;
@@ -173,6 +173,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private SimpleDateFormat sdf10 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
     private String TYPE_TYPHOON = "type_typhoon", TYPE_FACT = "type_fact", TYPE_WARNING= "type_warning", TYPE_FORE = "type_fore";
     private int width, height;
+    private String MAPCLICK_TYPHOON = "mapclick_typhoon", MAPCLICK_WARNING = "mapclick_warning", MAPCLICK_MINUTE = "mapclick_minute";//区分点击地图时，是哪个要素点击
 
     //台风
     private boolean isShowTyphoon = true;//是否显示台风layout
@@ -710,7 +711,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         radarManager = new RadarManager(mContext);
         geocoderSearch = new GeocodeSearch(mContext);
-        geocoderSearch.setOnGeocodeSearchListener(this);
 
         //预警
         reWarningPrompt = findViewById(R.id.reWarningPrompt);
@@ -1115,7 +1115,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     }
                 }else {
                     for (TyphoonDto pub : publishList) {
-                        if (TextUtils.equals(dto.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
+                        if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
                             clearAllPoints(pub.publishCode+dto.tId);
                         }else {
                             clearAllPoints(pub.publishCode+dto.id);
@@ -1176,7 +1176,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         if (TextUtils.isEmpty(tvTyphoonYear.getText().toString())) {
             return;
         }
-//        String currentYear = Calendar.getInstance().get(Calendar.YEAR)+"";
         String selectYear = tvTyphoonYear.getText().toString().substring(0, tvTyphoonYear.getText().length()-1);
         final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
         new Thread(new Runnable() {
@@ -1231,10 +1230,12 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             }else {
                                                 dto.status = "0";
                                             }
-                                            nameList.add(dto);
+                                            if (!dto.code.contains("****")) {
+                                                nameList.add(dto);
+                                            }
 
                                             //把活跃台风过滤出来存放
-                                            if (TextUtils.equals(dto.status, "1")) {
+                                            if (TextUtils.equals(dto.status, "1") && !dto.code.contains("****")) {
                                                 dto.isSelected = true;//生效台风默认选中状态
                                                 startList.add(0, dto);
                                                 selectList.add(0, dto);
@@ -1412,12 +1413,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 dto.isFactPoint = false;
                                             }
                                         }
-//                                        if (!itemObj.isNull("RR07") && !TextUtils.isEmpty(itemObj.getString("RR07"))) {
-//                                            dto.radius_7 = itemObj.getString("RR07");
-//                                        }
-//                                        if (!itemObj.isNull("RR10") && !TextUtils.isEmpty(itemObj.getString("RR10"))) {
-//                                            dto.radius_10 = itemObj.getString("RR10");
-//                                        }
                                         if (!itemObj.isNull("RD07") && !TextUtils.isEmpty(itemObj.getString("RD07"))) {
                                             dto.radius_7 = itemObj.getString("RD07");
                                         }
@@ -2314,7 +2309,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     if (!TextUtils.isEmpty(titles[2])) {
                         String[] circles = titles[2].split("\\|");
                         drawWindCircle(circles[0], circles[1], marker.getPosition());
-                        searchAddrByLatLng(marker.getPosition().latitude, marker.getPosition().longitude);//参考位置
+                        searchAddrByLatLng(marker.getPosition().latitude, marker.getPosition().longitude, MAPCLICK_TYPHOON);//参考位置
                     }
                 }else if (TextUtils.equals(markerType, TYPE_WARNING)) {//点击预警marker
                     //点击预警marker
@@ -2339,24 +2334,24 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     @Override
     public void onMapClick(LatLng latLng) {
         if (isShowTyphoon && isRanging) {//测距状态下
-            removeRange(null);
             clickLatLng = latLng;
             addLocationMarker();
             addLocationCircles();
+            removeRange(null);
             ranging(null);
         }
 
         if (isShowMinute) {//分钟降水
             clickLatLng = latLng;
             addLocationMarker();
-            searchAddrByLatLng(latLng.latitude, latLng.longitude);
+            searchAddrByLatLng(latLng.latitude, latLng.longitude, MAPCLICK_MINUTE);
             OkHttpMinute(latLng.longitude, latLng.latitude);
         }
 
         if (isShowWarning) {//预警
             clickLatLng = latLng;
             addLocationMarker();
-            searchAddrByLatLng(latLng.latitude, latLng.longitude);
+            searchAddrByLatLng(latLng.latitude, latLng.longitude, MAPCLICK_WARNING);
         }
 
         mapClick();
@@ -4581,44 +4576,45 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * @param lat
      * @param lng
      */
-    private void searchAddrByLatLng(double lat, double lng) {
+    private void searchAddrByLatLng(double lat, double lng, final String mapClick) {
         //latLonPoint参数表示一个Latlng，第二参数表示范围多少米，GeocodeSearch.AMAP表示是国测局坐标系还是GPS原生坐标系
         loadingView.setVisibility(View.VISIBLE);
         RegeocodeQuery query = new RegeocodeQuery(new LatLonPoint(lat, lng), 200, GeocodeSearch.AMAP);
         geocoderSearch.getFromLocationAsyn(query);
-    }
+        geocoderSearch.setOnGeocodeSearchListener(new GeocodeSearch.OnGeocodeSearchListener() {
+            @Override
+            public void onRegeocodeSearched(RegeocodeResult result, int i) {
+                if (result != null && result.getRegeocodeAddress() != null && result.getRegeocodeAddress().getFormatAddress() != null) {
+                    loadingView.setVisibility(View.GONE);
 
-    @Override
-    public void onGeocodeSearched(GeocodeResult arg0, int arg1) {
-    }
-    @Override
-    public void onRegeocodeSearched(RegeocodeResult result, int rCode) {
-        if (result != null && result.getRegeocodeAddress() != null && result.getRegeocodeAddress().getFormatAddress() != null) {
-            loadingView.setVisibility(View.GONE);
+                    clickAdcode = result.getRegeocodeAddress().getAdCode();
+                    clickLatLng = new LatLng(result.getRegeocodeQuery().getPoint().getLatitude(), result.getRegeocodeQuery().getPoint().getLongitude());
+                    saveSharedPreferences();
 
-            clickAdcode = result.getRegeocodeAddress().getAdCode();
-            clickLatLng = new LatLng(result.getRegeocodeQuery().getPoint().getLatitude(), result.getRegeocodeQuery().getPoint().getLongitude());
-            saveSharedPreferences();
+                    if (TextUtils.equals(mapClick, MAPCLICK_TYPHOON) && isShowTyphoon) {
+                        typhoonPointAddr = result.getRegeocodeAddress().getProvince()+result.getRegeocodeAddress().getCity();
+                        if (clickMarker != null && TextUtils.equals(clickMarker.getSnippet(), TYPE_TYPHOON)) {//为了显示"参考位置"
+                            clickMarker.showInfoWindow();
+                        }
+                    }
 
-            if (isShowTyphoon) {
-                typhoonPointAddr = result.getRegeocodeAddress().getProvince()+result.getRegeocodeAddress().getCity();
-                if (clickMarker != null && TextUtils.equals(clickMarker.getSnippet(), TYPE_TYPHOON)) {//为了显示"参考位置"
-                    clickMarker.showInfoWindow();
+                    if (TextUtils.equals(mapClick, MAPCLICK_MINUTE) && isShowMinute) {
+                        String addr = result.getRegeocodeAddress().getFormatAddress();
+                        if (!TextUtils.isEmpty(addr)) {
+                            tvAddr.setText(addr);
+                        }
+                    }
+
+                    if (TextUtils.equals(mapClick, MAPCLICK_WARNING) && isShowWarning) {
+                        addLocationWarnings();
+                    }
+
                 }
             }
-
-            if (isShowMinute) {
-                String addr = result.getRegeocodeAddress().getFormatAddress();
-                if (!TextUtils.isEmpty(addr)) {
-                    tvAddr.setText(addr);
-                }
+            @Override
+            public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
             }
-
-            if (isShowWarning) {
-                addLocationWarnings();
-            }
-
-        }
+        });
     }
 
     /**
@@ -5216,7 +5212,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (isShowMinute) {//选中分钟降水状态下
                 if (clickLatLng != null) {
                     addLocationMarker();
-                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude, MAPCLICK_MINUTE);
                     OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
                 }
             }
@@ -5224,7 +5220,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (isShowWarning) {//选中预警状态下
                 if (clickLatLng != null) {
                     addLocationMarker();
-                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude, MAPCLICK_WARNING);
                 }
             }
 
@@ -5364,6 +5360,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvCloudStr.setVisibility(View.GONE);
                 sbCloud.setVisibility(View.GONE);
                 removeCloudOverlay();
+                if (cloudThread != null) {
+                    cloudThread.pause();
+                    ivCloudPlay.setImageResource(R.drawable.shawn_icon_play);
+                }
             }
         }else if (i == R.id.ivCloudPlay) {
             if (cloudThread != null) {
@@ -5428,6 +5428,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvRadarStr.setVisibility(View.GONE);
                 sbRadar.setVisibility(View.GONE);
                 removeRadarOverlay();
+                if (radarThread != null) {
+                    radarThread.pause();
+                    ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
+                }
             }
         }else if (i == R.id.ivRadarPlay) {
             if (radarThread != null) {
@@ -5536,7 +5540,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvMinute.setTextColor(Color.WHITE);
                 if (clickLatLng != null) {
                     addLocationMarker();
-                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude);
+                    searchAddrByLatLng(clickLatLng.latitude, clickLatLng.longitude, MAPCLICK_MINUTE);
                     OkHttpMinute(clickLatLng.longitude, clickLatLng.latitude);
                 }
             } else {
