@@ -158,7 +158,7 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         list.add(RAIN1);
         list.add(RAIN3);
         list.add(RAIN6);
-        list.add(RAIN12);
+//        list.add(RAIN12);//暂时过滤掉12小时降水
         list.add(RAIN24);
         list.add(TEMP1);
         list.add(WINDJD1);
@@ -247,43 +247,43 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
             if (TextUtils.equals(columnName, RAIN1)) {//1小时降水
                 factTime = "广东省1小时降水实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
                 tvValue.setText("降水mm");
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js", startTime1, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
             }else if (TextUtils.equals(columnName, RAIN3)) {//3小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省3小时降水实况["+sdf1.format(sdf2.parse(startTime3))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js3", startTime3, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
             }else if (TextUtils.equals(columnName, RAIN6)) {//6小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省6小时降水实况["+sdf1.format(sdf2.parse(startTime6))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js6", startTime6, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
             }else if (TextUtils.equals(columnName, RAIN12)) {//12小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省12小时降水实况["+sdf1.format(sdf2.parse(startTime12))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js12", startTime12, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
             }else if (TextUtils.equals(columnName, RAIN24)) {//24小时降水
                 tvValue.setText("降水mm");
                 factTime = "广东省24小时降水实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s&statime=%s&endtime=%s", "js24", startTime24, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
             }else if (TextUtils.equals(columnName, TEMP1)) {//1小时温度
                 tvValue.setText("温度℃");
                 factTime = "广东省1小时温度实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd?statime=%s&endtime=%s", startTime1, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd");
             }else if (TextUtils.equals(columnName, WINDJD1)) {//1小时极大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省1小时极大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime1, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=jd");
             }else if (TextUtils.equals(columnName, WINDJD24)) {//24小时极大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省24小时极大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=jd", startTime24, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=jd");
             }else if (TextUtils.equals(columnName, WINDZD1)) {//1小时最大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省1小时最大风速实况["+sdf1.format(sdf2.parse(startTime1))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime1, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=zd");
             }else if (TextUtils.equals(columnName, WINDZD24)) {//24小时最大风
                 tvValue.setText("风速m/s");
                 factTime = "广东省24小时最大风速实况["+sdf1.format(sdf2.parse(startTime24))+"-"+sdf1.format(sdf2.parse(endTime))+"]";
-                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&statime=%s&endtime=%s&mold=zd", startTime24, endTime);
+                url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=zd");
             }
             tvFactTime.setText(factTime);
         } catch (ParseException e) {
@@ -331,9 +331,29 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                     if (!itemObj.isNull("Lon")) {
                                                         dto.lng = itemObj.getDouble("Lon");
                                                     }
-                                                    if (!itemObj.isNull("JS")) {
-                                                        dto.rain = itemObj.getDouble("JS");
+
+                                                    if (TextUtils.equals(columnName, RAIN1)) {//1小时降水
+                                                        if (!itemObj.isNull("JS")) {
+                                                            dto.rain = itemObj.getDouble("JS");
+                                                        }
+                                                    }else if (TextUtils.equals(columnName, RAIN3)) {//3小时降水
+                                                        if (!itemObj.isNull("JS3")) {
+                                                            dto.rain = itemObj.getDouble("JS3");
+                                                        }
+                                                    }else if (TextUtils.equals(columnName, RAIN6)) {//6小时降水
+                                                        if (!itemObj.isNull("JS6")) {
+                                                            dto.rain = itemObj.getDouble("JS6");
+                                                        }
+                                                    }else if (TextUtils.equals(columnName, RAIN12)) {//12小时降水
+                                                        if (!itemObj.isNull("JS12")) {
+                                                            dto.rain = itemObj.getDouble("JS12");
+                                                        }
+                                                    }else if (TextUtils.equals(columnName, RAIN24)) {//24小时降水
+                                                        if (!itemObj.isNull("JS24")) {
+                                                            dto.rain = itemObj.getDouble("JS24");
+                                                        }
                                                     }
+
                                                     if (!itemObj.isNull("DPT")) {
                                                         dto.temp = itemObj.getDouble("DPT");
                                                     }
