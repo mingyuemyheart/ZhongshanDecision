@@ -3248,6 +3248,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             options.position(new LatLng(dto.lat, dto.lng));
             options.icon(BitmapDescriptorFactory.fromView(drawFactMarkerBitmap(dto, imgUrl)));
             Marker marker = aMap.addMarker(options);
+            marker.setVisible(isShowFactPoint);
             factMarkers.add(marker);
         }
     }
