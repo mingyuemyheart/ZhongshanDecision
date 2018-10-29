@@ -4,12 +4,9 @@ import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 
 import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.util.WeatherUtil;
-
-import java.util.GregorianCalendar;
 
 public class TyphoonDto implements Parcelable {
 
@@ -72,19 +69,19 @@ public class TyphoonDto implements Parcelable {
 	public int icon() {
 		int power = TextUtils.isEmpty(type) ? -1: Integer.parseInt(type);
 		if(power == 1){
-			return R.drawable.typhoon_level1;
+			return R.drawable.shawn_typhoon_level1;
 		}else if(power == 2){
-			return R.drawable.typhoon_level2;
+			return R.drawable.shawn_typhoon_level2;
 		}else if(power == 3){
-			return R.drawable.typhoon_level3;
+			return R.drawable.shawn_typhoon_level3;
 		}else if(power == 4){
-			return R.drawable.typhoon_level4;
+			return R.drawable.shawn_typhoon_level4;
 		}else if(power == 5){
-			return R.drawable.typhoon_level5;
+			return R.drawable.shawn_typhoon_level5;
 		}else if(power == 6){
-			return R.drawable.typhoon_level6;
+			return R.drawable.shawn_typhoon_level6;
 		}
-		return R.drawable.typhoon_yb;
+		return R.drawable.shawn_typhoon_yb;
 	}
 
 	@Override

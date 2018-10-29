@@ -28,7 +28,7 @@
             android:id="@+id/ivBack"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/shawn_icon_back"/>
+            android:src="@drawable/shawn_icon_arrow_left"/>
 
         <TextView
             android:id="@+id/tvBack"
@@ -36,7 +36,7 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:text="返回"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:textSize="@dimen/level_4"/>
     </LinearLayout>
 
