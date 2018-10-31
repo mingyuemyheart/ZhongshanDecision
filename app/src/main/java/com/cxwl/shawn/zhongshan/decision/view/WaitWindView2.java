@@ -31,10 +31,11 @@ import java.util.List;
 
 public class WaitWindView2 extends View {
 
+	private Context mContext;
 	private Paint paint;
 	private int width = 0, height = 0;//手机屏幕宽高
 	private List<WindDto> particles = new ArrayList<>();//存放随机点的list
-	private int time = 60;//ms,刷新画布时间
+	private int time = 100;//ms,刷新画布时间
 	private int maxLife = 100;//长度，粒子的最大生命周期
 	private Bitmap bitmap;//每一帧图像承载对象
 	private Canvas tempCanvas;
@@ -50,21 +51,24 @@ public class WaitWindView2 extends View {
 
 	public WaitWindView2(Context context) {
 		super(context);
+		mContext = context;
 	}
 
 	public WaitWindView2(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mContext = context;
 	}
 
 	public WaitWindView2(Context context, AttributeSet attrs, int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
+		mContext = context;
 	}
 
 	public void init(ShawnMainActivity activity) {
 		this.activity = activity;
 
 		DisplayMetrics dm = new DisplayMetrics();
-		activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+		activity.getWindowManager().getDefaultDisplay().getRealMetrics(dm);
 		width = dm.widthPixels;
 		height = dm.heightPixels;
 
@@ -72,40 +76,26 @@ public class WaitWindView2 extends View {
 		paint.setColor(Color.WHITE);
 		paint.setAntiAlias(true);
 		paint.setStrokeWidth(4f);
+		paint.setStrokeCap(Paint.Cap.ROUND);
 
-		float totalMemory = getTotalMemorySize()/1024/1024;//手机内存大小(G)
-		if (totalMemory <= 3.0) {//内存小于等于2G
+		float curFreq = Float.parseFloat(getMaxCpuFreq());
+		if (curFreq <= 1000000) {
+			partileCount = 400;//绘制粒子个数
+			frameCount = 10;//帧数
+			speedRate = 1.8f;//离子运动速度系数
+		}else if (curFreq <= 1200000) {
 			partileCount = 600;//绘制粒子个数
 			frameCount = 10;//帧数
-			speedRate = 1.0f;//离子运动速度系数
-		}else if (totalMemory > 3.0 && totalMemory <= 4.0) {//内存小于等于3G
-			partileCount = 800;//绘制粒子个数
-			frameCount = 10;//帧数
-			speedRate = 1.0f;//离子运动速度系数
-		}else if (totalMemory > 4.0) {//内存大于3G
+			speedRate = 1.5f;//离子运动速度系数
+		}else if (curFreq <= 1500000) {
 			partileCount = 1000;//绘制粒子个数
+			frameCount = 10;//帧数
+			speedRate = 1.2f;//离子运动速度系数
+		}else {
+			partileCount = 1500;//绘制粒子个数
 			frameCount = 10;//帧数
 			speedRate = 1.0f;//离子运动速度系数
 		}
-
-//		float curFreq = Float.parseFloat(getMaxCpuFreq());
-//		if (curFreq <= 1000000) {
-//			partileCount = 400;//绘制粒子个数
-//			frameCount = 6;//帧数
-//			speedRate = 1.8f;//离子运动速度系数
-//		}else if (curFreq > 1000000 && curFreq <= 1200000) {
-//			partileCount = 600;//绘制粒子个数
-//			frameCount = 8;//帧数
-//			speedRate = 1.5f;//离子运动速度系数
-//		}else if (curFreq > 1200000 && curFreq <= 1500000) {
-//			partileCount = 1000;//绘制粒子个数
-//			frameCount = 8;//帧数
-//			speedRate = 1.2f;//离子运动速度系数
-//		}else if (curFreq > 1500000) {
-//			partileCount = 1500;//绘制粒子个数
-//			frameCount = 10;//帧数
-//			speedRate = 1.0f;//离子运动速度系数
-//		}
 
 		getParticleInfo();
 	}
@@ -122,60 +112,6 @@ public class WaitWindView2 extends View {
 
 	public void start() {
 		startThread();
-	}
-
-	/**
-	 * 判断是否为华为P9
-	 * @return
-	 */
-	private boolean isHuaWeiP9() {
-		String brand = android.os.Build.BRAND; //手机品牌
-		String model = android.os.Build.MODEL; // 手机型号
-		if (TextUtils.equals("HUAWEI", brand) && TextUtils.equals("VIE-AL10", model)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * 获取系统总内存
-	 *
-	 * @return 总内存大单位为kB。
-	 */
-	public static float getTotalMemorySize() {
-		String dir = "/proc/meminfo";
-		try {
-			FileReader fr = new FileReader(dir);
-			BufferedReader br = new BufferedReader(fr, 2048);
-			String memoryLine = br.readLine();
-			String subMemoryLine = memoryLine.substring(memoryLine.indexOf("MemTotal:"));
-			br.close();
-			return Float.parseFloat(subMemoryLine.replaceAll("\\D+", ""));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return 0;
-	}
-
-	/**
-	 * 实时获取CPU当前频率（单位KHZ）
-	 * @return
-	 */
-	public static float getCurCpuFreq() {
-		float result = 0;
-		try {
-			FileReader fr = new FileReader("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq");
-			BufferedReader br = new BufferedReader(fr);
-			String text = br.readLine();
-			if (!TextUtils.isEmpty(text)) {
-				result = Float.valueOf(text.trim());
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return result;
 	}
 
 	// 获取CPU最大频率（单位KHZ）
@@ -270,14 +206,14 @@ public class WaitWindView2 extends View {
 				try {
 					calculatePoints();
 					Thread.sleep(time);
+					postInvalidate();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-				postInvalidate();
 			}
 		}
 
-		public void cancel() {
+		private void cancel() {
 			this.state = STATE_CANCEL;
 		}
 	}
@@ -292,7 +228,7 @@ public class WaitWindView2 extends View {
 			}
 			tempCanvas = new Canvas(bitmap);
 
-			ImageView image = new ImageView(getContext());
+			ImageView image = new ImageView(mContext);
 			image.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 			image.setImageBitmap(bitmap);
 			activity.windContainer2.addView(image);
@@ -322,8 +258,8 @@ public class WaitWindView2 extends View {
 				float x = (float)(Math.random()*width);
 				float y = (float)(Math.random()*height);
 				double longDetla = windData.latLngEnd.longitude - windData.latLngStart.longitude;
-				if (Math.abs(windData.latLngEnd.longitude - windData.latLngStart.longitude) > 180) {
-					longDetla = (windData.latLngEnd.longitude - (-180)) + (180 - windData.latLngStart.longitude);
+				if (Math.abs(longDetla) > 180) {
+					longDetla = (windData.latLngEnd.longitude + 360 - windData.latLngStart.longitude);
 				}
 				double lng = (longDetla)/width*x+windData.latLngStart.longitude;
 				if (lng > 180) {
@@ -354,8 +290,8 @@ public class WaitWindView2 extends View {
 				float x = dto.x + dto.vx;
 				float y = dto.y - dto.vy;
 				double longDetla = windData.latLngEnd.longitude - windData.latLngStart.longitude;
-				if (Math.abs(windData.latLngEnd.longitude - windData.latLngStart.longitude) > 180) {
-					longDetla = (windData.latLngEnd.longitude - (-180)) + (180 - windData.latLngStart.longitude);
+				if (Math.abs(longDetla) > 180) {
+					longDetla = (windData.latLngEnd.longitude + 360 - windData.latLngStart.longitude);
 				}
 				double lng = (longDetla)/width*x+windData.latLngStart.longitude;
 				if (lng > 180) {

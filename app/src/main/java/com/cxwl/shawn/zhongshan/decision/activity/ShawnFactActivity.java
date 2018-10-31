@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
@@ -67,11 +68,7 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
     private FactAdapter mAdapter;
     private List<FactDto> dataList = new ArrayList<>();
     private AVLoadingIndicatorView loadingView;
-    private String levleStations = "59657,59668,59755,59759,59307,59490,59494,59503,59511,59325,59504,59512,59513,59667,59669,59674,59751,59479,59682,59683" +
-            ",59487,59090,59094,59099,59279,59284,59285,59288,59290,59297,59310,59312,59313,59314,59315,59318,59319,59469,59470,59471" +
-            ",59473,59475,59476,59477,59480,59481,57988,57989,59071,59074,59075,59081,59106,59109,59114,5926459268,59269,59270,59276" +
-            ",59650,59492,59500,59502,59653,59654,59655,59656,59659,59750";
-    private String userAuthority;//用户权限，3为专业用户，其它为普通用户
+    private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -441,65 +438,11 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
 
-                                                    if (TextUtils.equals(cityName, "全省")) {
-                                                        if (columnName.endsWith("降水")) {
-                                                            if (dto.rain > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }else if (columnName.endsWith("大风")) {
-                                                            if (dto.windS > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (TextUtils.equals(userAuthority, "3")) {
-                                                                dataList.add(dto);
-                                                            }else {
-                                                                if (levleStations.contains(dto.stationId)) {
-                                                                    dataList.add(dto);
-                                                                }
-                                                            }
-                                                        }
-                                                    }else if (TextUtils.equals(cityName, dto.city)) {
-                                                        if (columnName.endsWith("降水")) {
-                                                            if (dto.rain > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }else if (columnName.endsWith("大风")) {
-                                                            if (dto.windS > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (TextUtils.equals(userAuthority, "3")) {
-                                                                dataList.add(dto);
-                                                            }else {
-                                                                if (levleStations.contains(dto.stationId)) {
-                                                                    dataList.add(dto);
-                                                                }
-                                                            }
+                                                    if (TextUtils.equals(userAuthority, "3")) {//专业用户
+                                                        dataList.add(dto);
+                                                    }else {
+                                                        if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                            dataList.add(dto);
                                                         }
                                                     }
 
@@ -601,71 +544,18 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
 
-                                                    if (TextUtils.equals(cityName, "全省")) {
-                                                        if (columnName.endsWith("降水")) {
-                                                            if (dto.rain > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }else if (columnName.endsWith("大风")) {
-                                                            if (dto.windS > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (TextUtils.equals(userAuthority, "3")) {
-                                                                dataList.add(dto);
-                                                            }else {
-                                                                if (levleStations.contains(dto.stationId)) {
-                                                                    dataList.add(dto);
-                                                                }
-                                                            }
-                                                        }
-                                                    }else if (TextUtils.equals(cityName, dto.city)) {
-                                                        if (columnName.endsWith("降水")) {
-                                                            if (dto.rain > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        }else if (columnName.endsWith("大风")) {
-                                                            if (dto.windS > 0) {
-                                                                if (TextUtils.equals(userAuthority, "3")) {
-                                                                    dataList.add(dto);
-                                                                }else {
-                                                                    if (levleStations.contains(dto.stationId)) {
-                                                                        dataList.add(dto);
-                                                                    }
-                                                                }
-                                                            }
-                                                        } else {
-                                                            if (TextUtils.equals(userAuthority, "3")) {
-                                                                dataList.add(dto);
-                                                            }else {
-                                                                if (levleStations.contains(dto.stationId)) {
-                                                                    dataList.add(dto);
-                                                                }
-                                                            }
+                                                    if (TextUtils.equals(userAuthority, "3")) {//专业用户
+                                                        dataList.add(dto);
+                                                    }else {
+                                                        if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                            dataList.add(dto);
                                                         }
                                                     }
 
                                                 }
                                             }
 
+                                            Log.e("size", dataList.size()+"");
                                             rankData();
                                             loadingView.setVisibility(View.GONE);
 

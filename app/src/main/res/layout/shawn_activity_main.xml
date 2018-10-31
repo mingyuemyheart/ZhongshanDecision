@@ -54,7 +54,6 @@
         android:id="@+id/tvFactTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
         android:layout_centerHorizontal="true"
         android:textColor="@color/colorPrimary"
         android:textSize="@dimen/level_5"/>
