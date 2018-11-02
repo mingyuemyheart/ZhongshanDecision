@@ -19,7 +19,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.adapter.FactAdapter;
@@ -27,6 +26,8 @@ import com.cxwl.shawn.zhongshan.decision.adapter.FactCityAdapter;
 import com.cxwl.shawn.zhongshan.decision.dto.FactDto;
 import com.cxwl.shawn.zhongshan.decision.util.OkHttpUtil;
 import com.wang.avi.AVLoadingIndicatorView;
+
+import net.sourceforge.pinyin4j.PinyinHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -54,8 +54,8 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
 
     private Context mContext;
     private TextView tvSwitch,tvFactTime,tvValue;
-    private LinearLayout llGridView,llContainer,llContainer1;
-    private ImageView ivSwitch,ivValue;
+    private LinearLayout llTitle,llGridView,llContainer,llContainer1;
+    private ImageView ivSwitch,ivValue,ivCity;
     private boolean isDesc = true;//是否为降序
     private String RAIN1 = "1h降水",RAIN3 = "3h降水",RAIN6 = "6h降水",RAIN12 = "12h降水",RAIN24 = "24h降水",
             TEMP1 = "1h温度",WINDJD1 = "1h极大风",WINDJD24 = "24h极大风",WINDZD1 = "1h最大风",WINDZD24 = "24h最大风";
@@ -98,6 +98,10 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         tvSwitch = findViewById(R.id.tvSwitch);
         ivSwitch = findViewById(R.id.ivSwitch);
         llGridView = findViewById(R.id.llGridView);
+        LinearLayout llCity = findViewById(R.id.llCity);
+        llCity.setOnClickListener(this);
+        ivCity = findViewById(R.id.ivCity);
+        llTitle = findViewById(R.id.llTitle);
 
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
@@ -438,11 +442,21 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
 
-                                                    if (TextUtils.equals(userAuthority, "3")) {//专业用户
-                                                        dataList.add(dto);
-                                                    }else {
-                                                        if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                    if (TextUtils.equals(cityName, "全省")) {
+                                                        if (TextUtils.equals(userAuthority, "3")) {//专业用户
                                                             dataList.add(dto);
+                                                        }else {
+                                                            if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                                dataList.add(dto);
+                                                            }
+                                                        }
+                                                    }else if (TextUtils.equals(cityName, dto.city)) {
+                                                        if (TextUtils.equals(userAuthority, "3")) {//专业用户
+                                                            dataList.add(dto);
+                                                        }else {
+                                                            if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                                dataList.add(dto);
+                                                            }
                                                         }
                                                     }
 
@@ -544,11 +558,21 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                                         dto.pro = itemObj.getString("Prcode");
                                                     }
 
-                                                    if (TextUtils.equals(userAuthority, "3")) {//专业用户
-                                                        dataList.add(dto);
-                                                    }else {
-                                                        if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                    if (TextUtils.equals(cityName, "全省")) {
+                                                        if (TextUtils.equals(userAuthority, "3")) {//专业用户
                                                             dataList.add(dto);
+                                                        }else {
+                                                            if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                                dataList.add(dto);
+                                                            }
+                                                        }
+                                                    }else if (TextUtils.equals(cityName, dto.city)) {
+                                                        if (TextUtils.equals(userAuthority, "3")) {//专业用户
+                                                            dataList.add(dto);
+                                                        }else {
+                                                            if (dto.stationId.startsWith("59")) {//普通用户只能看国家站
+                                                                dataList.add(dto);
+                                                            }
                                                         }
                                                     }
 
@@ -556,8 +580,9 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                                             }
 
                                             Log.e("size", dataList.size()+"");
-                                            rankData();
+                                            rankValueData();
                                             loadingView.setVisibility(View.GONE);
+                                            llTitle.setVisibility(View.VISIBLE);
 
                                         }
                                     } catch (JSONException e) {
@@ -618,9 +643,9 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
     }
 
     /**
-     * 排序
+     * 数值排序
      */
-    private void rankData() {
+    private void rankValueData() {
         if (isDesc) {
             ivValue.setImageResource(R.drawable.shawn_icon_sequnce_down);
             Collections.sort(dataList, new Comparator<FactDto>() {
@@ -707,6 +732,63 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
         }
     }
 
+    /**
+     * 名称排序
+     */
+    private void rankNameData() {
+        if (isDesc) {
+            ivCity.setImageResource(R.drawable.shawn_icon_sequnce_down);
+            Collections.sort(dataList, new Comparator<FactDto>() {
+                @Override
+                public int compare(FactDto arg0, FactDto arg1) {
+                    if (TextUtils.isEmpty(arg0.city) || TextUtils.isEmpty(arg1.city)) {
+                        return 0;
+                    }else {
+                        return getPinYinHeadChar(arg0.city).compareTo(getPinYinHeadChar(arg1.city));
+                    }
+                }
+            });
+        }else {
+            ivCity.setImageResource(R.drawable.shawn_icon_sequnce_up);
+            Collections.sort(dataList, new Comparator<FactDto>() {
+                @Override
+                public int compare(FactDto arg0, FactDto arg1) {
+                    if (TextUtils.isEmpty(arg0.city) || TextUtils.isEmpty(arg1.city)) {
+                        return -1;
+                    }else {
+                        return getPinYinHeadChar(arg1.city).compareTo(getPinYinHeadChar(arg0.city));
+                    }
+                }
+            });
+        }
+        if (mAdapter != null) {
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 返回中文的首字母
+      * @param str
+     * @return
+     */
+    public static String getPinYinHeadChar(String str) {
+        String convert = "";
+        int size = str.length();
+        if (size >= 2) {
+            size = 2;
+        }
+        for (int j = 0; j < size; j++) {
+            char word = str.charAt(j);
+            String[] pinyinArray = PinyinHelper.toHanyuPinyinStringArray(word);
+            if (pinyinArray != null) {
+                convert += pinyinArray[0].charAt(0);
+            } else {
+                convert += word;
+            }
+        }
+        return convert;
+    }
+
     @Override
     public void onClick(View v) {
         int id = v.getId();
@@ -719,8 +801,15 @@ public class ShawnFactActivity extends ShawnBaseActivity implements View.OnClick
                 closeList();
             }
         }else if (id == R.id.llValue) {
+            ivValue.setVisibility(View.VISIBLE);
+            ivCity.setVisibility(View.GONE);
             isDesc = !isDesc;
-            rankData();
+            rankValueData();
+        }else if (id == R.id.llCity) {
+            ivValue.setVisibility(View.GONE);
+            ivCity.setVisibility(View.VISIBLE);
+            isDesc = !isDesc;
+            rankNameData();
         }
     }
 

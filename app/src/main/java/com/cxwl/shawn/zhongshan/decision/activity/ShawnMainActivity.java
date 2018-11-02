@@ -176,6 +176,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private SimpleDateFormat sdf8 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.0", Locale.CHINA);
     private SimpleDateFormat sdf9 = new SimpleDateFormat("HH:mm", Locale.CHINA);
     private SimpleDateFormat sdf10 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA);
+    private SimpleDateFormat sdf11 = new SimpleDateFormat("yyyyMMddHHmm", Locale.CHINA);
     private String TYPE_TYPHOON = "type_typhoon", TYPE_FACT = "type_fact", TYPE_WARNING= "type_warning", TYPE_FORE = "type_fore";
     private int width, height;
     private String MAPCLICK_TYPHOON = "mapclick_typhoon", MAPCLICK_WARNING = "mapclick_warning", MAPCLICK_MINUTE = "mapclick_minute";//区分点击地图时，是哪个要素点击
@@ -205,6 +206,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Map<String, Marker> rangeMarkersMap = new LinkedHashMap<>();//测距中点距离marker
     private Map<String, TyphoonDto> lastFactPointMap = new LinkedHashMap<>();//最后一个实况点数据集合
 
+    private Text text7, text10;
     private List<Polygon> windCirclePolygons = new ArrayList<>();//风圈
     private boolean isShowInfoWindow = true;//是否显示气泡
     private boolean isShowTime = false;//是否显示台风实况、预报时间
@@ -1737,6 +1739,12 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 清除七级、十级风圈
      */
     private void removeWindCircle() {
+        if (text7 != null) {
+            text7.remove();
+        }
+        if (text10 != null) {
+            text10.remove();
+        }
         for (Polygon polygon : windCirclePolygons) {
             polygon.remove();
         }
@@ -2292,8 +2300,19 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (wind7Points.size() > 0) {
                 PolygonOptions polygonOptions = new PolygonOptions();
                 polygonOptions.strokeWidth(3).strokeColor(Color.YELLOW).fillColor(0x20FFFF00);
-                for (LatLng latLng : wind7Points) {
+                for (int i = 0; i < wind7Points.size(); i++) {
+                    LatLng latLng = wind7Points.get(i);
                     polygonOptions.add(latLng);
+
+                    if (i == 0) {
+                        TextOptions textOptions = new TextOptions();
+                        textOptions.backgroundColor(0x30000000);
+                        textOptions.text("七级风圈");
+                        textOptions.fontColor(Color.YELLOW);
+                        textOptions.fontSize(30);
+                        textOptions.position(latLng);
+                        text7 = aMap.addText(textOptions);
+                    }
                 }
                 Polygon polygon = aMap.addPolygon(polygonOptions);
                 windCirclePolygons.add(polygon);
@@ -2311,8 +2330,19 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (wind10Points.size() > 0) {
                 PolygonOptions polygonOptions = new PolygonOptions();
                 polygonOptions.strokeWidth(3).strokeColor(Color.RED).fillColor(0x20FF0000);
-                for (LatLng latLng : wind10Points) {
+                for (int i = 0; i < wind10Points.size(); i++) {
+                    LatLng latLng = wind10Points.get(i);
                     polygonOptions.add(latLng);
+
+                    if (i == 0) {
+                        TextOptions textOptions = new TextOptions();
+                        textOptions.backgroundColor(0x30000000);
+                        textOptions.text("10级风圈");
+                        textOptions.fontColor(Color.RED);
+                        textOptions.fontSize(30);
+                        textOptions.position(latLng);
+                        text10 = aMap.addText(textOptions);
+                    }
                 }
                 Polygon polygon = aMap.addPolygon(polygonOptions);
                 windCirclePolygons.add(polygon);
@@ -2787,7 +2817,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             String temp = titles[3]+"~"+titles[7]+"℃";
             String windDir = getString(WeatherUtil.getWindDirection(Integer.valueOf(titles[4])));
             String windForce = WeatherUtil.getFactWindForce(Integer.valueOf(titles[5]));
-                    tvInfo.setText(phe+"\n"+temp+"\n"+windDir+windForce);
+            try {
+                tvInfo.setText(phe+"，"+temp+"，"+windDir+windForce+"\n"+sdf6.format(sdf11.parse(titles[11]))+"发布");
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }else if (TextUtils.equals(marker.getSnippet(), TYPE_FACT)) {//实况
             view = inflater.inflate(R.layout.shawn_fact_marker_info, null);
             TextView tvName = view.findViewById(R.id.tvName);
@@ -4226,7 +4260,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                         if (!object.isNull("data")) {
                                             warningList.clear();
                                             JSONArray jsonArray = object.getJSONArray("data");
-                                            for (int i = jsonArray.length()-1; i >= 0; i--) {
+                                            for (int i = 0; i < jsonArray.length(); i++) {
                                                 JSONArray tempArray = jsonArray.getJSONArray(i);
                                                 WarningDto dto = new WarningDto();
                                                 dto.html = tempArray.optString(1);
@@ -4248,6 +4282,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                     warningList.add(dto);
                                                 }
                                             }
+
+                                            Collections.sort(warningList, new Comparator<WarningDto>() {//按照预警等级排序，保证同一个区域绘制在最上层的是最高等级预警
+                                                @Override
+                                                public int compare(WarningDto arg0, WarningDto arg1) {
+                                                    return Double.valueOf(arg0.time).compareTo(Double.valueOf(arg1.time));
+                                                }
+                                            });
 
                                             addLocationWarnings();
 
@@ -4517,14 +4558,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         aMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
                     }
 
-                    List<WarningDto> list = new ArrayList<>(warningList);
-                    Collections.sort(list, new Comparator<WarningDto>() {//按照预警等级排序，保证同一个区域绘制在最上层的是最高等级预警
-                        @Override
-                        public int compare(WarningDto arg0, WarningDto arg1) {
-                            return Integer.valueOf(arg0.color).compareTo(Integer.valueOf(arg1.color));
-                        }
-                    });
-                    for (WarningDto dto : list) {
+//                    List<WarningDto> list = new ArrayList<>(warningList);
+//                    Collections.sort(list, new Comparator<WarningDto>() {//按照预警等级排序，保证同一个区域绘制在最上层的是最高等级预警
+//                        @Override
+//                        public int compare(WarningDto arg0, WarningDto arg1) {
+//                            return Integer.valueOf(arg0.color).compareTo(Integer.valueOf(arg1.color));
+//                        }
+//                    });
+                    for (WarningDto dto : warningList) {
                         if (!warningPolaygonsMap.containsKey(dto.html)) {
                             int color = 0;
                             if (TextUtils.equals(dto.color, "01")) {
@@ -4954,6 +4995,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                 //15天预报
                                 if (!obj.isNull("f")) {
                                     JSONObject f = obj.getJSONObject("f");
+                                    String f0 = f.getString("f0");
                                     JSONArray f1 = f.getJSONArray("f1");
                                     if (f1.length() > 0) {
                                         //预报内容
@@ -4973,7 +5015,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                                         MarkerOptions options = new MarkerOptions();
                                         options.title(dto.cityId+","+dto.cityName+","+dto.highPheCode+","+dto.highTemp+","+dto.highWindDir+","+dto.highWindForce
-                                                +","+dto.lowPheCode+","+dto.lowTemp+","+dto.lowWindDir+","+dto.lowWindForce+","+dto.level);
+                                                +","+dto.lowPheCode+","+dto.lowTemp+","+dto.lowWindDir+","+dto.lowWindForce+","+dto.level+","+f0);
                                         options.snippet(TYPE_FORE);
                                         options.anchor(0.5f, 1.0f);
                                         options.position(new LatLng(dto.lat, dto.lng));
