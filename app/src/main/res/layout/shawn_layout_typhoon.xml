@@ -5,6 +5,60 @@
                 android:orientation="vertical"
                 android:paddingBottom="10dp">
 
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/llLink"
+        android:layout_width="wrap_content"
+        android:layout_height="35dp"
+        android:layout_above="@+id/ivList"
+        android:layout_toStartOf="@+id/tvLink"
+        android:background="@drawable/shawn_bg_corner_normal"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp">
+
+        <TextView
+            android:id="@+id/tvLinkRadar"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center"
+            android:text="雷达拼图"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_5"/>
+
+        <TextView
+            android:id="@+id/tvLinkCloud"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:gravity="center"
+            android:text="卫星拼图"
+            android:textColor="@color/text_color3"
+            android:textSize="@dimen/level_5"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvLink"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_above="@+id/ivList"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="10dp"
+        android:layout_marginEnd="10dp"
+        android:text="联动"
+        android:textSize="@dimen/level_5"
+        android:gravity="center"
+        android:textColor="@color/text_color3"
+        android:background="@drawable/shawn_bg_typhoon_link"/>
+
     <ImageView
         android:id="@+id/ivList"
         android:layout_width="35dp"

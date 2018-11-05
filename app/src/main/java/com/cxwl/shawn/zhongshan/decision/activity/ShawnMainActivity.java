@@ -216,9 +216,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Circle circle100, circle300, circle500;//定位点对一个的区域圈
     private Text text100, text300, text500;//定位点对一个的区域圈文字
     private ImageView ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
-    private TextView tvCurrent,tvHistory,tvTyphoonYear;
+    private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLink,tvLinkRadar,tvLinkCloud;
     private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend;
     private String typhoonPointAddr = "";
+    private boolean isShowLink = false, isLinkRadar = false, isLinkCloud = false;//联动设置
+    private LinearLayout llLink;
 
     //更多
     private ImageView ivMore,ivMapType1,ivMapType2;
@@ -563,6 +565,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvTyphoonName = findViewById(R.id.tvTyphoonName);
         ivRange = findViewById(R.id.ivRange);
         ivRange.setOnClickListener(this);
+        tvLink = findViewById(R.id.tvLink);
+        tvLink.setOnClickListener(this);
+        tvLinkRadar = findViewById(R.id.tvLinkRadar);
+        tvLinkRadar.setOnClickListener(this);
+        tvLinkCloud = findViewById(R.id.tvLinkCloud);
+        tvLinkCloud.setOnClickListener(this);
+        llLink = findViewById(R.id.llLink);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvCurrent.setOnClickListener(this);
         tvHistory = findViewById(R.id.tvHistory);
@@ -2070,7 +2079,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             factLines.add(factLine);
         } else {//预报虚线
             double dis = Math.sqrt(Math.pow(firstLat-lastLat, 2)+ Math.pow(firstLng-lastLng, 2));
-            int numPoint = (int) Math.floor(dis/0.2);
+            int numPoint = (int) Math.floor(dis/0.1);
             double lng_per = (lastLng-firstLng)/numPoint;
             double lat_per = (lastLat-firstLat)/numPoint;
             for (int i = 0; i < numPoint; i++) {
@@ -2458,14 +2467,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * @param time
      */
     private void OkHttpPointCloudIMg(String time) {
-        if (TextUtils.isEmpty(time)) {
+        removeCloudOverlay();
+        if (!isLinkCloud || TextUtils.isEmpty(time)) {
             return;
         }
-        final String url = "http://scapi.weather.com.cn/weather/getyt?test=ncg&date="+time;
+        final String cloudUrl = String.format("http://scapi.weather.com.cn/weather/getyt?statdate=%s&enddate=%s&test=ncg", time, time);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
+                OkHttpUtil.enqueue(new Request.Builder().url(cloudUrl).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
                     }
@@ -2480,24 +2490,84 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                             public void run() {
                                 if (!TextUtils.isEmpty(result)) {
                                     try {
-                                        JSONObject obj = new JSONObject(result);
-                                        if (!obj.isNull("url")) {
-                                            String imgUrl = obj.getString("url");
-                                            if (!TextUtils.isEmpty(imgUrl)) {
-                                                Picasso.get().load(imgUrl).into(new Target() {
-                                                    @Override
-                                                    public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                        if (bitmap != null) {
-                                                            drawCloud(bitmap, 56.385845314127209,62.8820698883665,-10.787277369124666,161.69675114151386);
+                                        JSONArray array = new JSONArray(result);
+                                        if (array.length() > 0) {
+                                            JSONObject obj = array.getJSONObject(0);
+                                            if (!obj.isNull("url")) {
+                                                String imgUrl = obj.getString("url");
+                                                if (!TextUtils.isEmpty(imgUrl)) {
+                                                    Picasso.get().load(imgUrl).into(new Target() {
+                                                        @Override
+                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                            if (bitmap != null) {
+                                                                drawCloud(bitmap, 56.385845314127209,62.8820698883665,-10.787277369124666,161.69675114151386);
+                                                            }
                                                         }
-                                                    }
-                                                    @Override
-                                                    public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                                    }
-                                                    @Override
-                                                    public void onPrepareLoad(Drawable placeHolderDrawable) {
-                                                    }
-                                                });
+                                                        @Override
+                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                        }
+                                                        @Override
+                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }).start();
+
+        removeRadarOverlay();
+        if (!isLinkRadar || TextUtils.isEmpty(time)) {
+            return;
+        }
+        final String radarUrl = String.format("http://scapi.weather.com.cn/weather/ldt?statdate=%s&enddate=%s&test=ncg", time, time);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpUtil.enqueue(new Request.Builder().url(radarUrl).build(), new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                    }
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            return;
+                        }
+                        final String result = response.body().string();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!TextUtils.isEmpty(result)) {
+                                    try {
+                                        JSONArray array = new JSONArray(result);
+                                        if (array.length() > 0) {
+                                            JSONObject obj = array.getJSONObject(0);
+                                            if (!obj.isNull("url")) {
+                                                String imgUrl = obj.getString("url");
+                                                if (!TextUtils.isEmpty(imgUrl)) {
+                                                    Picasso.get().load(imgUrl).into(new Target() {
+                                                        @Override
+                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                            if (bitmap != null) {
+                                                                drawRadar(bitmap, 3.9079,71.9282,57.9079,134.8656);
+                                                            }
+                                                        }
+                                                        @Override
+                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                        }
+                                                        @Override
+                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                        }
+                                                    });
+                                                }
                                             }
                                         }
                                     } catch (JSONException e) {
@@ -2519,17 +2589,17 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (!TextUtils.isEmpty(markerType)) {
                 if (TextUtils.equals(markerType, TYPE_TYPHOON)) {//点击台风点
                     String[] titles = marker.getTitle().split(";");
-//                    if (!TextUtils.isEmpty(titles[1])) {
-//                        String[] title1 = titles[1].split("\\|");
-//                        if (!TextUtils.isEmpty(title1[2])) {
-//                            try {
-//                                String time = sdf2.format(sdf3.parse(title1[2]));
-//                                OkHttpPointCloudIMg(time);
-//                            } catch (ParseException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                    }
+                    if (!TextUtils.isEmpty(titles[1])) {
+                        String[] title1 = titles[1].split("\\|");
+                        if (!TextUtils.isEmpty(title1[2])) {
+                            try {
+                                String time = sdf2.format(sdf3.parse(title1[2]));
+                                OkHttpPointCloudIMg(time);
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
                     if (!TextUtils.isEmpty(titles[2])) {
                         String[] circles = titles[2].split("\\|");
                         drawWindCircle(circles[0], circles[1], marker.getPosition());
@@ -2865,10 +2935,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             return;
         }
         TranslateAnimation animation = new TranslateAnimation(
-                    Animation.RELATIVE_TO_SELF, 0,
-                    Animation.RELATIVE_TO_SELF, 0,
-                    Animation.RELATIVE_TO_SELF, 0,
-                    Animation.RELATIVE_TO_SELF, 1);
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 0,
+                Animation.RELATIVE_TO_SELF, 1);
 
         animation.setDuration(200);
         animation.setFillAfter(true);
@@ -4119,7 +4189,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     }
 
     private class RadarThread extends Thread {
-        
+
         static final int STATE_NONE = 0;
         static final int STATE_PLAYING = 1;
         static final int STATE_PAUSE = 2;
@@ -5727,6 +5797,37 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 ivLegend.setImageResource(R.drawable.shawn_icon_legend);
             }
 
+        } else if (i == R.id.tvLink) {
+            isShowLink = !isShowLink;
+            if (isShowLink) {
+                tvLink.setTextColor(Color.WHITE);
+                tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link_press);
+                llLink.setVisibility(View.VISIBLE);
+            }else {
+                tvLink.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link);
+                llLink.setVisibility(View.GONE);
+            }
+        } else if (i == R.id.tvLinkRadar) {
+            isLinkRadar = !isLinkRadar;
+            if (isLinkRadar) {
+                tvLinkRadar.setTextColor(Color.WHITE);
+                tvLinkRadar.setBackgroundResource(R.drawable.shawn_bg_warning_list);
+            }else {
+                tvLinkRadar.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkRadar.setBackgroundColor(Color.TRANSPARENT);
+                removeRadarOverlay();
+            }
+        } else if (i == R.id.tvLinkCloud) {
+            isLinkCloud = !isLinkCloud;
+            if (isLinkCloud) {
+                tvLinkCloud.setTextColor(Color.WHITE);
+                tvLinkCloud.setBackgroundResource(R.drawable.shawn_bg_warning_list);
+            }else {
+                tvLinkCloud.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkCloud.setBackgroundColor(Color.TRANSPARENT);
+                removeCloudOverlay();
+            }
         } else if (i == R.id.ivLocation) {
             clickAdcode = locationAdcode;
             clickLatLng = locationLatLng;
