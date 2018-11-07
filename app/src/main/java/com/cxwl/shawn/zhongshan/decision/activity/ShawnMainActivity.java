@@ -216,10 +216,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Circle circle100, circle300, circle500;//定位点对一个的区域圈
     private Text text100, text300, text500;//定位点对一个的区域圈文字
     private ImageView ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
-    private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLink,tvLinkRadar,tvLinkCloud;
+    private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLink,tvLinkRadar,tvLinkCloud,tvLinkRain,tvLinkWind;
     private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend;
     private String typhoonPointAddr = "";
-    private boolean isShowLink = false, isLinkRadar = false, isLinkCloud = false;//联动设置
+    private boolean isShowLink = false, isLinkRadar = false, isLinkCloud = false, isLinkRain = false, isLinkWind = false;//联动设置
     private LinearLayout llLink;
 
     //更多
@@ -571,6 +571,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvLinkRadar.setOnClickListener(this);
         tvLinkCloud = findViewById(R.id.tvLinkCloud);
         tvLinkCloud.setOnClickListener(this);
+        tvLinkRain = findViewById(R.id.tvLinkRain);
+        tvLinkRain.setOnClickListener(this);
+        tvLinkWind = findViewById(R.id.tvLinkWind);
+        tvLinkWind.setOnClickListener(this);
         llLink = findViewById(R.id.llLink);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvCurrent.setOnClickListener(this);
@@ -1987,15 +1991,20 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 //                    typhoonHandler.sendMessage(msg);
 //                }
 
+                final TyphoonDto firstPoint = allPoints.get(i);//第一个点
+
                 if (isAnimate) {
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(500);
+                        String time = sdf2.format(sdf3.parse(firstPoint.time));
+                        OkHttpPointImgs(time);
                     } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
                         e.printStackTrace();
                     }
                 }
 
-                final TyphoonDto firstPoint = allPoints.get(i);//第一个点
                 final TyphoonDto lastPoint = i >= (len-1) ? null : allPoints.get(i+1);//最后一个点
                 TyphoonDto lastFactPoint = null;//最后一个实况点
                 if (factPoints.size() > 0) {
@@ -2463,10 +2472,15 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     }
 
     /**
-     * 根据台风正点时间获取对应台风点云图
+     * 根据台风正点时间获取对应台风点云图、雷达图、实况图
      * @param time
      */
-    private void OkHttpPointCloudIMg(String time) {
+    private void OkHttpPointImgs(String time) {
+        if (TextUtils.isEmpty(time)) {
+            return;
+        }
+
+        //云图
         removeCloudOverlay();
         if (!isLinkCloud || TextUtils.isEmpty(time)) {
             return;
@@ -2524,6 +2538,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }).start();
 
+        //雷达图
         removeRadarOverlay();
         if (!isLinkRadar || TextUtils.isEmpty(time)) {
             return;
@@ -2580,6 +2595,88 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 });
             }
         }).start();
+
+        //实况图
+        removeFact();
+        if ((!isLinkRain && !isLinkWind) || TextUtils.isEmpty(time)) {
+            return;
+        }
+        final String factUrl = String.format("https://app.tianqi.cn/tile_map/getgdcimisslayer/%s", time);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                OkHttpUtil.enqueue(new Request.Builder().url(factUrl).build(), new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                    }
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        if (!response.isSuccessful()) {
+                            return;
+                        }
+                        final String result = response.body().string();
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (!TextUtils.isEmpty(result)) {
+                                    try {
+                                        JSONObject obj = new JSONObject(result);
+
+                                        //1h降水
+                                        if (isLinkRain) {
+                                            if (!obj.isNull("js_1h")) {
+                                                String js_1h = obj.getString("js_1h");
+                                                if (!TextUtils.isEmpty(js_1h)) {
+                                                    Picasso.get().load(js_1h).into(new Target() {
+                                                        @Override
+                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                            if (bitmap != null) {
+                                                                drawFactBitmap(bitmap, false);
+                                                            }
+                                                        }
+                                                        @Override
+                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                        }
+                                                        @Override
+                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+
+                                        //1h极大风
+                                        if (isLinkWind) {
+                                            if (!obj.isNull("gd_jd_wind_1h")) {
+                                                String js_1h = obj.getString("gd_jd_wind_1h");
+                                                if (!TextUtils.isEmpty(js_1h)) {
+                                                    Picasso.get().load(js_1h).into(new Target() {
+                                                        @Override
+                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                            if (bitmap != null) {
+                                                                drawFactBitmap(bitmap, false);
+                                                            }
+                                                        }
+                                                        @Override
+                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                        }
+                                                        @Override
+                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        }
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }).start();
     }
 
     @Override
@@ -2594,7 +2691,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         if (!TextUtils.isEmpty(title1[2])) {
                             try {
                                 String time = sdf2.format(sdf3.parse(title1[2]));
-                                OkHttpPointCloudIMg(time);
+                                OkHttpPointImgs(time);
                             } catch (ParseException e) {
                                 e.printStackTrace();
                             }
@@ -5827,6 +5924,32 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvLinkCloud.setTextColor(getResources().getColor(R.color.text_color3));
                 tvLinkCloud.setBackgroundColor(Color.TRANSPARENT);
                 removeCloudOverlay();
+            }
+        } else if (i == R.id.tvLinkRain) {
+            isLinkRain = !isLinkRain;
+            if (isLinkRain) {
+                tvLinkRain.setTextColor(Color.WHITE);
+                tvLinkRain.setBackgroundResource(R.drawable.shawn_bg_warning_list);
+                tvLinkWind.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkWind.setBackgroundColor(Color.TRANSPARENT);
+                isLinkWind = false;
+            }else {
+                tvLinkRain.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkRain.setBackgroundColor(Color.TRANSPARENT);
+                removeFact();
+            }
+        } else if (i == R.id.tvLinkWind) {
+            isLinkWind = !isLinkWind;
+            if (isLinkWind) {
+                tvLinkWind.setTextColor(Color.WHITE);
+                tvLinkWind.setBackgroundResource(R.drawable.shawn_bg_warning_list);
+                tvLinkRain.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkRain.setBackgroundColor(Color.TRANSPARENT);
+                isLinkRain = false;
+            }else {
+                tvLinkWind.setTextColor(getResources().getColor(R.color.text_color3));
+                tvLinkWind.setBackgroundColor(Color.TRANSPARENT);
+                removeFact();
             }
         } else if (i == R.id.ivLocation) {
             clickAdcode = locationAdcode;
