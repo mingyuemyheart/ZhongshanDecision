@@ -328,6 +328,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         this.savedInstanceState = savedInstanceState;
         setContentView(R.layout.shawn_activity_main);
         mContext = this;
+        if (Build.VERSION.SDK_INT >= 23) {
+            getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        }
         Sofia.with(this)
                 .invasionStatusBar()//设置顶部状态栏缩进
                 .statusBarBackground(Color.TRANSPARENT);//设置状态栏颜色
@@ -1219,7 +1222,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             return;
         }
         String selectYear = tvTyphoonYear.getText().toString().substring(0, tvTyphoonYear.getText().length()-1);
-        final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
+        final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
         new Thread(new Runnable() {
             @Override
             public void run() {
