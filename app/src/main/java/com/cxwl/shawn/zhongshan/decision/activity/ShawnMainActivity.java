@@ -217,10 +217,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Text text100, text300, text500;//定位点对一个的区域圈文字
     private ImageView ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
     private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLink,tvLinkRadar,tvLinkCloud,tvLinkRain,tvLinkWind;
-    private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend;
+    private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend,reLink;
     private String typhoonPointAddr = "";
     private boolean isShowLink = false, isLinkRadar = false, isLinkCloud = false, isLinkRain = false, isLinkWind = false;//联动设置
-    private LinearLayout llLink;
 
     //更多
     private ImageView ivMore,ivMapType1,ivMapType2;
@@ -578,7 +577,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvLinkRain.setOnClickListener(this);
         tvLinkWind = findViewById(R.id.tvLinkWind);
         tvLinkWind.setOnClickListener(this);
-        llLink = findViewById(R.id.llLink);
+        reLink = findViewById(R.id.reLink);
         tvCurrent = findViewById(R.id.tvCurrent);
         tvCurrent.setOnClickListener(this);
         tvHistory = findViewById(R.id.tvHistory);
@@ -5446,9 +5445,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(SecretUrlUtil.windGFS(windHeight)).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -5520,9 +5517,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 OkHttpUtil.enqueue(new Request.Builder().url(SecretUrlUtil.windT639(windHeight, "0")).build(), new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {
-
                     }
-
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
                         if (!response.isSuccessful()) {
@@ -5655,9 +5650,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         }
 
         int strokeColor = Color.WHITE;
-        if (AMapType == AMap.MAP_TYPE_SATELLITE) {
+        if (AMapType == AMap.MAP_TYPE_SATELLITE) {//卫星地图
             strokeColor = Color.WHITE;
-        }else if (AMapType == AMap.MAP_TYPE_NORMAL) {
+        }else if (AMapType == AMap.MAP_TYPE_NORMAL) {//普通地图
             strokeColor = 0x9000FF00;
 //            strokeColor = getResources().getColor(R.color.refresh_color2);
         }
@@ -5902,11 +5897,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (isShowLink) {
                 tvLink.setTextColor(Color.WHITE);
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link_press);
-                llLink.setVisibility(View.VISIBLE);
+                reLink.setVisibility(View.VISIBLE);
             }else {
                 tvLink.setTextColor(getResources().getColor(R.color.text_color3));
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link);
-                llLink.setVisibility(View.GONE);
+                reLink.setVisibility(View.GONE);
             }
         } else if (i == R.id.tvLinkRadar) {
             isLinkRadar = !isLinkRadar;
