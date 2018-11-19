@@ -161,7 +161,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private Bundle savedInstanceState;
     private LinearLayout llBack,llMenu,llTyphoon,llFact,llSatelite,llRadar,llWarning,llFore,llMinute,llWind,llValue;
     private ImageView ivBack,ivRefresh,ivMenu,ivTyphoon,ivFact,ivSatelite,ivRadar,ivWarning,ivFore,ivMinute,ivWind,ivValue;
-    private TextView tvBack,tvTyphoonName,tvTyphoon,tvFact,tvSatelite,tvRadar,tvWarning,tvFore,tvMinute,tvWind,tvValue;
+    private TextView tvBack,tvTyphoonName,tvLinkFactTime,tvTyphoon,tvFact,tvSatelite,tvRadar,tvWarning,tvFore,tvMinute,tvWind,tvValue;
     private AMapLocationClientOption mLocationOption;//声明mLocationOption对象
     private AMapLocationClient mLocationClient;//声明AMapLocationClient类对象
     private String locationAdcode = "442000", clickAdcode = "442000";//定位点对应行政区划
@@ -565,10 +565,22 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         //台风
         tvTyphoonName = findViewById(R.id.tvTyphoonName);
+        tvLinkFactTime = findViewById(R.id.tvLinkFactTime);
         ivRange = findViewById(R.id.ivRange);
         ivRange.setOnClickListener(this);
         tvLink = findViewById(R.id.tvLink);
         tvLink.setOnClickListener(this);
+        tvTyphoonName.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (tvLink.getVisibility() == View.VISIBLE) {
+                    tvLink.setVisibility(View.GONE);
+                }else {
+                    tvLink.setVisibility(View.VISIBLE);
+                }
+                return false;
+            }
+        });
         tvLinkRadar = findViewById(R.id.tvLinkRadar);
         tvLinkRadar.setOnClickListener(this);
         tvLinkCloud = findViewById(R.id.tvLinkCloud);
@@ -1307,6 +1319,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                                         if (startList.size() <= 0) {// 没有生效台风
                                             tvTyphoonName.setText(getString(R.string.no_typhoon));
+                                            tvLink.setVisibility(View.GONE);
+                                        }else {
+                                            tvLink.setVisibility(View.VISIBLE);
                                         }
 
                                         if (startAdapter != null) {
@@ -2484,201 +2499,220 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         //云图
         removeCloudOverlay();
-        if (!isLinkCloud || TextUtils.isEmpty(time)) {
-            return;
-        }
-        final String cloudUrl = String.format("http://scapi.weather.com.cn/weather/getyt?statdate=%s&enddate=%s&test=ncg", time, time);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OkHttpUtil.enqueue(new Request.Builder().url(cloudUrl).build(), new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                    }
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            return;
+        if (isLinkCloud) {
+            final String cloudUrl = String.format("http://scapi.weather.com.cn/weather/getyt?statdate=%s&enddate=%s&test=ncg", time, time);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    OkHttpUtil.enqueue(new Request.Builder().url(cloudUrl).build(), new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
                         }
-                        final String result = response.body().string();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!TextUtils.isEmpty(result)) {
-                                    try {
-                                        JSONArray array = new JSONArray(result);
-                                        if (array.length() > 0) {
-                                            JSONObject obj = array.getJSONObject(0);
-                                            if (!obj.isNull("url")) {
-                                                String imgUrl = obj.getString("url");
-                                                if (!TextUtils.isEmpty(imgUrl)) {
-                                                    Picasso.get().load(imgUrl).into(new Target() {
-                                                        @Override
-                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                            if (bitmap != null) {
-                                                                drawCloud(bitmap, 56.385845314127209,62.8820698883665,-10.787277369124666,161.69675114151386);
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (!response.isSuccessful()) {
+                                return;
+                            }
+                            final String result = response.body().string();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!TextUtils.isEmpty(result)) {
+                                        try {
+                                            JSONArray array = new JSONArray(result);
+                                            if (array.length() > 0) {
+                                                JSONObject obj = array.getJSONObject(0);
+                                                if (!obj.isNull("url")) {
+                                                    String imgUrl = obj.getString("url");
+                                                    if (!TextUtils.isEmpty(imgUrl)) {
+                                                        Picasso.get().load(imgUrl).into(new Target() {
+                                                            @Override
+                                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                                if (bitmap != null) {
+                                                                    drawCloud(bitmap, 56.385845314127209,62.8820698883665,-10.787277369124666,161.69675114151386);
+                                                                }
                                                             }
-                                                        }
-                                                        @Override
-                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                                        }
-                                                        @Override
-                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                                                        }
-                                                    });
+                                                            @Override
+                                                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                            }
+                                                            @Override
+                                                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                            }
+                                                        });
+                                                    }
                                                 }
                                             }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
                                         }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
                                     }
                                 }
-                            }
-                        });
-                    }
-                });
-            }
-        }).start();
+                            });
+                        }
+                    });
+                }
+            }).start();
+        }
 
         //雷达图
         removeRadarOverlay();
-        if (!isLinkRadar || TextUtils.isEmpty(time)) {
-            return;
-        }
-        final String radarUrl = String.format("http://scapi.weather.com.cn/weather/ldt?statdate=%s&enddate=%s&test=ncg", time, time);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OkHttpUtil.enqueue(new Request.Builder().url(radarUrl).build(), new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                    }
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            return;
+        if (isLinkRadar) {
+            final String radarUrl = String.format("http://scapi.weather.com.cn/weather/ldt?statdate=%s&enddate=%s&test=ncg", time, time);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    OkHttpUtil.enqueue(new Request.Builder().url(radarUrl).build(), new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
                         }
-                        final String result = response.body().string();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!TextUtils.isEmpty(result)) {
-                                    try {
-                                        JSONArray array = new JSONArray(result);
-                                        if (array.length() > 0) {
-                                            JSONObject obj = array.getJSONObject(0);
-                                            if (!obj.isNull("url")) {
-                                                String imgUrl = obj.getString("url");
-                                                if (!TextUtils.isEmpty(imgUrl)) {
-                                                    Picasso.get().load(imgUrl).into(new Target() {
-                                                        @Override
-                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                            if (bitmap != null) {
-                                                                drawRadar(bitmap, 3.9079,71.9282,57.9079,134.8656);
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (!response.isSuccessful()) {
+                                return;
+                            }
+                            final String result = response.body().string();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!TextUtils.isEmpty(result)) {
+                                        try {
+                                            JSONArray array = new JSONArray(result);
+                                            if (array.length() > 0) {
+                                                JSONObject obj = array.getJSONObject(0);
+                                                if (!obj.isNull("url")) {
+                                                    String imgUrl = obj.getString("url");
+                                                    if (!TextUtils.isEmpty(imgUrl)) {
+                                                        Picasso.get().load(imgUrl).into(new Target() {
+                                                            @Override
+                                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                                if (bitmap != null) {
+                                                                    drawRadar(bitmap, 3.9079,71.9282,57.9079,134.8656);
+                                                                }
                                                             }
-                                                        }
-                                                        @Override
-                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                                        }
-                                                        @Override
-                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                                                        }
-                                                    });
+                                                            @Override
+                                                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                            }
+                                                            @Override
+                                                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                            }
+                                                        });
+                                                    }
                                                 }
                                             }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
                                         }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
                                     }
                                 }
-                            }
-                        });
-                    }
-                });
-            }
-        }).start();
+                            });
+                        }
+                    });
+                }
+            }).start();
+        }
 
         //实况图
         removeFact();
-        if ((!isLinkRain && !isLinkWind) || TextUtils.isEmpty(time)) {
-            return;
-        }
-        final String factUrl = String.format("https://app.tianqi.cn/tile_map/getgdcimisslayer/%s", time);
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                OkHttpUtil.enqueue(new Request.Builder().url(factUrl).build(), new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                    }
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-                        if (!response.isSuccessful()) {
-                            return;
+        if (isLinkRain || isLinkWind) {
+            final String factUrl = String.format("https://app.tianqi.cn/tile_map/getgdcimisslayer/%s", time);
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    OkHttpUtil.enqueue(new Request.Builder().url(factUrl).build(), new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
                         }
-                        final String result = response.body().string();
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (!TextUtils.isEmpty(result)) {
-                                    try {
-                                        JSONObject obj = new JSONObject(result);
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (!response.isSuccessful()) {
+                                return;
+                            }
+                            final String result = response.body().string();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (!TextUtils.isEmpty(result)) {
+                                        try {
+                                            JSONObject obj = new JSONObject(result);
 
-                                        //1h降水
-                                        if (isLinkRain) {
-                                            if (!obj.isNull("js_1h")) {
-                                                String js_1h = obj.getString("js_1h");
-                                                if (!TextUtils.isEmpty(js_1h)) {
-                                                    Picasso.get().load(js_1h).into(new Target() {
-                                                        @Override
-                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                            if (bitmap != null) {
-                                                                drawFactBitmap(bitmap, false);
+                                            //1h降水
+                                            if (isLinkRain) {
+                                                if (!obj.isNull("js_1h")) {
+                                                    String js_1h = obj.getString("js_1h");
+                                                    if (!TextUtils.isEmpty(js_1h)) {
+                                                        Picasso.get().load(js_1h).into(new Target() {
+                                                            @Override
+                                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                                if (bitmap != null) {
+                                                                    drawFactBitmap(bitmap, false);
+                                                                }
                                                             }
-                                                        }
-                                                        @Override
-                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                                        }
-                                                        @Override
-                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                                                        }
-                                                    });
+                                                            @Override
+                                                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                            }
+                                                            @Override
+                                                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                            }
+                                                        });
+                                                    }
                                                 }
                                             }
-                                        }
 
-                                        //1h极大风
-                                        if (isLinkWind) {
-                                            if (!obj.isNull("gd_jd_wind_1h")) {
-                                                String js_1h = obj.getString("gd_jd_wind_1h");
-                                                if (!TextUtils.isEmpty(js_1h)) {
-                                                    Picasso.get().load(js_1h).into(new Target() {
-                                                        @Override
-                                                        public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
-                                                            if (bitmap != null) {
-                                                                drawFactBitmap(bitmap, false);
+                                            //1h极大风
+                                            if (isLinkWind) {
+                                                if (!obj.isNull("gd_jd_wind_1h")) {
+                                                    String js_1h = obj.getString("gd_jd_wind_1h");
+                                                    if (!TextUtils.isEmpty(js_1h)) {
+                                                        Picasso.get().load(js_1h).into(new Target() {
+                                                            @Override
+                                                            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                                                                if (bitmap != null) {
+                                                                    drawFactBitmap(bitmap, false);
+                                                                }
                                                             }
-                                                        }
-                                                        @Override
-                                                        public void onBitmapFailed(Exception e, Drawable errorDrawable) {
-                                                        }
-                                                        @Override
-                                                        public void onPrepareLoad(Drawable placeHolderDrawable) {
-                                                        }
-                                                    });
+                                                            @Override
+                                                            public void onBitmapFailed(Exception e, Drawable errorDrawable) {
+                                                            }
+                                                            @Override
+                                                            public void onPrepareLoad(Drawable placeHolderDrawable) {
+                                                            }
+                                                        });
+                                                    }
                                                 }
                                             }
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
                                         }
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
                                     }
                                 }
-                            }
-                        });
-                    }
-                });
+                            });
+                        }
+                    });
+                }
+            }).start();
+        }
+
+        String linkFactTime = "";
+        try {
+            if (isLinkRadar) {
+                linkFactTime = linkFactTime + sdf5.format(sdf2.parse(time))+"雷达拼图" + "\n";
             }
-        }).start();
+            if (isLinkCloud) {
+                linkFactTime = linkFactTime + sdf5.format(sdf2.parse(time))+"卫星拼图" + "\n";
+            }
+            if (isLinkRain) {
+                String startTime1 = sdf2.format(sdf2.parse(time).getTime()-1000*60*60);
+                linkFactTime = linkFactTime + "广东省1小时降水实况["+sdf5.format(sdf2.parse(startTime1))+" - "+sdf5.format(sdf2.parse(time))+"]" + "\n";
+            }
+            if (isLinkWind) {
+                String startTime1 = sdf2.format(sdf2.parse(time).getTime()-1000*60*60);
+                linkFactTime = linkFactTime + "广东省1小时极大风实况["+sdf1.format(sdf2.parse(startTime1))+" - "+sdf1.format(sdf2.parse(time))+"]" + "\n";
+            }
+            tvLinkFactTime.setText(linkFactTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -3503,13 +3537,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                 }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
                                                                     factTime = "广东省1小时温度实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
-                                                                    factTime = "广东省1小时极大风速实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
+                                                                    factTime = "广东省1小时极大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
-                                                                    factTime = "广东省24小时极大风速实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
+                                                                    factTime = "广东省24小时极大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
-                                                                    factTime = "广东省1小时最大风速实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
+                                                                    factTime = "广东省1小时最大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
-                                                                    factTime = "广东省24小时最大风速实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
+                                                                    factTime = "广东省24小时最大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }
                                                                 tvFactTime.setText(factTime);
                                                             } catch (ParseException e) {
@@ -5898,10 +5932,51 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvLink.setTextColor(Color.WHITE);
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link_press);
                 reLink.setVisibility(View.VISIBLE);
+                tvLinkFactTime.setVisibility(View.VISIBLE);
             }else {
                 tvLink.setTextColor(getResources().getColor(R.color.text_color3));
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link);
                 reLink.setVisibility(View.GONE);
+                tvLinkFactTime.setVisibility(View.GONE);
+                tvLinkFactTime.setText("");
+            }
+
+            //选择联动后，关闭左侧与之冲突的天气实况、卫星拼图、雷达拼图图层
+            isShowFact = false;
+            tvFactTime.setVisibility(View.GONE);
+            layoutFact.setVisibility(View.GONE);
+            llFact.setBackgroundColor(Color.TRANSPARENT);
+            ivFact.setImageResource(R.drawable.shawn_icon_fact);
+            tvFact.setTextColor(getResources().getColor(R.color.text_color3));
+            tvFactStr.setVisibility(View.GONE);
+            sbFact.setVisibility(View.GONE);
+            removeFact();
+            removeFactMarkers();
+
+            isShowCloud = false;
+            layoutCloud.setVisibility(View.GONE);
+            llSatelite.setBackgroundColor(Color.TRANSPARENT);
+            ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
+            tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
+            tvCloudStr.setVisibility(View.GONE);
+            sbCloud.setVisibility(View.GONE);
+            removeCloudOverlay();
+            if (cloudThread != null) {
+                cloudThread.pause();
+                ivCloudPlay.setImageResource(R.drawable.shawn_icon_play);
+            }
+
+            isShowRadar = false;
+            layoutRadar.setVisibility(View.GONE);
+            llRadar.setBackgroundColor(Color.TRANSPARENT);
+            ivRadar.setImageResource(R.drawable.shawn_icon_radar);
+            tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
+            tvRadarStr.setVisibility(View.GONE);
+            sbRadar.setVisibility(View.GONE);
+            removeRadarOverlay();
+            if (radarThread != null) {
+                radarThread.pause();
+                ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
             }
         } else if (i == R.id.tvLinkRadar) {
             isLinkRadar = !isLinkRadar;
