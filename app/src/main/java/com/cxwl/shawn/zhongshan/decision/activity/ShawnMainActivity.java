@@ -554,11 +554,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         //判断是否为专业用户
         if (getIntent().hasExtra("type")) {
             userAuthority = getIntent().getStringExtra("type");
-            if (TextUtils.equals(userAuthority, "3")) {
-                llValue.setVisibility(View.VISIBLE);
-            }else {
-                llValue.setVisibility(View.GONE);
-            }
+//            if (TextUtils.equals(userAuthority, "3")) {
+//                llValue.setVisibility(View.VISIBLE);
+//            }else {
+//                llValue.setVisibility(View.GONE);
+//            }
         }else {
             llValue.setVisibility(View.GONE);
         }
