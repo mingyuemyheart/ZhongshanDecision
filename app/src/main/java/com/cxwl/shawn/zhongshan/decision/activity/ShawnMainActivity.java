@@ -2191,7 +2191,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         }else {
             isLastFactPoint = "-1";
         }
-        String title2 = firstPoint.move_speed+"|"+lastPoint.move_speed+"|"+lastPoint.time+"|"+firstPoint.wind_dir+"|"+isLastFactPoint+";";//前后两个点速度，为计算强度字符串所用
+        String title2 = firstPoint.move_speed+"|"+lastPoint.move_speed+"|"+lastPoint.time+"|"+firstPoint.wind_dir+"|"+isLastFactPoint+"|"+firstPoint.time+";";//前后两个点速度，为计算强度字符串所用
         String title3 = firstPoint.radius_7+"|"+firstPoint.radius_10;
         options.title(title1+title2+title3);
         options.snippet(TYPE_TYPHOON);
@@ -2724,9 +2724,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     String[] titles = marker.getTitle().split(";");
                     if (!TextUtils.isEmpty(titles[1])) {
                         String[] title1 = titles[1].split("\\|");
-                        if (!TextUtils.isEmpty(title1[2])) {
+                        if (!TextUtils.isEmpty(title1[5])) {
                             try {
-                                String time = sdf2.format(sdf3.parse(title1[2]));
+                                String time = sdf2.format(sdf3.parse(title1[5]));
                                 OkHttpPointImgs(time);
                             } catch (ParseException e) {
                                 e.printStackTrace();
