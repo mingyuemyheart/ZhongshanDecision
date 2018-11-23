@@ -371,6 +371,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         aMap.setOnMapLoadedListener(new AMap.OnMapLoadedListener() {
             @Override
             public void onMapLoaded() {
+                TextView tvMapNumber = findViewById(R.id.tvMapNumber);
+                tvMapNumber.setText(aMap.getMapContentApprovalNumber());
+
                 drawWarningLines();
 
                 if (CommonUtil.isLocationOpen(mContext)) {
@@ -1233,7 +1236,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             return;
         }
         String selectYear = tvTyphoonYear.getText().toString().substring(0, tvTyphoonYear.getText().length()-1);
-        final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
+//        final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
+        final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
         new Thread(new Runnable() {
             @Override
             public void run() {

@@ -9,6 +9,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
+    <TextView
+        android:id="@+id/tvMapNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="70dp"
+        android:layout_marginBottom="2dp"
+        android:textStyle="bold"
+        android:layout_alignBottom="@+id/mapView"
+        android:textColor="#6990A9"
+        android:textSize="@dimen/level_5" />
+
     <include
         android:id="@+id/layoutWind"
         layout="@layout/shawn_layout_wind"
