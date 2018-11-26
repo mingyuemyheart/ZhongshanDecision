@@ -1236,8 +1236,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             return;
         }
         String selectYear = tvTyphoonYear.getText().toString().substring(0, tvTyphoonYear.getText().length()-1);
-//        final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
-        final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
+        final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
+//        final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -2496,7 +2496,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * 根据台风正点时间获取对应台风点云图、雷达图、实况图
      * @param time
      */
-    private void OkHttpPointImgs(String time) {
+    private void OkHttpPointImgs(final String time) {
         if (TextUtils.isEmpty(time)) {
             return;
         }
@@ -2639,16 +2639,19 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                         try {
                                             JSONObject obj = new JSONObject(result);
 
+                                            String imgUrl = "";
+
                                             //1h降水
                                             if (isLinkRain) {
                                                 if (!obj.isNull("js_1h")) {
-                                                    String js_1h = obj.getString("js_1h");
-                                                    if (!TextUtils.isEmpty(js_1h)) {
-                                                        Picasso.get().load(js_1h).into(new Target() {
+                                                    imgUrl = obj.getString("js_1h");
+                                                    if (!TextUtils.isEmpty(imgUrl)) {
+                                                        Picasso.get().load(imgUrl).into(new Target() {
                                                             @Override
                                                             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                                                 if (bitmap != null) {
-                                                                    drawFactBitmap(bitmap, false);
+                                                                    factBitmap = bitmap;
+                                                                    drawFactBitmap(factBitmap, false);
                                                                 }
                                                             }
                                                             @Override
@@ -2665,13 +2668,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             //1h极大风
                                             if (isLinkWind) {
                                                 if (!obj.isNull("gd_jd_wind_1h")) {
-                                                    String js_1h = obj.getString("gd_jd_wind_1h");
-                                                    if (!TextUtils.isEmpty(js_1h)) {
-                                                        Picasso.get().load(js_1h).into(new Target() {
+                                                    imgUrl = obj.getString("gd_jd_wind_1h");
+                                                    if (!TextUtils.isEmpty(imgUrl)) {
+                                                        Picasso.get().load(imgUrl).into(new Target() {
                                                             @Override
                                                             public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
                                                                 if (bitmap != null) {
-                                                                    drawFactBitmap(bitmap, false);
+                                                                    factBitmap = bitmap;
+                                                                    drawFactBitmap(factBitmap, false);
                                                                 }
                                                             }
                                                             @Override
@@ -2684,6 +2688,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                     }
                                                 }
                                             }
+
+                                            currentFactChartImgUrl = imgUrl;
+
+                                            //获取对应实况图层的实况点数据
+                                            if (!TextUtils.isEmpty(imgUrl)) {
+                                                OkHttpFactList(imgUrl, time);
+                                            }
+
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                         }
@@ -3160,26 +3172,26 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             String imgUrl = itemObj.getString("imgurl");
                                             String columnName = "";
 
-                                            if (!imgUrl.contains("gd_12js.png")) {//暂时过滤掉12小时降水
-                                                if (imgUrl.contains("gd_1js.png")) {
+                                            if (!imgUrl.contains("gd_12js")) {//暂时过滤掉12小时降水
+                                                if (imgUrl.contains("gd_1js")) {
                                                     columnName = "1h降水";
-                                                }else if (imgUrl.contains("gd_3js.png")) {
+                                                }else if (imgUrl.contains("gd_3js")) {
                                                     columnName = "3h降水";
-                                                }else if (imgUrl.contains("gd_6js.png")) {
+                                                }else if (imgUrl.contains("gd_6js")) {
                                                     columnName = "6h降水";
-                                                }else if (imgUrl.contains("gd_12js.png")) {
+                                                }else if (imgUrl.contains("gd_12js")) {
                                                     columnName = "12h降水";
-                                                }else if (imgUrl.contains("gd_24js.png")) {
+                                                }else if (imgUrl.contains("gd_24js")) {
                                                     columnName = "24h降水";
-                                                }else if (imgUrl.contains("gd_temp.png")) {
+                                                }else if (imgUrl.contains("gd_temp")) {
                                                     columnName = "1h温度";
-                                                }else if (imgUrl.contains("gd_jd_wind_1h.png")) {
+                                                }else if (imgUrl.contains("gd_jd_wind_1h")) {
                                                     columnName = "1h极大风";
-                                                }else if (imgUrl.contains("gd_jd_wind_24h.png")) {
+                                                }else if (imgUrl.contains("gd_jd_wind_24h")) {
                                                     columnName = "24h极大风";
-                                                }else if (imgUrl.contains("gd_zd_wind_1h.png")) {
+                                                }else if (imgUrl.contains("gd_zd_wind_1h")) {
                                                     columnName = "1h最大风";
-                                                }else if (imgUrl.contains("gd_zd_wind_24h.png")) {
+                                                }else if (imgUrl.contains("gd_zd_wind_24h")) {
                                                     columnName = "24h最大风";
                                                 }
 
@@ -3191,7 +3203,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 tvName.setText(columnName);
                                                 tvName.setTag(imgUrl);
 
-                                                if (imgUrl.contains("gd_1js.png")) {
+                                                if (imgUrl.contains("gd_1js")) {
                                                     tvName.setTextColor(Color.WHITE);
                                                     tvName.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                                                     currentFactChartImgUrl = imgUrl;
@@ -3203,7 +3215,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                                                 if (imgUrl.contains("js.png")) {
                                                     llFactContainerRain.addView(tvName);
-                                                }else if (imgUrl.contains("gd_temp.png")) {
+                                                }else if (imgUrl.contains("gd_temp")) {
                                                     llFactContainerTemp.addView(tvName);
                                                 }else {
                                                     llFactContainerWind.addView(tvName);
@@ -3365,7 +3377,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         //判断当前选择的要素是否请求过数据，如果请求过直接通过marker集合绘制
         removeFactMarkers();
-        if (imgUrl.contains("gd_1js.png")) {//1小时降水
+        if (imgUrl.contains("gd_1js")) {//1小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain1);
             if (factRains1.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3374,7 +3386,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factRains1.clear();
             }
-        }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+        }else if (imgUrl.contains("gd_3js")) {//3小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain3);
             if (factRains3.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3383,7 +3395,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factRains3.clear();
             }
-        }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+        }else if (imgUrl.contains("gd_6js")) {//6小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain6);
             if (factRains6.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3392,7 +3404,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factRains6.clear();
             }
-        }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+        }else if (imgUrl.contains("gd_12js")) {//12小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain12);
             if (factRains12.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3401,7 +3413,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factRains12.clear();
             }
-        }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+        }else if (imgUrl.contains("gd_24js")) {//24小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain24);
             if (factRains24.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3410,7 +3422,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factRains24.clear();
             }
-        }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
+        }else if (imgUrl.contains("gd_temp")) {//1小时温度
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_temp);
             if (factTemps1.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3419,7 +3431,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factTemps1.clear();
             }
-        }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
+        }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
             if (factWindsJd1.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3428,7 +3440,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factWindsJd1.clear();
             }
-        }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
+        }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
             if (factWindsJd24.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3437,7 +3449,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factWindsJd24.clear();
             }
-        }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
+        }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
             if (factWindsZd1.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3446,7 +3458,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }else {
                 factWindsZd1.clear();
             }
-        }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
+        }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
             if (factWindsZd24.size() > 0) {
                 drawFactMarkers(imgUrl);
@@ -3457,47 +3469,50 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             }
         }
 
-        String url = "";
-        if (imgUrl.contains("gd_1js.png")) {//1小时降水
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
-        }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
-        }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
-        }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
-        }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
-        }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd");
-        }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=jd");
-        }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=jd");
-        }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=zd");
-        }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
-            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=zd");
-        }
-
-        OkHttpFactList(imgUrl, url);
+        OkHttpFactList(imgUrl, "");
 
     }
 
     /**
      * 获取天气实况信息
      */
-    private void OkHttpFactList(final String imgUrl, final String url) {
-        if (TextUtils.isEmpty(url)) {
+    private void OkHttpFactList(final String imgUrl, final String time) {
+        if (TextUtils.isEmpty(imgUrl)) {
             return;
         }
+        String url = "";
+        if (imgUrl.contains("gd_1js")) {//1小时降水
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
+        }else if (imgUrl.contains("gd_3js")) {//3小时降水
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
+        }else if (imgUrl.contains("gd_6js")) {//6小时降水
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
+        }else if (imgUrl.contains("gd_12js")) {//12小时降水
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
+        }else if (imgUrl.contains("gd_24js")) {//24小时降水
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsjs?type=%s", "js");
+        }else if (imgUrl.contains("gd_temp")) {//1小时温度
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zswd");
+        }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=jd");
+        }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=jd");
+        }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs&mold=zd");
+        }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
+            url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zsfs?type=fs24&mold=zd");
+        }
+        if (!TextUtils.isEmpty(time)) {//联动时整点需要
+            url = url+String.format("&statime=%s&endtime=%s", time, time);
+        }
+        final String dataUrl = url;
         new Thread(new Runnable() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        OkHttpUtil.enqueue(new Request.Builder().url(url).build(), new Callback() {
+                        OkHttpUtil.enqueue(new Request.Builder().url(dataUrl).build(), new Callback() {
                             @Override
                             public void onFailure(Call call, IOException e) {
                             }
@@ -3528,25 +3543,25 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                 String startTime12 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*12);
                                                                 String startTime24 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*24);
                                                                 String factTime = "";
-                                                                if (imgUrl.contains("gd_1js.png")) {//1小时降水
+                                                                if (imgUrl.contains("gd_1js")) {//1小时降水
                                                                     factTime = "广东省1小时降水实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+                                                                }else if (imgUrl.contains("gd_3js")) {//3小时降水
                                                                     factTime = "广东省3小时降水实况["+sdf1.format(sdf10.parse(startTime3))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+                                                                }else if (imgUrl.contains("gd_6js")) {//6小时降水
                                                                     factTime = "广东省6小时降水实况["+sdf1.format(sdf10.parse(startTime6))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+                                                                }else if (imgUrl.contains("gd_12js")) {//12小时降水
                                                                     factTime = "广东省12小时降水实况["+sdf1.format(sdf10.parse(startTime12))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+                                                                }else if (imgUrl.contains("gd_24js")) {//24小时降水
                                                                     factTime = "广东省24小时降水实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
+                                                                }else if (imgUrl.contains("gd_temp")) {//1小时温度
                                                                     factTime = "广东省1小时温度实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
+                                                                }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
                                                                     factTime = "广东省1小时极大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
+                                                                }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
                                                                     factTime = "广东省24小时极大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
+                                                                }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
                                                                     factTime = "广东省1小时最大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
-                                                                }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
+                                                                }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
                                                                     factTime = "广东省24小时最大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]";
                                                                 }
                                                                 tvFactTime.setText(factTime);
@@ -3562,35 +3577,35 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                             dto.lng = itemObj.getDouble("Lon");
                                                         }
 
-                                                        if (imgUrl.contains("gd_1js.png")) {//1小时降水
+                                                        if (imgUrl.contains("gd_1js")) {//1小时降水
                                                             if (!itemObj.isNull("JS")) {
                                                                 dto.rain = itemObj.getDouble("JS");
                                                                 if (dto.rain >= 9999) {
                                                                     dto.rain = 0;
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+                                                        }else if (imgUrl.contains("gd_3js")) {//3小时降水
                                                             if (!itemObj.isNull("JS3")) {
                                                                 dto.rain = itemObj.getDouble("JS3");
                                                                 if (dto.rain >= 9999) {
                                                                     dto.rain = 0;
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+                                                        }else if (imgUrl.contains("gd_6js")) {//6小时降水
                                                             if (!itemObj.isNull("JS6")) {
                                                                 dto.rain = itemObj.getDouble("JS6");
                                                                 if (dto.rain >= 9999) {
                                                                     dto.rain = 0;
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+                                                        }else if (imgUrl.contains("gd_12js")) {//12小时降水
                                                             if (!itemObj.isNull("JS12")) {
                                                                 dto.rain = itemObj.getDouble("JS12");
                                                                 if (dto.rain >= 9999) {
                                                                     dto.rain = 0;
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+                                                        }else if (imgUrl.contains("gd_24js")) {//24小时降水
                                                             if (!itemObj.isNull("JS24")) {
                                                                 dto.rain = itemObj.getDouble("JS24");
                                                                 if (dto.rain >= 9999) {
@@ -3652,7 +3667,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                             dto.level = nums[level]+"";
                                                         }
 
-                                                        if (imgUrl.contains("gd_1js.png")) {//1小时降水
+                                                        if (imgUrl.contains("gd_1js")) {//1小时降水
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factRains1.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3660,7 +3675,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factRains1.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+                                                        }else if (imgUrl.contains("gd_3js")) {//3小时降水
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factRains3.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3668,7 +3683,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factRains3.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+                                                        }else if (imgUrl.contains("gd_6js")) {//6小时降水
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factRains6.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3676,7 +3691,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factRains6.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+                                                        }else if (imgUrl.contains("gd_12js")) {//12小时降水
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factRains12.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3684,7 +3699,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factRains12.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+                                                        }else if (imgUrl.contains("gd_24js")) {//24小时降水
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factRains24.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3692,7 +3707,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factRains24.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
+                                                        }else if (imgUrl.contains("gd_temp")) {//1小时温度
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factTemps1.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3700,7 +3715,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factTemps1.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
+                                                        }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factWindsJd1.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3708,7 +3723,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factWindsJd1.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
+                                                        }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factWindsJd24.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3716,7 +3731,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factWindsJd24.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
+                                                        }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factWindsZd1.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3724,7 +3739,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                                     factWindsZd1.add(dto);
                                                                 }
                                                             }
-                                                        }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
+                                                        }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
                                                             if (TextUtils.equals(userAuthority, "3")) {//专业用户权限
                                                                 factWindsZd24.add(dto);
                                                             }else {//普通用户权限，只能查看国家站数据
@@ -3742,7 +3757,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 e.printStackTrace();
                                             }
                                         }else {
-                                            OkHttpFactList(imgUrl, url);
+                                            OkHttpFactList(imgUrl, time);
                                         }
                                     }
                                 });
@@ -3767,25 +3782,25 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 removeFactMarkers();
                 try {
                     List<FactDto> list = new ArrayList<>();
-                    if (imgUrl.contains("gd_1js.png")) {//1小时降水
+                    if (imgUrl.contains("gd_1js")) {//1小时降水
                         list.addAll(factRains1);
-                    }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+                    }else if (imgUrl.contains("gd_3js")) {//3小时降水
                         list.addAll(factRains3);
-                    }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+                    }else if (imgUrl.contains("gd_6js")) {//6小时降水
                         list.addAll(factRains6);
-                    }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+                    }else if (imgUrl.contains("gd_12js")) {//12小时降水
                         list.addAll(factRains12);
-                    }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+                    }else if (imgUrl.contains("gd_24js")) {//24小时降水
                         list.addAll(factRains24);
-                    }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
+                    }else if (imgUrl.contains("gd_temp")) {//1小时温度
                         list.addAll(factTemps1);
-                    }else if (imgUrl.contains("gd_jd_wind_1h.png")) {//1小时极大风
+                    }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
                         list.addAll(factWindsJd1);
-                    }else if (imgUrl.contains("gd_jd_wind_24h.png")) {//24小时极大风
+                    }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
                         list.addAll(factWindsJd24);
-                    }else if (imgUrl.contains("gd_zd_wind_1h.png")) {//1小时最大风
+                    }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
                         list.addAll(factWindsZd1);
-                    }else if (imgUrl.contains("gd_zd_wind_24h.png")) {//24小时最大风
+                    }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
                         list.addAll(factWindsZd24);
                     }
 
@@ -3826,7 +3841,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             String value;
             if (imgUrl.contains("js.png")) {//降水
                 value = dto.rain+"mm";
-            }else if (imgUrl.contains("gd_temp.png")) {//温度
+            }else if (imgUrl.contains("gd_temp")) {//温度
                 value = dto.temp+"℃";
             }else {//风速
                 value = CommonUtil.getWindDirection(dto.windD)+"风 "+dto.windS+"m/s";
@@ -3854,22 +3869,22 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         GradientDrawable gradientDrawable = (GradientDrawable) ivMarker.getBackground();
         if (!TextUtils.isEmpty(imgUrl)) {
-            if (imgUrl.contains("gd_1js.png")) {//1小时降水
+            if (imgUrl.contains("gd_1js")) {//1小时降水
                 gradientDrawable.setColor(CommonUtil.factRain1Color(dto.rain));
                 tvValue.setText(dto.rain+"");
-            }else if (imgUrl.contains("gd_3js.png")) {//3小时降水
+            }else if (imgUrl.contains("gd_3js")) {//3小时降水
                 gradientDrawable.setColor(CommonUtil.factRain3Color(dto.rain));
                 tvValue.setText(dto.rain+"");
-            }else if (imgUrl.contains("gd_6js.png")) {//6小时降水
+            }else if (imgUrl.contains("gd_6js")) {//6小时降水
                 gradientDrawable.setColor(CommonUtil.factRain6Color(dto.rain));
                 tvValue.setText(dto.rain+"");
-            }else if (imgUrl.contains("gd_12js.png")) {//12小时降水
+            }else if (imgUrl.contains("gd_12js")) {//12小时降水
                 gradientDrawable.setColor(CommonUtil.factRain12Color(dto.rain));
                 tvValue.setText(dto.rain+"");
-            }else if (imgUrl.contains("gd_24js.png")) {//24小时降水
+            }else if (imgUrl.contains("gd_24js")) {//24小时降水
                 gradientDrawable.setColor(CommonUtil.factRain24Color(dto.rain));
                 tvValue.setText(dto.rain+"");
-            }else if (imgUrl.contains("gd_temp.png")) {//1小时温度
+            }else if (imgUrl.contains("gd_temp")) {//1小时温度
                 gradientDrawable.setColor(CommonUtil.factTemp1Color(dto.temp));
                 tvValue.setText(dto.temp+"");
             }else {//风速
@@ -5637,7 +5652,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         zoom = arg0.zoom;
 
-        if (isShowFact) {//选中实况状态下
+        if (isShowFact || isLinkRain || isLinkWind) {//选中实况状态下或联动状态下选择1h降水或1h极大风
             factHandler.removeMessages(1002);
             Message msg = foreHandler.obtainMessage();
             msg.what = 1002;
@@ -5937,50 +5952,50 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link_press);
                 reLink.setVisibility(View.VISIBLE);
                 tvLinkFactTime.setVisibility(View.VISIBLE);
+
+                //选择联动后，关闭左侧与之冲突的天气实况、卫星拼图、雷达拼图图层
+                isShowFact = false;
+                tvFactTime.setVisibility(View.GONE);
+                layoutFact.setVisibility(View.GONE);
+                llFact.setBackgroundColor(Color.TRANSPARENT);
+                ivFact.setImageResource(R.drawable.shawn_icon_fact);
+                tvFact.setTextColor(getResources().getColor(R.color.text_color3));
+                tvFactStr.setVisibility(View.GONE);
+                sbFact.setVisibility(View.GONE);
+                removeFact();
+                removeFactMarkers();
+
+                isShowCloud = false;
+                layoutCloud.setVisibility(View.GONE);
+                llSatelite.setBackgroundColor(Color.TRANSPARENT);
+                ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
+                tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
+                tvCloudStr.setVisibility(View.GONE);
+                sbCloud.setVisibility(View.GONE);
+                removeCloudOverlay();
+                if (cloudThread != null) {
+                    cloudThread.pause();
+                    ivCloudPlay.setImageResource(R.drawable.shawn_icon_play);
+                }
+
+                isShowRadar = false;
+                layoutRadar.setVisibility(View.GONE);
+                llRadar.setBackgroundColor(Color.TRANSPARENT);
+                ivRadar.setImageResource(R.drawable.shawn_icon_radar);
+                tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
+                tvRadarStr.setVisibility(View.GONE);
+                sbRadar.setVisibility(View.GONE);
+                removeRadarOverlay();
+                if (radarThread != null) {
+                    radarThread.pause();
+                    ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
+                }
             }else {
                 tvLink.setTextColor(getResources().getColor(R.color.text_color3));
                 tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link);
                 reLink.setVisibility(View.GONE);
                 tvLinkFactTime.setVisibility(View.GONE);
                 tvLinkFactTime.setText("");
-            }
-
-            //选择联动后，关闭左侧与之冲突的天气实况、卫星拼图、雷达拼图图层
-            isShowFact = false;
-            tvFactTime.setVisibility(View.GONE);
-            layoutFact.setVisibility(View.GONE);
-            llFact.setBackgroundColor(Color.TRANSPARENT);
-            ivFact.setImageResource(R.drawable.shawn_icon_fact);
-            tvFact.setTextColor(getResources().getColor(R.color.text_color3));
-            tvFactStr.setVisibility(View.GONE);
-            sbFact.setVisibility(View.GONE);
-            removeFact();
-            removeFactMarkers();
-
-            isShowCloud = false;
-            layoutCloud.setVisibility(View.GONE);
-            llSatelite.setBackgroundColor(Color.TRANSPARENT);
-            ivSatelite.setImageResource(R.drawable.shawn_icon_satelite);
-            tvSatelite.setTextColor(getResources().getColor(R.color.text_color3));
-            tvCloudStr.setVisibility(View.GONE);
-            sbCloud.setVisibility(View.GONE);
-            removeCloudOverlay();
-            if (cloudThread != null) {
-                cloudThread.pause();
-                ivCloudPlay.setImageResource(R.drawable.shawn_icon_play);
-            }
-
-            isShowRadar = false;
-            layoutRadar.setVisibility(View.GONE);
-            llRadar.setBackgroundColor(Color.TRANSPARENT);
-            ivRadar.setImageResource(R.drawable.shawn_icon_radar);
-            tvRadar.setTextColor(getResources().getColor(R.color.text_color3));
-            tvRadarStr.setVisibility(View.GONE);
-            sbRadar.setVisibility(View.GONE);
-            removeRadarOverlay();
-            if (radarThread != null) {
-                radarThread.pause();
-                ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
             }
         } else if (i == R.id.tvLinkRadar) {
             isLinkRadar = !isLinkRadar;
