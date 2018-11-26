@@ -17,7 +17,7 @@ android {
     aaptOptions.useNewCruncher = false
 
     defaultConfig {
-        applicationId "com.cxwl.shawn.zhongshan.decision"
+//        applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 38
@@ -53,34 +53,34 @@ android {
 
 }
 
-////发布GitHub项目到JitPack
-//apply plugin: 'com.github.dcendents.android-maven' // ADD THIS
-//group='com.cxwl.shawn.zhongshan.decision'
-//
-//// build a jar with source files
-//task sourcesJar(type: Jar) {
-//    from android.sourceSets.main.java.srcDirs
-//    classifier = 'sources'
-//}
-//
-//task javadoc(type: Javadoc) {
-//    failOnError  false
-//    source = android.sourceSets.main.java.sourceFiles
-//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-//    classpath += configurations.compile
-//}
-//
-//// build a jar with javadoc
-//task javadocJar(type: Jar, dependsOn: javadoc) {
-//    classifier = 'javadoc'
-//    from javadoc.destinationDir
-//}
-//
-//artifacts {
-//    archives sourcesJar
-//    archives javadocJar
-//}
-////发布GitHub项目到JitPack
+//发布GitHub项目到JitPack
+apply plugin: 'com.github.dcendents.android-maven' // ADD THIS
+group='com.cxwl.shawn.zhongshan.decision'
+
+// build a jar with source files
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+task javadoc(type: Javadoc) {
+    failOnError  false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+}
+
+// build a jar with javadoc
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+//发布GitHub项目到JitPack
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
