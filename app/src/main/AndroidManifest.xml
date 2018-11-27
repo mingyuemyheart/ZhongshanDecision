@@ -21,7 +21,7 @@
         android:supportsRtl="true"
         android:allowBackup="true">
 
-        <!--&lt;!&ndash;高德地图&ndash;&gt;-->
+        <!--高德地图-->
         <!--<meta-data-->
             <!--android:name="com.amap.api.v2.apikey"-->
             <!--android:value="44ed336efdac5683d2a3cd8df8ac979c"/>-->
