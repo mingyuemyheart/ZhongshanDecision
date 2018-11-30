@@ -32,7 +32,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled true //代码混淆，默认为false
+            minifyEnabled false //代码混淆，默认为false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -55,7 +55,7 @@ android {
 
 //发布GitHub项目到JitPack
 apply plugin: 'com.github.dcendents.android-maven' // ADD THIS
-group='com.cxwl.shawn.zhongshan.decision'
+group='com.github.mingyuemyheart'
 
 // build a jar with source files
 task sourcesJar(type: Jar) {
