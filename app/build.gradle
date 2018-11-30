@@ -9,6 +9,8 @@ apply plugin: 'com.android.library'
 //5、注释掉高德地图信息
 //6、根目录增加classpath 'com.github.dcendents:android-maven-gradle-plugin:1.5' //用于打包Maven所需文件
 //maven { url 'https://www.jitpack.io' }
+//7、执行./gradlew install
+//8、提交代码至github，并更新发布gitpack
 
 android {
     compileSdkVersion 27
@@ -20,8 +22,8 @@ android {
 //        applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 43
-        versionName "1.4.3"
+        versionCode 45
+        versionName "1.4.5"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {

@@ -1045,38 +1045,26 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private void initYearListView() {
         publishList.clear();
         TyphoonDto dto = new TyphoonDto();
-        dto.publishName = "北京台";
+        dto.publishName = "中央气象台";
         dto.publishCode = "BABJ";
         dto.isSelected = true;
         publishList.add(dto);
         dto = new TyphoonDto();
-        dto.publishName = "广州台";
+        dto.publishName = "广东省气象台";
         dto.publishCode = "BCGZ";
         publishList.add(dto);
         dto = new TyphoonDto();
-        dto.publishName = "香港台";
+        dto.publishName = "香港天文台";
         dto.publishCode = "VHHH";
         publishList.add(dto);
         dto = new TyphoonDto();
-        dto.publishName = "日本台";
+        dto.publishName = "日本气象厅";
         dto.publishCode = "RJTD";
         publishList.add(dto);
         dto = new TyphoonDto();
-        dto.publishName = "关岛台";
+        dto.publishName = "美国台风中心";
         dto.publishCode = "PGTW";
         publishList.add(dto);
-//        dto = new TyphoonDto();
-//        dto.publishName = "欧洲台";
-//        dto.publishCode = "ECMF";
-//        publishList.add(dto);
-//        dto = new TyphoonDto();
-//        dto.publishName = "广州热带所KM";
-//        dto.publishCode = "GZRD";
-//        publishList.add(dto);
-//        dto = new TyphoonDto();
-//        dto.publishName = "广州热带所9KM";
-//        dto.publishCode = "GZRD9KM";
-//        publishList.add(dto);
 
 
         publishListView = findViewById(R.id.publishListView);
@@ -1493,7 +1481,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     lyoutTyphoon.setVisibility(View.VISIBLE);
                                     //防止多个台风绘制不全
                                     try {
-                                        drawTyphoon(publishName, publishCode+typhoonId,tSid, false, allPoints);
+                                        drawTyphoon(publishName, publishCode+typhoonId,tSid, true, allPoints);
                                         Thread.sleep(300);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
@@ -1665,7 +1653,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 lyoutTyphoon.setVisibility(View.VISIBLE);
                                                 //防止多个台风绘制不全
                                                 try {
-                                                    drawTyphoon(publishName, publishCode+typhoonId,tSid, false, allPoints);
+                                                    drawTyphoon(publishName, publishCode+typhoonId,tSid, true, allPoints);
                                                     Thread.sleep(300);
                                                 } catch (InterruptedException e) {
                                                     e.printStackTrace();
@@ -2016,9 +2004,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                 if (isAnimate) {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(200);
                         String time = sdf2.format(sdf3.parse(firstPoint.time));
-                        OkHttpPointImgs(time);
+//                        OkHttpPointImgs(time);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (ParseException e) {
@@ -2205,6 +2193,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         Marker marker = aMap.addMarker(options);
         markerPoints.add(marker);
 
+        if (firstPoint.isFactPoint) {//根据实况点绘制中心，增加动画效果
+            aMap.animateCamera(CameraUpdateFactory.newLatLng(firstLatLng));
+        }
 
         if (firstPoint.isFactPoint && lastFactPoint == firstPoint) {//最后一个实况点
 
@@ -2247,9 +2238,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 //绘制最后一个实况点对应的七级、十级风圈
                 drawWindCircle(firstPoint.radius_7, firstPoint.radius_10, firstLatLng);
 
-                //最后一个实况点处于屏幕中心
-                aMap.animateCamera(CameraUpdateFactory.newLatLng(firstLatLng));
+//                //最后一个实况点处于屏幕中心
+//                aMap.animateCamera(CameraUpdateFactory.newLatLng(firstLatLng));
             }
+
 
             //绘制最后一个实况点对应的时间
             View timeView = inflater.inflate(R.layout.shawn_typhoon_marker_time, null);
@@ -5441,26 +5433,26 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         dto.windHeight = "1000";
         dto.isGFS = true;
         windTypeList.add(dto);
-        dto = new WindDto();
-        dto.windHeight = "1000";
-        dto.isGFS = false;
-        windTypeList.add(dto);
+//        dto = new WindDto();
+//        dto.windHeight = "1000";
+//        dto.isGFS = false;
+//        windTypeList.add(dto);
         dto = new WindDto();
         dto.windHeight = "500";
         dto.isGFS = true;
         windTypeList.add(dto);
-        dto = new WindDto();
-        dto.windHeight = "500";
-        dto.isGFS = false;
-        windTypeList.add(dto);
+//        dto = new WindDto();
+//        dto.windHeight = "500";
+//        dto.isGFS = false;
+//        windTypeList.add(dto);
         dto = new WindDto();
         dto.windHeight = "200";
         dto.isGFS = true;
         windTypeList.add(dto);
-        dto = new WindDto();
-        dto.windHeight = "200";
-        dto.isGFS = false;
-        windTypeList.add(dto);
+//        dto = new WindDto();
+//        dto.windHeight = "200";
+//        dto.isGFS = false;
+//        windTypeList.add(dto);
 
         gridviewWind = findViewById(R.id.gridviewWind);
         windMapTypeAdapter = new WindMapTypeAdapter(mContext, windTypeList);
