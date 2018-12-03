@@ -1278,9 +1278,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             }else {
                                                 dto.status = "0";
                                             }
-                                            if (i == 0) {
-                                                dto.status = "1";
-                                            }
                                             if (!dto.code.contains("****")) {
                                                 nameList.add(dto);
                                             }
@@ -1484,8 +1481,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     lyoutTyphoon.setVisibility(View.VISIBLE);
                                     //防止多个台风绘制不全
                                     try {
+                                        int pubList = 0;
+                                        for (TyphoonDto pub : publishList) {
+                                            if (pub.isSelected) {
+                                                pubList++;
+                                            }
+                                        }
                                         boolean isAnimate = false;
-                                        if (startList.size() == 1 && TextUtils.equals(tStatus, "1")) {
+                                        if (startList.size() == 1 && selectList.size() == 1 && pubList == 1 && TextUtils.equals(tStatus, "1")) {
                                             isAnimate = true;
                                         }
                                         drawTyphoon(publishName, publishCode+typhoonId,tSid, isAnimate, allPoints);
@@ -1660,8 +1663,14 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 lyoutTyphoon.setVisibility(View.VISIBLE);
                                                 //防止多个台风绘制不全
                                                 try {
+                                                    int pubList = 0;
+                                                    for (TyphoonDto pub : publishList) {
+                                                        if (pub.isSelected) {
+                                                            pubList++;
+                                                        }
+                                                    }
                                                     boolean isAnimate = false;
-                                                    if (startList.size() == 1 && TextUtils.equals(tStatus, "1")) {
+                                                    if (startList.size() == 1 && selectList.size() == 1 && pubList == 1 && TextUtils.equals(tStatus, "1")) {
                                                         isAnimate = true;
                                                     }
                                                     drawTyphoon(publishName, publishCode+typhoonId,tSid, isAnimate, allPoints);
