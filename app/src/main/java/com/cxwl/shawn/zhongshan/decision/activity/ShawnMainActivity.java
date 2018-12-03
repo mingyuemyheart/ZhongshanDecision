@@ -1085,9 +1085,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         isShowInfoWindow = true;
                         String name = dto.code+" "+dto.name+" "+dto.enName;
                         if (TextUtils.equals(data.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                            OkHttpTyphoonDetailBABJ(data.publishName, data.publishCode, dto.tId, dto.code, name);
+                            OkHttpTyphoonDetailBABJ(data.publishName, data.publishCode, dto.tId, dto.code, name, dto.status);
                         }else {
-                            OkHttpTyphoonDetailIdea(data.publishName, data.publishCode, dto.id, dto.code, name);
+                            OkHttpTyphoonDetailIdea(data.publishName, data.publishCode, dto.id, dto.code, name, dto.status);
                         }
                     }
                 }else {//清除选择的数据源对应的所有台风
@@ -1152,9 +1152,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     for (TyphoonDto pub : publishList) {
                         if (pub.isSelected) {
                             if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                                OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name);
+                                OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name, dto.status);
                             }else {
-                                OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name);
+                                OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name, dto.status);
                             }
                         }
                     }
@@ -1204,9 +1204,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 for (TyphoonDto pub : publishList) {
                     if (pub.isSelected) {
                         if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                            OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name);
+                            OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name, dto.status);
                         }else {
-                            OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name);
+                            OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name, dto.status);
                         }
                     }
                 }
@@ -1278,6 +1278,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             }else {
                                                 dto.status = "0";
                                             }
+                                            if (i == 0) {
+                                                dto.status = "1";
+                                            }
                                             if (!dto.code.contains("****")) {
                                                 nameList.add(dto);
                                             }
@@ -1301,9 +1304,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             for (TyphoonDto pub : publishList) {
                                                 if (pub.isSelected) {
                                                     if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                                                        OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name);
+                                                        OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name, dto.status);
                                                     }else {
-                                                        OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name);
+                                                        OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name, dto.status);
                                                     }
                                                 }
                                             }
@@ -1345,7 +1348,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * @param typhoonId
      * @param typhoonName
      */
-    private void OkHttpTyphoonDetailIdea(final String publishName, final String publishCode, final String typhoonId, final String tSid, final String typhoonName) {
+    private void OkHttpTyphoonDetailIdea(final String publishName, final String publishCode, final String typhoonId, final String tSid, final String typhoonName, final String tStatus) {
         loadingView.setVisibility(View.VISIBLE);
         final String url = String.format("http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=1&tsid=%s&fcid=%s", typhoonId, publishCode);
         new Thread(new Runnable() {
@@ -1481,7 +1484,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                     lyoutTyphoon.setVisibility(View.VISIBLE);
                                     //防止多个台风绘制不全
                                     try {
-                                        drawTyphoon(publishName, publishCode+typhoonId,tSid, true, allPoints);
+                                        boolean isAnimate = false;
+                                        if (startList.size() == 1 && TextUtils.equals(tStatus, "1")) {
+                                            isAnimate = true;
+                                        }
+                                        drawTyphoon(publishName, publishCode+typhoonId,tSid, isAnimate, allPoints);
                                         Thread.sleep(300);
                                     } catch (InterruptedException e) {
                                         e.printStackTrace();
@@ -1506,7 +1513,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      * @param typhoonId
      * @param typhoonName
      */
-    private void OkHttpTyphoonDetailBABJ(final String publishName, final String publishCode, final String typhoonId, final String tSid, final String typhoonName) {
+    private void OkHttpTyphoonDetailBABJ(final String publishName, final String publishCode, final String typhoonId, final String tSid, final String typhoonName, final String tStatus) {
         loadingView.setVisibility(View.VISIBLE);
         final String url = "http://decision-admin.tianqi.cn/Home/extra/gettyphoon/view/"+typhoonId;
         new Thread(new Runnable() {
@@ -1653,7 +1660,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                 lyoutTyphoon.setVisibility(View.VISIBLE);
                                                 //防止多个台风绘制不全
                                                 try {
-                                                    drawTyphoon(publishName, publishCode+typhoonId,tSid, true, allPoints);
+                                                    boolean isAnimate = false;
+                                                    if (startList.size() == 1 && TextUtils.equals(tStatus, "1")) {
+                                                        isAnimate = true;
+                                                    }
+                                                    drawTyphoon(publishName, publishCode+typhoonId,tSid, isAnimate, allPoints);
                                                     Thread.sleep(300);
                                                 } catch (InterruptedException e) {
                                                     e.printStackTrace();
@@ -2004,7 +2015,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                 if (isAnimate) {
                     try {
-                        Thread.sleep(200);
+                        Thread.sleep(100);
                         String time = sdf2.format(sdf3.parse(firstPoint.time));
 //                        OkHttpPointImgs(time);
                     } catch (InterruptedException e) {
@@ -5808,9 +5819,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     for (TyphoonDto pub : publishList) {
                         if (pub.isSelected) {
                             if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                                OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name);
+                                OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name, dto.status);
                             }else {
-                                OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name);
+                                OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name, dto.status);
                             }
                         }
                     }
@@ -5879,9 +5890,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 for (TyphoonDto pub : publishList) {
                     if (pub.isSelected) {
                         if (TextUtils.equals(pub.publishCode, "BABJ") && !TextUtils.isEmpty(dto.tId)) {
-                            OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name);
+                            OkHttpTyphoonDetailBABJ(pub.publishName, pub.publishCode, dto.tId, dto.code, name, dto.status);
                         }else {
-                            OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name);
+                            OkHttpTyphoonDetailIdea(pub.publishName, pub.publishCode, dto.id, dto.code, name, dto.status);
                         }
                     }
                 }
