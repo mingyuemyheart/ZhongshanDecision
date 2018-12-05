@@ -4788,8 +4788,11 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                         }
 
                     }
-                    if (warningList.size() > 0) {
-                        aMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
+//                    if (warningList.size() > 0) {
+//                        aMap.animateCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
+//                    }
+                    if (zhongshanMarker != null) {
+                        aMap.animateCamera(CameraUpdateFactory.newLatLngZoom(zhongshanMarker.getPosition(), zoom1));
                     }
 
 //                    List<WarningDto> list = new ArrayList<>(warningList);
@@ -5677,7 +5680,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 if (warningMarkers.containsKey(html)) {
                     Marker marker = warningMarkers.get(html);
                     String item0 = html.split("-")[0];
-                    if (zoom <= zoom1) {
+                    if (zoom < zoom1) {
                         if (item0.endsWith("00")) {
                             marker.setVisible(true);
                         }else {
