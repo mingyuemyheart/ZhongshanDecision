@@ -22,8 +22,8 @@ android {
         applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 48
-        versionName "1.4.8"
+        versionCode 49
+        versionName "1.4.9"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {

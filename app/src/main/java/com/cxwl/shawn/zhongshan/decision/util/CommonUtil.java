@@ -446,7 +446,9 @@ public class CommonUtil {
      */
     public static int factRain1Color(double rain) {
         int color;
-        if (rain <= 2) {
+        if (rain <= 0) {
+            color = 0xffffffff;
+        }else if (rain <= 2) {
             color = 0xffa5f38d;
         }else if (rain <= 4) {
             color = 0xff35af0e;
@@ -473,7 +475,9 @@ public class CommonUtil {
      */
     public static int factRain3Color(double rain) {
         int color;
-        if (rain <= 3) {
+        if (rain <= 0) {
+            color = 0xffffffff;
+        }else if (rain <= 3) {
             color = 0xffa5f38d;
         }else if (rain <= 10) {
             color = 0xff35af0e;
@@ -496,7 +500,9 @@ public class CommonUtil {
      */
     public static int factRain6Color(double rain) {
         int color;
-        if (rain <= 4) {
+        if (rain <= 0) {
+            color = 0xffffffff;
+        }else if (rain <= 4) {
             color = 0xffa5f38d;
         }else if (rain <= 13) {
             color = 0xff64bb4c;
@@ -517,7 +523,9 @@ public class CommonUtil {
      */
     public static int factRain12Color(double rain) {
         int color;
-        if (rain <= 10) {
+        if (rain <= 0) {
+            color = 0xffffffff;
+        }else if (rain <= 10) {
             color = 0xffa5f38d;
         }else if (rain <= 25) {
             color = 0xff35af0e;
@@ -540,7 +548,9 @@ public class CommonUtil {
      */
     public static int factRain24Color(double rain) {
         int color;
-        if (rain <= 10) {
+        if (rain <= 0) {
+            color = 0xffffffff;
+        }else if (rain <= 10) {
             color = 0xffa5f38d;
         }else if (rain <= 25) {
             color = 0xff35af0e;
