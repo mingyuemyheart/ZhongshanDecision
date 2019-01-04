@@ -3041,8 +3041,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
             String[] titles = marker.getTitle().split(",");
             tvName.setText(titles[1]);
-            String phe = getString(WeatherUtil.getWeatherId(Integer.valueOf(titles[2]))) + "~" + getString(WeatherUtil.getWeatherId(Integer.valueOf(titles[5])));
-            if (Integer.valueOf(titles[2]) == Integer.valueOf(titles[5])) {
+            String phe = getString(WeatherUtil.getWeatherId(Integer.valueOf(titles[2]))) + "~" + getString(WeatherUtil.getWeatherId(Integer.valueOf(titles[6])));
+            if (Integer.valueOf(titles[2]) == Integer.valueOf(titles[6])) {
                 phe = getString(WeatherUtil.getWeatherId(Integer.valueOf(titles[2])));
             }
             String temp = titles[3]+"~"+titles[7]+"℃";
