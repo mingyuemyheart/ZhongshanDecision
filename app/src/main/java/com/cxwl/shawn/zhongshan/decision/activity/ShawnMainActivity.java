@@ -31,6 +31,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -150,6 +151,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         AMap.OnMapClickListener, AMap.InfoWindowAdapter, AMap.OnInfoWindowClickListener, AMap.OnCameraChangeListener {
 
     private Context mContext;
+    private long mExitTime;//记录点击完返回按钮后的long型时间
+    private boolean isLibrary = false;
     private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
     private AVLoadingIndicatorView loadingView;
     private ScrollView scrollView;
@@ -215,8 +218,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private final int DRAW_TYPHOON_COMPLETE = 1002;//一个台风绘制结束
     private Circle circle100, circle300, circle500;//定位点对一个的区域圈
     private Text text100, text300, text500;//定位点对一个的区域圈文字
-    private ImageView ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
-    private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLink,tvLinkRadar,tvLinkCloud,tvLinkRain,tvLinkWind;
+    private ImageView ivLink,ivList,ivRange,ivTyphoonClose,ivLegend,ivLegendClose,ivLocation;
+    private TextView tvCurrent,tvHistory,tvTyphoonYear,tvLinkRadar,tvLinkCloud,tvLinkRain,tvLinkWind;
     private RelativeLayout lyoutTyphoon,reTyphoonList,reLegend,reLink;
     private String typhoonPointAddr = "";
     private boolean isShowLink = false, isLinkRadar = false, isLinkCloud = false, isLinkRain = false, isLinkWind = false;//联动设置
@@ -571,19 +574,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         tvLinkFactTime = findViewById(R.id.tvLinkFactTime);
         ivRange = findViewById(R.id.ivRange);
         ivRange.setOnClickListener(this);
-        tvLink = findViewById(R.id.tvLink);
-        tvLink.setOnClickListener(this);
-        tvTyphoonName.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (tvLink.getVisibility() == View.VISIBLE) {
-                    tvLink.setVisibility(View.GONE);
-                }else {
-                    tvLink.setVisibility(View.VISIBLE);
-                }
-                return false;
-            }
-        });
         tvLinkRadar = findViewById(R.id.tvLinkRadar);
         tvLinkRadar.setOnClickListener(this);
         tvLinkCloud = findViewById(R.id.tvLinkCloud);
@@ -605,8 +595,21 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         ivTyphoonClose = findViewById(R.id.ivTyphoonClose);
         ivTyphoonClose.setOnClickListener(this);
         reTyphoonList = findViewById(R.id.reTyphoonList);
+        ivLink = findViewById(R.id.ivLink);
+        ivLink.setOnClickListener(this);
         ivList = findViewById(R.id.ivList);
         ivList.setOnClickListener(this);
+        tvTyphoonName.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if (ivList.getVisibility() == View.VISIBLE) {
+                    ivList.setVisibility(View.GONE);
+                }else {
+                    ivList.setVisibility(View.VISIBLE);
+                }
+                return false;
+            }
+        });
         ivLegendClose = findViewById(R.id.ivLegendClose);
         ivLegendClose.setOnClickListener(this);
         reLegend = findViewById(R.id.reLegend);
@@ -1262,6 +1265,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             }
                                             if (!itemObj.isNull("TSENAME")) {
                                                 dto.enName = itemObj.getString("TSENAME");
+                                                if (!TextUtils.isEmpty(dto.enName)) {
+                                                    dto.enName = dto.enName.toUpperCase();
+                                                }
                                             }
                                             if (!itemObj.isNull("TSCNAME")) {
                                                 dto.name = itemObj.getString("TSCNAME");
@@ -1311,9 +1317,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                                         if (startList.size() <= 0) {// 没有生效台风
                                             tvTyphoonName.setText(getString(R.string.no_typhoon));
-                                            tvLink.setVisibility(View.GONE);
+                                            ivLink.setVisibility(View.GONE);
                                         }else {
-                                            tvLink.setVisibility(View.VISIBLE);
+                                            ivLink.setVisibility(View.VISIBLE);
                                         }
 
                                         if (startAdapter != null) {
@@ -2024,7 +2030,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
                 if (isAnimate) {
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(50);
                         String time = sdf2.format(sdf3.parse(firstPoint.time));
 //                        OkHttpPointImgs(time);
                     } catch (InterruptedException e) {
@@ -2194,7 +2200,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         String content = firstPoint.time+"&"+firstPoint.max_wind_speed+"&"+firstPoint.type+"&"+firstPoint.pressure+"&"+firstPoint.radius_7+"&"+firstPoint.radius_10;
         String title1 = "("+publishName+")"+firstPoint.name+"|"+content+";";
         if (firstPoint.isFactPoint && lastFactPoint == firstPoint) {//最后一个实况点
-            title1 = "("+publishName+")"+firstPoint.name+" (当前位置)"+"|"+content+";";
+            title1 = "("+publishName+")"+firstPoint.name+" (最新位置)"+"|"+content+";";
         }
 
         String isLastFactPoint;
@@ -3843,10 +3849,10 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     private void addSingleFactMarker(FactDto dto, String imgUrl) {
         if (dto.lat > leftlatlng.latitude && dto.lat < rightLatlng.latitude && dto.lng > leftlatlng.longitude && dto.lng < rightLatlng.longitude) {
-//            if (imgUrl.contains("js.png") && dto.rain <= 0) {//过滤掉降水为0、风速为0的点
-//                return;
-//            }
-//            if (imgUrl.contains("gd_jd_wind") && dto.windS <= 0) {//过滤掉降水为0、风速为0的点
+            if (imgUrl.contains("js.png") && dto.rain <= 0) {//过滤掉降水为0的点
+                return;
+            }
+//            if (imgUrl.contains("gd_jd_wind") && dto.windS <= 0) {//过滤掉风速为0的点
 //                return;
 //            }
             MarkerOptions options = new MarkerOptions();
@@ -3950,6 +3956,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             super.handleMessage(msg);
             switch (msg.what) {
                 case 1002:
+                    if (!isShowFact) {//防止1000后线程，已经取消了实况绘制
+                        return;
+                    }
                     drawFactBitmap(factBitmap, false);
                     drawFactMarkers(currentFactChartImgUrl);
                     break;
@@ -5204,6 +5213,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             super.handleMessage(msg);
             switch (msg.what) {
                 case 1001:
+                    if (!isShowFore) {//防止1000后线程，已经取消了预报绘制
+                        return;
+                    }
                     removeForeMarkers();
                     addForeMarkers();
                     break;
@@ -5679,16 +5691,19 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             for (String html : warningMarkers.keySet()) {
                 if (warningMarkers.containsKey(html)) {
                     Marker marker = warningMarkers.get(html);
-                    String item0 = html.split("-")[0];
-                    if (zoom < zoom1) {
-                        if (item0.endsWith("00")) {
-                            marker.setVisible(true);
+                    String warningType = html.split("-")[2].substring(0,5);
+                    if (selectWarningTypes.contains(warningType)) {
+                        String item0 = html.split("-")[0];
+                        if (zoom < zoom1) {
+                            if (item0.endsWith("00")) {
+                                marker.setVisible(true);
+                            }else {
+                                marker.setVisible(false);
+                            }
                         }else {
-                            marker.setVisible(false);
-                        }
-                    }else {
-                        if (!item0.endsWith("00")) {
-                            marker.setVisible(true);
+                            if (!item0.endsWith("00")) {
+                                marker.setVisible(true);
+                            }
                         }
                     }
                 }
@@ -5853,11 +5868,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             isRanging = !isRanging;
             if (isRanging) {
                 ivRange.setImageResource(R.drawable.shawn_icon_range_press);
+                ivRange.setBackgroundResource(R.drawable.shawn_bg_circle_press);
                 addLocationMarker();
                 addLocationCircles();
                 ranging(null);
             } else {
                 ivRange.setImageResource(R.drawable.shawn_icon_range);
+                ivRange.setBackgroundResource(R.drawable.shawn_bg_circle_gray);
                 removeLocationMarker();
                 removeLocationCirces();
                 removeRange(null);
@@ -5946,25 +5963,29 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             if (reTyphoonList.getVisibility() == View.GONE) {
                 animationDownToUp(reTyphoonList);
                 ivList.setImageResource(R.drawable.shawn_icon_list_press);
+                ivList.setBackgroundResource(R.drawable.shawn_bg_circle_press);
             } else {
                 animationUpToDown(reTyphoonList);
                 ivList.setImageResource(R.drawable.shawn_icon_list);
+                ivList.setBackgroundResource(R.drawable.shawn_bg_circle_gray);
             }
 
         } else if (i == R.id.ivLegend || i == R.id.ivLegendClose) {
             if (reLegend.getVisibility() == View.GONE) {
                 animationDownToUp(reLegend);
                 ivLegend.setImageResource(R.drawable.shawn_icon_legend_press);
+                ivLegend.setBackgroundResource(R.drawable.shawn_bg_circle_press);
             } else {
                 animationUpToDown(reLegend);
                 ivLegend.setImageResource(R.drawable.shawn_icon_legend);
+                ivLegend.setBackgroundResource(R.drawable.shawn_bg_circle_gray);
             }
 
-        } else if (i == R.id.tvLink) {
+        } else if (i == R.id.ivLink) {
             isShowLink = !isShowLink;
             if (isShowLink) {
-                tvLink.setTextColor(Color.WHITE);
-                tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link_press);
+                ivLink.setImageResource(R.drawable.shawn_icon_link_press);
+                ivList.setBackgroundResource(R.drawable.shawn_bg_circle_press);
                 reLink.setVisibility(View.VISIBLE);
                 tvLinkFactTime.setVisibility(View.VISIBLE);
 
@@ -6006,8 +6027,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                     ivRadarPlay.setImageResource(R.drawable.shawn_icon_play);
                 }
             }else {
-                tvLink.setTextColor(getResources().getColor(R.color.text_color3));
-                tvLink.setBackgroundResource(R.drawable.shawn_bg_typhoon_link);
+                ivLink.setImageResource(R.drawable.shawn_icon_link);
+                ivList.setBackgroundResource(R.drawable.shawn_bg_circle_gray);
                 reLink.setVisibility(View.GONE);
                 tvLinkFactTime.setVisibility(View.GONE);
                 tvLinkFactTime.setText("");
@@ -6095,10 +6116,12 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
             isShowMore = !isShowMore;
             if (isShowMore) {
                 ivMore.setImageResource(R.drawable.shawn_icon_more_press);
+                ivMore.setBackgroundResource(R.drawable.shawn_bg_circle_press);
                 enlargeAnimation(scrollViewMore);
                 scrollViewMore.setVisibility(View.VISIBLE);
             } else {
-                ivMore.setImageResource(R.drawable.shawn_icon_more);
+                ivMore.setImageResource(R.drawable.shawn_icon_more_press);
+                ivMore.setBackgroundResource(R.drawable.shawn_bg_circle_red);
                 narrowAnimation(scrollViewMore);
                 scrollViewMore.setVisibility(View.GONE);
             }
@@ -6501,6 +6524,23 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         if (mapView != null) {
             mapView.onSaveInstanceState(outState);
         }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (isLibrary) {
+                finish();
+            }else {
+                if ((System.currentTimeMillis() - mExitTime) > 2000) {
+                    Toast.makeText(this, "再按一次退出"+getString(R.string.app_name), Toast.LENGTH_SHORT).show();
+                    mExitTime = System.currentTimeMillis();
+                } else {
+                    finish();
+                }
+            }
+        }
+        return false;
     }
 
     /**

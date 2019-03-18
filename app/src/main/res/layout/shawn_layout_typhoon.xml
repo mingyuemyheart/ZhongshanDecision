@@ -75,19 +75,16 @@
 
     </RelativeLayout>
 
-    <TextView
-        android:id="@+id/tvLink"
+    <ImageView
+        android:id="@+id/ivLink"
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_above="@+id/ivList"
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:text="联动"
-        android:textSize="@dimen/level_5"
-        android:gravity="center"
-        android:textColor="@color/text_color3"
-        android:background="@drawable/shawn_bg_typhoon_link"/>
+        android:src="@drawable/shawn_icon_link"
+        android:background="@drawable/shawn_bg_circle_gray"/>
 
     <ImageView
         android:id="@+id/ivList"
@@ -97,7 +94,8 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_list"/>
+        android:src="@drawable/shawn_icon_list"
+        android:background="@drawable/shawn_bg_circle_gray"/>
 
     <ImageView
         android:id="@+id/ivRange"
@@ -107,7 +105,8 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_range"/>
+        android:src="@drawable/shawn_icon_range"
+        android:background="@drawable/shawn_bg_circle_gray"/>
 
     <ImageView
         android:id="@+id/ivLocation"
@@ -117,7 +116,8 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_location"/>
+        android:src="@drawable/shawn_icon_location"
+        android:background="@drawable/shawn_bg_circle_gray"/>
 
     <ImageView
         android:id="@+id/ivLegend"
@@ -126,7 +126,8 @@
         android:layout_above="@+id/ivMore"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_legend"/>
+        android:src="@drawable/shawn_icon_legend"
+        android:background="@drawable/shawn_bg_circle_gray"/>
 
     <ImageView
         android:id="@+id/ivMore"
@@ -136,8 +137,8 @@
         android:layout_alignParentEnd="true"
         android:layout_marginBottom="10dp"
         android:layout_marginEnd="10dp"
-        android:src="@drawable/shawn_icon_more"/>
-
+        android:src="@drawable/shawn_icon_more_press"
+        android:background="@drawable/shawn_bg_circle_red"/>
 
     <RelativeLayout
         android:id="@+id/reTyphoonList"

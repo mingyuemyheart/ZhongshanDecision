@@ -1,5 +1,5 @@
-//apply plugin: 'com.android.application'
-apply plugin: 'com.android.library'
+apply plugin: 'com.android.application'
+//apply plugin: 'com.android.library'
 
 //封装aar包步骤如下：
 //1、apply plugin: 'com.android.application'修改为apply plugin: 'com.android.library'，注释掉applicationId
@@ -12,6 +12,8 @@ apply plugin: 'com.android.library'
 //9、注释掉manifest里icon、lable、theme信息
 //7、执行./gradlew install
 //8、提交代码至github，并更新发布gitpack
+//9、MainActivity中isLibrary改为true
+//10、修改colors里的颜色值
 
 android {
     compileSdkVersion 27
@@ -20,11 +22,11 @@ android {
     aaptOptions.useNewCruncher = false
 
     defaultConfig {
-//        applicationId "com.cxwl.shawn.zhongshan.decision"
+        applicationId "com.cxwl.shawn.zhongshan.decision"
         minSdkVersion 19
         targetSdkVersion 27
-        versionCode 53
-        versionName "1.5.3"
+        versionCode 54
+        versionName "1.5.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -41,12 +43,12 @@ android {
     }
 
     //打包，自动追加版本号、名称
-//    android.applicationVariants.all {
-//        variant ->
-//            variant.outputs.all {
-//                outputFileName = "ZhongshanDecision" + "_" + "${defaultConfig.versionCode}" + "_V" + "${defaultConfig.versionName}" + "_" + buildType.name + ".apk"
-//            }
-//    }
+    android.applicationVariants.all {
+        variant ->
+            variant.outputs.all {
+                outputFileName = "ZhongshanDecision" + "_" + "${defaultConfig.versionCode}" + "_V" + "${defaultConfig.versionName}" + "_" + buildType.name + ".apk"
+            }
+    }
 
     lintOptions {
         checkReleaseBuilds false
@@ -56,34 +58,34 @@ android {
 
 }
 
-//发布GitHub项目到JitPack
-apply plugin: 'com.github.dcendents.android-maven' // ADD THIS
-group='com.github.mingyuemyheart'
-
-// build a jar with source files
-task sourcesJar(type: Jar) {
-    from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
-}
-
-task javadoc(type: Javadoc) {
-    failOnError  false
-    source = android.sourceSets.main.java.sourceFiles
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-    classpath += configurations.compile
-}
-
-// build a jar with javadoc
-task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
-    from javadoc.destinationDir
-}
-
-artifacts {
-    archives sourcesJar
-    archives javadocJar
-}
-//发布GitHub项目到JitPack
+////发布GitHub项目到JitPack
+//apply plugin: 'com.github.dcendents.android-maven' // ADD THIS
+//group='com.github.mingyuemyheart'
+//
+//// build a jar with source files
+//task sourcesJar(type: Jar) {
+//    from android.sourceSets.main.java.srcDirs
+//    classifier = 'sources'
+//}
+//
+//task javadoc(type: Javadoc) {
+//    failOnError  false
+//    source = android.sourceSets.main.java.sourceFiles
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+//    classpath += configurations.compile
+//}
+//
+//// build a jar with javadoc
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+//
+//artifacts {
+//    archives sourcesJar
+//    archives javadocJar
+//}
+////发布GitHub项目到JitPack
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
