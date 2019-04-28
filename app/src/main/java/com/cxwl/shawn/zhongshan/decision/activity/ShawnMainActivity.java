@@ -152,7 +152,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     private Context mContext;
     private long mExitTime;//记录点击完返回按钮后的long型时间
-    private boolean isLibrary = true;
+    private boolean isLibrary = false;
     private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
     private AVLoadingIndicatorView loadingView;
     private ScrollView scrollView;
@@ -391,7 +391,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                 options.anchor(0.5f, 0.5f);
                 LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
                 View mView = inflater.inflate(R.layout.shawn_zhongshan_marker_icon, null);
-                TextView tvMarker = mView.findViewById(R.id.tvMarker);
                 options.icon(BitmapDescriptorFactory.fromView(mView));
                 if (zhongshanMarker != null) {
                     zhongshanMarker.remove();

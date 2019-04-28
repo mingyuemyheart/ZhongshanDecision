@@ -1,6 +1,6 @@
 <resources>
 
-    <string name="app_name">中山气象</string>
+    <string name="app_name">台风眼</string>
 
     <!-- 天气表 -->
     <string name="weather0">晴</string>
