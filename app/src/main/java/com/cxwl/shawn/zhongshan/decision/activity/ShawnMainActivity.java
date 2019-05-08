@@ -4230,7 +4230,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      */
     private void OkHttpRadar() {
         loadingView.setVisibility(View.VISIBLE);
-        final String url = "http://api.tianqi.cn:8070/v1/img.py";
+//        final String url = "http://api.tianqi.cn:8070/v1/img.py";
+        final String url = "http://decision-admin.tianqi.cn/home/work2019/getcaiyunimgs";
         new Thread(new Runnable() {
             @Override
             public void run() {
