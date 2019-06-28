@@ -29,22 +29,22 @@
         <!--android:roundIcon="@drawable/shawn_ic_launcher_round"-->
         <!--android:theme="@style/AppTheme"-->
 
-        <!--&lt;!&ndash;高德地图&ndash;&gt;-->
-        <!--<meta-data-->
-            <!--android:name="com.amap.api.v2.apikey"-->
-            <!--android:value="44ed336efdac5683d2a3cd8df8ac979c"/>-->
-        <!--&lt;!&ndash; 定位需要的服务 &ndash;&gt;-->
-        <!--<service android:name="com.amap.api.location.APSService" />-->
+        <!--高德地图-->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="44ed336efdac5683d2a3cd8df8ac979c"/>
+        <!-- 定位需要的服务 -->
+        <service android:name="com.amap.api.location.APSService" />
 
-        <!--<activity android:name=".activity.ShawnWelcomeActivity"-->
-                  <!--android:screenOrientation="portrait"-->
-                  <!--android:theme="@style/SplashTheme">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN"/>-->
+        <activity android:name=".activity.ShawnWelcomeActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
 
-                <!--<category android:name="android.intent.category.LAUNCHER"/>-->
-            <!--</intent-filter>-->
-        <!--</activity>-->
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
         <activity android:name=".activity.ShawnMainActivity"
                   android:screenOrientation="portrait"/>
