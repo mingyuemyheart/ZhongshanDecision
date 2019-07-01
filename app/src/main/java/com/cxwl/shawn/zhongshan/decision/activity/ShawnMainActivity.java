@@ -260,6 +260,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     private List<FactDto> factWindsZd24 = new ArrayList<>();
     private List<Marker> factMarkers = new ArrayList<>();
     private String currentFactChartImgUrl;//当前选中的实况图层imgurl
+    private String endTime;
 
     //卫星拼图
     private boolean isShowCloud = false;//是否显示卫星拼图
@@ -3396,6 +3397,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
         //判断当前选择的要素是否请求过数据，如果请求过直接通过marker集合绘制
         removeFactMarkers();
+        setFactTime(imgUrl);
         if (imgUrl.contains("gd_1js")) {//1小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain1);
             if (factRains1.size() > 0) {
@@ -3492,6 +3494,42 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     }
 
+    private void setFactTime(String imgUrl) {
+        if (TextUtils.isEmpty(endTime)) {
+            return;
+        }
+        try {
+            String startTime1 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60);
+            String startTime3 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*3);
+            String startTime6 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*6);
+            String startTime12 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*12);
+            String startTime24 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*24);
+            if (imgUrl.contains("gd_1js")) {//1小时降水
+                tvFactTime.setText("广东省1小时降水实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_3js")) {//3小时降水
+                tvFactTime.setText("广东省3小时降水实况["+sdf1.format(sdf10.parse(startTime3))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_6js")) {//6小时降水
+                tvFactTime.setText("广东省6小时降水实况["+sdf1.format(sdf10.parse(startTime6))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_12js")) {//12小时降水
+                tvFactTime.setText("广东省12小时降水实况["+sdf1.format(sdf10.parse(startTime12))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_24js")) {//24小时降水
+                tvFactTime.setText("广东省24小时降水实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_temp")) {//1小时温度
+                tvFactTime.setText("广东省1小时温度实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
+                tvFactTime.setText("广东省1小时极大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
+                tvFactTime.setText("广东省24小时极大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
+                tvFactTime.setText("广东省1小时最大风实况["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
+                tvFactTime.setText("广东省24小时最大风实况["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 获取天气实况信息
      */
@@ -3566,37 +3604,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                                         JSONObject itemObj = array.getJSONObject(i);
 
                                                         if (i == 0) {
-                                                            String endTime = itemObj.getString("Datetime");
-                                                            try {
-                                                                String startTime1 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60);
-                                                                String startTime3 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*3);
-                                                                String startTime6 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*6);
-                                                                String startTime12 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*12);
-                                                                String startTime24 = sdf10.format(sdf10.parse(endTime).getTime()-1000*60*60*24);
-                                                                if (imgUrl.contains("gd_1js")) {//1小时降水
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_3js")) {//3小时降水
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime3))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_6js")) {//6小时降水
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime6))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_12js")) {//12小时降水
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime12))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_24js")) {//24小时降水
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_temp")) {//1小时温度
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime1))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
-                                                                    tvFactTime.setText(tvFactTime.getText()+"["+sdf1.format(sdf10.parse(startTime24))+" - "+sdf1.format(sdf10.parse(endTime))+"]");
-                                                                }
-                                                            } catch (ParseException e) {
-                                                                e.printStackTrace();
-                                                            }
+                                                            endTime = itemObj.getString("Datetime");
+                                                            setFactTime(imgUrl);
                                                         }
 
                                                         if (!itemObj.isNull("Lat")) {
