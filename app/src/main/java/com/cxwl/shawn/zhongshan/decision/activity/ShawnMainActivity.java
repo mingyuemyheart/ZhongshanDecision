@@ -3400,94 +3400,104 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         setFactTime(imgUrl);
         if (imgUrl.contains("gd_1js")) {//1小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain1);
-            if (factRains1.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factRains1.clear();
-            }
+//            if (factRains1.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factRains1.clear();
+//            }
+            factRains1.clear();
         }else if (imgUrl.contains("gd_3js")) {//3小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain3);
-            if (factRains3.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factRains3.clear();
-            }
+//            if (factRains3.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factRains3.clear();
+//            }
+            factRains3.clear();
         }else if (imgUrl.contains("gd_6js")) {//6小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain6);
-            if (factRains6.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factRains6.clear();
-            }
+//            if (factRains6.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factRains6.clear();
+//            }
+            factRains6.clear();
         }else if (imgUrl.contains("gd_12js")) {//12小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain12);
-            if (factRains12.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factRains12.clear();
-            }
+//            if (factRains12.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factRains12.clear();
+//            }
+            factRains12.clear();
         }else if (imgUrl.contains("gd_24js")) {//24小时降水
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_rain24);
-            if (factRains24.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factRains24.clear();
-            }
+//            if (factRains24.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factRains24.clear();
+//            }
+            factRains24.clear();
         }else if (imgUrl.contains("gd_temp")) {//1小时温度
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_temp);
-            if (factTemps1.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factTemps1.clear();
-            }
+//            if (factTemps1.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factTemps1.clear();
+//            }
+            factTemps1.clear();
         }else if (imgUrl.contains("gd_jd_wind_1h")) {//1小时极大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
-            if (factWindsJd1.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factWindsJd1.clear();
-            }
+//            if (factWindsJd1.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factWindsJd1.clear();
+//            }
+            factWindsJd1.clear();
         }else if (imgUrl.contains("gd_jd_wind_24h")) {//24小时极大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
-            if (factWindsJd24.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factWindsJd24.clear();
-            }
+//            if (factWindsJd24.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factWindsJd24.clear();
+//            }
+            factWindsJd24.clear();
         }else if (imgUrl.contains("gd_zd_wind_1h")) {//1小时最大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
-            if (factWindsZd1.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factWindsZd1.clear();
-            }
+//            if (factWindsZd1.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factWindsZd1.clear();
+//            }
+            factWindsZd1.clear();
         }else if (imgUrl.contains("gd_zd_wind_24h")) {//24小时最大风
             ivFactLegend.setImageResource(R.drawable.shawn_fact_legend_wind);
-            if (factWindsZd24.size() > 0) {
-                drawFactMarkers(imgUrl);
-                loadingView.setVisibility(View.GONE);
-                return;
-            }else {
-                factWindsZd24.clear();
-            }
+//            if (factWindsZd24.size() > 0) {
+//                drawFactMarkers(imgUrl);
+//                loadingView.setVisibility(View.GONE);
+//                return;
+//            }else {
+//                factWindsZd24.clear();
+//            }
+            factWindsZd24.clear();
         }
 
         OkHttpFactList(imgUrl, "");
