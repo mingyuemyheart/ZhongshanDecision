@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--<color name="colorPrimary">#EF9A1A</color>-->
-    <!--<color name="colorPrimaryDark">#EF9A1A</color>-->
-    <!--<color name="colorAccent">#EF9A1A</color>-->
+    <color name="colorPrimary">#EF9A1A</color>
+    <color name="colorPrimaryDark">#EF9A1A</color>
+    <color name="colorAccent">#EF9A1A</color>
 
-    <color name="colorPrimary">#31babd</color>
-    <color name="colorPrimaryDark">#31babd</color>
-    <color name="colorAccent">#31babd</color>
+    <!--<color name="colorPrimary">#31babd</color>-->
+    <!--<color name="colorPrimaryDark">#31babd</color>-->
+    <!--<color name="colorAccent">#31babd</color>-->
 
     <color name="text_color1">#F0F0F0</color>
     <color name="text_color2">#A3A7AC</color>
