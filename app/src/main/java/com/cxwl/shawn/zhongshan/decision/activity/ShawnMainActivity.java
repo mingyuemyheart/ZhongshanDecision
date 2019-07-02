@@ -1286,12 +1286,13 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
                                             }else {
                                                 dto.status = "0";
                                             }
-                                            if (!dto.code.contains("****")) {
+//                                            if (!dto.code.contains("****")) {
                                                 nameList.add(dto);
-                                            }
+//                                            }
 
                                             //把活跃台风过滤出来存放
-                                            if (TextUtils.equals(dto.status, "1") && !dto.code.contains("****")) {
+//                                            if (TextUtils.equals(dto.status, "1") && !dto.code.contains("****")) {
+                                            if (TextUtils.equals(dto.status, "1")) {
                                                 dto.isSelected = true;//生效台风默认选中状态
                                                 startList.add(0, dto);
                                                 selectList.add(0, dto);
