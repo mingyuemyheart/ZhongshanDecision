@@ -152,7 +152,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     private Context mContext;
     private long mExitTime;//记录点击完返回按钮后的long型时间
-    private boolean isLibrary = true;
+    private boolean isLibrary = false;
     private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
     private AVLoadingIndicatorView loadingView;
     private ScrollView scrollView;
@@ -1230,7 +1230,6 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         }
         String selectYear = tvTyphoonYear.getText().toString().substring(0, tvTyphoonYear.getText().length()-1);
         final String url = "http://decision-admin.tianqi.cn/Home/other/zs_get_tflist/year/"+selectYear;
-//        final String url = "http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=0&year="+selectYear;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -1356,7 +1355,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
      */
     private void OkHttpTyphoonDetailIdea(final String publishName, final String publishCode, final String typhoonId, final String tSid, final String typhoonName, final String tStatus) {
         loadingView.setVisibility(View.VISIBLE);
-        final String url = String.format("http://61.142.114.104:8080/zstyphoon/lhdata/zstf?type=1&tsid=%s&fcid=%s", typhoonId, publishCode);
+        final String url = String.format("http://national-observe-data.tianqi.cn/zstyphoon/lhdata/zstf?type=1&tsid=%s&fcid=%s", typhoonId, publishCode);
         new Thread(new Runnable() {
             @Override
             public void run() {
