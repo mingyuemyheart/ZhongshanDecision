@@ -100,6 +100,7 @@ import com.cxwl.shawn.zhongshan.decision.dto.WindDto;
 import com.cxwl.shawn.zhongshan.decision.manager.CloudManager;
 import com.cxwl.shawn.zhongshan.decision.manager.RadarManager;
 import com.cxwl.shawn.zhongshan.decision.util.AuthorityUtil;
+import com.cxwl.shawn.zhongshan.decision.util.AutoUpdateUtil;
 import com.cxwl.shawn.zhongshan.decision.util.CommonUtil;
 import com.cxwl.shawn.zhongshan.decision.util.OkHttpUtil;
 import com.cxwl.shawn.zhongshan.decision.util.SecretUrlUtil;
@@ -152,7 +153,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     private Context mContext;
     private long mExitTime;//记录点击完返回按钮后的long型时间
-    private boolean isLibrary = false;
+    private boolean isLibrary = true;
     private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
     private AVLoadingIndicatorView loadingView;
     private ScrollView scrollView;
@@ -505,6 +506,9 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
     }
 
     private void initWidget() {
+        if (!isLibrary) {
+            AutoUpdateUtil.checkUpdate(this, this, "103", getString(R.string.app_name), true);
+        }
         DisplayMetrics dm = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(dm);
         width = dm.widthPixels;
