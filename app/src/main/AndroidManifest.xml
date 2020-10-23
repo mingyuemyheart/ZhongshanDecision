@@ -54,15 +54,15 @@
 <!--        &lt;!&ndash; 定位需要的服务 &ndash;&gt;-->
 <!--        <service android:name="com.amap.api.location.APSService" />-->
 
-        <activity android:name=".activity.ShawnWelcomeActivity"
-                  android:screenOrientation="portrait"
-                  android:theme="@style/SplashTheme">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+<!--        <activity android:name=".activity.ShawnWelcomeActivity"-->
+<!--                  android:screenOrientation="portrait"-->
+<!--                  android:theme="@style/SplashTheme">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN"/>-->
 
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-        </activity>
+<!--                <category android:name="android.intent.category.LAUNCHER"/>-->
+<!--            </intent-filter>-->
+<!--        </activity>-->
 
         <activity android:name=".activity.ShawnMainActivity"
                   android:screenOrientation="portrait"/>
