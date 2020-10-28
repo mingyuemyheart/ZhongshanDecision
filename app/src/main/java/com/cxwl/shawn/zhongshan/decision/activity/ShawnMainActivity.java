@@ -339,7 +339,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         Sofia.with(this)
                 .invasionStatusBar()//设置顶部状态栏缩进
                 .statusBarBackground(Color.TRANSPARENT);//设置状态栏颜色
-        checkMultiAuthority();
+        initAll();
     }
 
     private void initAll() {
