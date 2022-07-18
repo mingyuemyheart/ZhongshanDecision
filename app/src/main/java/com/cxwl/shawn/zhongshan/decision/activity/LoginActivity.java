@@ -1,17 +1,20 @@
 package com.cxwl.shawn.zhongshan.decision.activity;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.view.KeyEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cxwl.shawn.zhongshan.decision.R;
 import com.cxwl.shawn.zhongshan.decision.common.MyApplication;
 import com.cxwl.shawn.zhongshan.decision.util.OkHttpUtil;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,62 +28,44 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-/**
- * 欢迎界面
- */
-public class ShawnWelcomeActivity extends ShawnBaseActivity {
+public class LoginActivity extends ShawnBaseActivity implements OnClickListener {
 
-	private Context mContext;
+	private EditText etUserName, etPwd;
+	private AVLoadingIndicatorView loadingView;
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	protected void onCreate(@Nullable Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.shawn_activity_welcome);
-
-		//点击Home键后再点击APP图标，APP重启而不是回到原来界面
-		if (!isTaskRoot()) {
-			finish();
-			return;
-		}
-		//点击Home键后再点击APP图标，APP重启而不是回到原来界面
-
-		mContext = this;
-
-//		DisplayMetrics dm = new DisplayMetrics();
-//		getWindowManager().getDefaultDisplay().getMetrics(dm);
-//		int width = dm.widthPixels;
-//		ImageView imageView = findViewById(R.id.imageView);
-//		ViewGroup.LayoutParams params = imageView.getLayoutParams();
-//		params.width = width/3;
-//		imageView.setLayoutParams(params);
-
-		new Handler().postDelayed(new Runnable() {
-			@Override
-			public void run() {
-				if (!TextUtils.isEmpty(MyApplication.USERNAME) && !TextUtils.isEmpty(MyApplication.PASSWORD)) {
-					okHttpLogin();
-				} else {
-					startActivity(new Intent(mContext, LoginActivity.class));
-					finish();
-				}
-			}
-		}, 2000);
-
+		setContentView(R.layout.activity_login);
+		initWidget();
 	}
 
-	@Override
-	public boolean onKeyDown(int KeyCode, KeyEvent event){
-		if (KeyCode == KeyEvent.KEYCODE_BACK){
-			return true;
-		}
-		return super.onKeyDown(KeyCode, event);
+	/**
+	 * 初始化控件
+	 */
+	private void initWidget() {
+		TextView tvLogin = findViewById(R.id.tvLogin);
+		tvLogin.setOnClickListener(this);
+		etUserName = findViewById(R.id.etUserName);
+		etPwd = findViewById(R.id.etPwd);
+		loadingView = findViewById(R.id.loadingView);
 	}
 
 	private void okHttpLogin() {
 		FormBody.Builder builder = new FormBody.Builder();
+		if (TextUtils.isEmpty(etUserName.getText().toString())) {
+			Toast.makeText(this, "请输入用户名", Toast.LENGTH_SHORT).show();
+			return;
+		}
+		if (TextUtils.isEmpty(etPwd.getText().toString())) {
+			Toast.makeText(this, "请输入密码", Toast.LENGTH_SHORT).show();
+			return;
+		}
+
+		loadingView.setVisibility(View.VISIBLE);
 		final String url = "http://zsadmin.cxwldata.cn/api/auth/login";
-		builder.add("name", MyApplication.USERNAME);
-		builder.add("password", MyApplication.PASSWORD);
+		builder.add("name", etUserName.getText().toString());
+		builder.add("password", etPwd.getText().toString());
 		final RequestBody body = builder.build();
 		new Thread(new Runnable() {
 			@Override
@@ -98,17 +83,23 @@ public class ShawnWelcomeActivity extends ShawnBaseActivity {
 						runOnUiThread(new Runnable() {
 							@Override
 							public void run() {
+								loadingView.setVisibility(View.GONE);
 								if (!TextUtils.isEmpty(result)) {
 									try {
 										JSONObject obj = new JSONObject(result);
 										if (!obj.isNull("code")) {
 											int code = obj.getInt("code");
 											if (code == 1) {
-												startActivity(new Intent(ShawnWelcomeActivity.this, ShawnMainActivity.class));
+												//把用户信息保存在sharedPreferance里
+												MyApplication.USERNAME = etUserName.getText().toString();
+												MyApplication.PASSWORD = etPwd.getText().toString();
+												MyApplication.saveUserInfo(LoginActivity.this);
+
+												startActivity(new Intent(LoginActivity.this, ShawnMainActivity.class));
+												finish();
 											} else {
-												startActivity(new Intent(mContext, LoginActivity.class));
+												Toast.makeText(LoginActivity.this, "登录失败", Toast.LENGTH_SHORT).show();
 											}
-											finish();
 										}
 									} catch (JSONException e) {
 										e.printStackTrace();
@@ -121,5 +112,11 @@ public class ShawnWelcomeActivity extends ShawnBaseActivity {
 			}
 		}).start();
 	}
-	
+
+	@Override
+	public void onClick(View view) {
+		if (view.getId() == R.id.tvLogin) {
+			okHttpLogin();
+		}
+	}
 }

@@ -3,28 +3,28 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.cxwl.shawn.zhongshan.decision">
 
-<!--    <uses-permission android:name="android.permission.INTERNET" />-->
-<!--    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />-->
-<!--    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />-->
-<!--    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />-->
-<!--    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />-->
-<!--    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>-->
-<!--    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>-->
-<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
-<!--    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>-->
-<!--    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>-->
-<!--    &lt;!&ndash;//添加允许安装未知应用市场权限，这个权限不是动态权限，所以不用进行动态申请，否则自动更新功能失效&ndash;&gt;-->
-<!--    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!--//添加允许安装未知应用市场权限，这个权限不是动态权限，所以不用进行动态申请，否则自动更新功能失效-->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
+        android:name=".common.MyApplication"
         android:supportsRtl="true"
         android:allowBackup="true"
-        tools:ignore="GoogleAppIndexingWarning">
-
-        <!--android:icon="@drawable/shawn_ic_launcher"-->
-        <!--android:label="@string/app_name"-->
-        <!--android:roundIcon="@drawable/shawn_ic_launcher_round"-->
-        <!--android:theme="@style/AppTheme"-->
+        tools:ignore="GoogleAppIndexingWarning"
+        android:icon="@drawable/shawn_ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/shawn_ic_launcher_round"
+        android:theme="@style/AppTheme">
 
         <!--解决android28以后无法使用apache http协议-->
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
@@ -38,7 +38,7 @@
         </receiver>
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:authorities="${applicationId}.FileProvider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
@@ -47,22 +47,25 @@
         </provider>
         <!-- 自动更新 -->
 
-<!--        &lt;!&ndash;高德地图&ndash;&gt;-->
-<!--        <meta-data-->
-<!--            android:name="com.amap.api.v2.apikey"-->
-<!--            android:value="44ed336efdac5683d2a3cd8df8ac979c"/>-->
-<!--        &lt;!&ndash; 定位需要的服务 &ndash;&gt;-->
-<!--        <service android:name="com.amap.api.location.APSService" />-->
+        <!--高德地图-->
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="44ed336efdac5683d2a3cd8df8ac979c"/>
+        <!-- 定位需要的服务 -->
+        <service android:name="com.amap.api.location.APSService" />
 
-<!--        <activity android:name=".activity.ShawnWelcomeActivity"-->
-<!--                  android:screenOrientation="portrait"-->
-<!--                  android:theme="@style/SplashTheme">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN"/>-->
+        <activity android:name=".activity.ShawnWelcomeActivity"
+                  android:screenOrientation="portrait"
+                  android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
 
-<!--                <category android:name="android.intent.category.LAUNCHER"/>-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".activity.LoginActivity"
+            android:screenOrientation="portrait"/>
 
         <activity android:name=".activity.ShawnMainActivity"
                   android:screenOrientation="portrait"/>
