@@ -153,7 +153,7 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
 
     private Context mContext;
     private long mExitTime;//记录点击完返回按钮后的long型时间
-    private boolean isLibrary = false;
+    private boolean isLibrary = true;
     private String userAuthority = "-1";//用户权限，3为专业用户，其它为普通用户
     private AVLoadingIndicatorView loadingView;
     private ScrollView scrollView;
@@ -339,7 +339,8 @@ public class ShawnMainActivity extends ShawnBaseActivity implements View.OnClick
         Sofia.with(this)
                 .invasionStatusBar()//设置顶部状态栏缩进
                 .statusBarBackground(Color.TRANSPARENT);//设置状态栏颜色
-        checkMultiAuthority();
+//        checkMultiAuthority();
+        initAll();
     }
 
     private void initAll() {
